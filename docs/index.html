@@ -29,6 +29,19 @@ h1{font-size:1.6rem}
 .sub{color:var(--text2);font-size:.9rem}
 .notice{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:12px 16px;margin:16px 0;font-size:.9rem;color:var(--text2);line-height:1.7}
 .notice b{color:var(--text)}
+
+/* ── 📚 多课程入口（2026-10-26 新增） ── */
+.track-bar{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px;margin-bottom:18px}
+.home-course{display:flex;align-items:center;gap:13px;padding:15px 16px;background:var(--card);border:1px solid var(--border);border-radius:16px;cursor:pointer;transition:.18s}
+.home-course:hover{border-color:var(--accent);transform:translateY(-1px)}
+.home-course.active{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent),0 8px 26px rgba(0,0,0,.32)}
+.home-course .hc-icon{font-size:1.6rem;line-height:1;flex:0 0 auto}
+.home-course .hc-body{flex:1;min-width:0}
+.home-course .hc-name{font-size:.96rem;font-weight:600;color:var(--text);margin-bottom:2px}
+.home-course .hc-desc{font-size:.76rem;color:var(--text2);line-height:1.5}
+.home-course .hc-go{font-size:.78rem;color:var(--accent);flex:0 0 auto;white-space:nowrap}
+@media(max-width:560px){.home-course .hc-go{display:none}.track-bar{grid-template-columns:1fr}}
+
 .layout{display:grid;grid-template-columns:260px 1fr;gap:20px;margin-top:16px}
 .weeks{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px;align-self:start;position:sticky;top:16px;max-height:calc(100vh - 32px);overflow-y:auto}
 @media(max-width:800px){.layout{grid-template-columns:1fr}.weeks{position:static;max-height:none;overflow-y:visible}}
@@ -134,6 +147,26 @@ footer{text-align:center;color:var(--text2);font-size:.75rem;margin-top:30px}
     <b>怎么用：</b>每周左边选周 → 逐课阅读 → 学完勾选（进度自动保存在你的账号里）→ 作业交到 <b>&lt;你的学员ID&gt;/homework/</b> 目录，批改回复会出现在 <b>&lt;你的学员ID&gt;/reviews/</b>（作业和评语分开放，更清楚）。<br>
     每周日晚发布下周内容。卡住随时跟你自己的智能体说一声 ❄️✨
   </div>
+
+    <!-- 📚 课程入口（2026-10-26 新增 · 多课程轨 · 未来加课只改 TRACKS） -->
+    <div class="track-bar" id="track-bar">
+      <div class="home-course active" data-track="code" onclick="switchTrack('code')">
+        <div class="hc-icon">🐍</div>
+        <div class="hc-body">
+          <div class="hc-name">编程课程</div>
+          <div class="hc-desc">17 周 Python 系统课 · 算法加餐 · AI 通识</div>
+        </div>
+        <div class="hc-go">进入 →</div>
+      </div>
+      <div class="home-course" data-track="phonics" onclick="switchTrack('phonics')">
+        <div class="hc-icon">🔤</div>
+        <div class="hc-body">
+          <div class="hc-name">英语音标</div>
+          <div class="hc-desc">9 单元速成 · 48 个国际音标（PEP 五上考纲）</div>
+        </div>
+        <div class="hc-go">进入 →</div>
+      </div>
+    </div>
   <div class="layout">
     <aside class="weeks"><h3>🗓 课程周</h3><div class="syll" id="syll-link" onclick="loadSyllabus()">📑 课程总大纲</div><div id="weeks"><div class="spin"></div></div></aside>
     <main class="content" id="content"><div class="spin"></div></main>
@@ -233,7 +266,8 @@ function raceJSON(path,timeout){
 }
 async function loadIndex(){
   // 缓存优先：本地秒开 → 后台竞速刷新（网络挂了也照常用旧数据）
-  const cached=lsGet('weeks');
+  const tr=CUR_TRACK;
+  const cached=lsGet('weeks:'+tr.key);
   // 进入页默认跳到「上次停留的章节」（2026-09-08 Tree 提需求）：pos 优先 > current 周 > 最新周
   function _pickStartWeek(){
     const pos=posResolve();
@@ -251,7 +285,7 @@ async function loadIndex(){
     const j=await raceJSON('/learning/weeks');
     const wks=(j.index&&j.index.weeks)||[];
     if(wks.length){
-      lsSet('weeks',wks);weeksData=wks;renderWeeks();
+      lsSet('weeks:'+tr.key,wks);weeksData=wks;renderWeeks();
       if(!cached||!cached.length){
         const s=_pickStartWeek();
         if(s.week)loadWeek(s.week.id,s.lessonId||null);
@@ -274,7 +308,14 @@ async function loadIndex(){
 }
 function renderWeeks(){
   const box=$('#weeks');box.innerHTML='';
-  const sorted=[...weeksData].sort((a,b)=>(a.id<b.id?-1:1));
+  const tr=CUR_TRACK;
+  // 按当前课程轨过滤周列表（编程=W*，音标=P*）
+  const all=[...weeksData].sort((a,b)=>(a.id<b.id?-1:1));
+  const sorted=tr.filter?all.filter(w=>tr.filter(w)):all;
+  if(!sorted.length){
+    box.innerHTML='<div class="empty" style="padding:18px"><div class="big">📚</div><b>这门课还没发布</b><br><br>课程内容还在路上，发布后就会出现。</div>';
+    return;
+  }
   for(const w of sorted){
     const done=weekDone(w.id);
     const el=document.createElement('div');
@@ -301,27 +342,39 @@ function weekDone(id){
 async function loadSyllabus(){
   curWeek=null;renderWeeks();
   const sl=$('#syll-link');if(sl)sl.classList.add('active');
-  const c=lsGet('syll');
-  if(c)renderSyll(c);
+  const tr=CUR_TRACK;
+  const ck='syll:'+tr.key;
+  const c=lsGet(ck);
+  if(c)renderSyll(c,tr.syllMeta);
   else $('#content').innerHTML='<div class="spin"></div>';
   try{
-    const j=await raceJSON('/learning/syllabus');
+    const j=await raceJSON(tr.syllPath);
     if(j&&j.syllabus){
-      lsSet('syll',j.syllabus);
-      if(curWeek===null&&j.syllabus!==c)renderSyll(j.syllabus);
+      lsSet(ck,j.syllabus);
+      if(curWeek===null&&j.syllabus!==c)renderSyll(j.syllabus,tr.syllMeta);
     }
   }catch(e){
     if(!c)$('#content').innerHTML='<div class="empty"><div class="big">📑</div><b>大纲还在路上</b><br><br>课程总大纲还没发布到线上。<br><button onclick="loadSyllabus()" style="margin-top:12px;padding:8px 22px;border-radius:9px;border:1px solid var(--accent);background:var(--card2);color:var(--accent);cursor:pointer">🔄 重试</button></div>';
   }
 }
-function renderSyll(md){
-  $('#content').innerHTML='<div class="wk-title">📑 课程总大纲</div><div class="wk-meta">12 周 · 一套材料，两位学员</div><div class="md">'+(window.marked?marked.parse(md):md)+'</div>';
+function renderSyll(md,meta){
+  // 2026-10-26 修 undefined：marked.parse(undefined) 会渲染出字面量 "undefined"。
+  // 根因：md 为空/undefined 时直接把 undefined 喂给 markdown 解析器。
+  // 修法：先归一化（null/undefined/非字符串 → 空串），再解析；空则给占位提示。
+  const raw=(md==null?'':(typeof md==='string'?md:String(md))).trim();
+  const metaHtml=meta?'<div class="wk-meta">'+meta+'</div>':'<div class="wk-meta">课程总大纲</div>';
+  if(!raw){
+    $('#content').innerHTML='<div class="wk-title">📑 课程总大纲</div>'+metaHtml+'<div class="empty"><div class="big">📑</div><b>大纲还没发布</b><br><br>这门课的课程总大纲还没发布到线上。<br><button onclick="loadSyllabus()" style="margin-top:12px;padding:8px 22px;border-radius:9px;border:1px solid var(--accent);background:var(--card2);color:var(--accent);cursor:pointer">🔄 重试</button></div>';
+    return;
+  }
+  const html=window.marked?marked.parse(raw):raw;
+  $('#content').innerHTML='<div class="wk-title">📑 课程总大纲</div>'+metaHtml+'<div class="md">'+html+'</div>';
 }
 async function loadWeek(id,scrollToLid){
   curWeek=id;
   const sl=$('#syll-link');if(sl)sl.classList.remove('active');
   // 缓存优先：localStorage 秒开，后台竞速刷新（内容有变才重渲染，防滚动位置被打断）
-  const c=lsGet('wk:'+id);
+  const c=lsGet('wk:'+id);   // week_id 自带 W/P 前缀 → 跨轨天然不冲突
   if(c){renderWeeks();renderWeek(c);if(scrollToLid)_scrollToLesson(scrollToLid);}
   else{$('#content').innerHTML='<div class="spin"></div>';renderWeeks();}
   try{
@@ -471,6 +524,41 @@ $('#bt').textContent=BUILD_TIME==='DEV'?'DEV build':'v'+BUILD_TIME;
 //   不同网络出口对两个域名的可达性不同 → 保留双域，主域失败时切备域（串行，不竞速）。
 //   （竞速的前提是两个域名都验证过可用；本机 workers.dev 不可用时竞速只会白等）
 const CF_BASES=['https://tpg-hq.thawflow.com','https://tpg-hq.icepaw.workers.dev'];
+
+// ─────────────────────────────────────────────────────────────
+// 📚 多课程轨注册表（2026-10-26 新增 · 未来加课程只改这一处）
+// 一门课 = 一个 track 对象；前端所有拉取/缓存/进度都按 track.key 隔离。
+// 加新课程步骤：① 在 TRACKS 里加一项 ② publish 脚本把课时发到对应 week_id 前缀 ③ 完事。
+// ─────────────────────────────────────────────────────────────
+const TRACKS=[
+  {key:'code',name:'编程',icon:'🐍',color:'var(--accent)',
+   desc:'17 周 Python 系统课 · 算法加餐 · AI 通识',
+   weekPrefix:'W',syllPath:'/learning/syllabus?track=code',
+   syllMeta:'17 周 · Python 编程 / AI 通识 / C++ 认脸',
+   filter:function(w){return !this.weekPrefix||String(w.id||'').indexOf(this.weekPrefix)===0;}},
+  {key:'phonics',name:'英语音标',icon:'🔤',color:'#7dd3fc',
+   desc:'9 单元速成 · 48 个国际音标（PEP 五上考纲）',
+   weekPrefix:'P',syllPath:'/learning/syllabus?track=phonics',
+   syllMeta:'9 单元 · 国际音标 IPA 48 个 · 速成',
+   filter:function(w){return !this.weekPrefix||String(w.id||'').indexOf(this.weekPrefix)===0;}},
+];
+let CUR_TRACK=TRACKS[0];
+function trackByKey(k){for(const tr of TRACKS)if(tr.key===k)return tr;return TRACKS[0];}
+function switchTrack(k){
+  const tr=trackByKey(k);
+  if(!tr||tr.key===CUR_TRACK.key)return;
+  CUR_TRACK=tr;
+  try{localStorage.setItem('learning-track',tr.key);}catch(e){}
+  // 切换 UI
+  document.querySelectorAll('.track-tab').forEach(b=>b.classList.toggle('active',b.dataset.track===tr.key));
+  const h=document.querySelectorAll('.home-course');
+  h.forEach(el=>el.classList.toggle('active',el.dataset.track===tr.key));
+  curWeek=null;
+  renderWeeks();
+  loadIndex();
+  if(window.marked)loadSyllabus();
+}
+
 const ACTIVE_KEY='thawpawActiveId';   // 与游戏小窝同一套 localStorage key
 const PLAYERS_KEY='thawpawPlayers';   // { id: {nickname, role, lastSeen} }
 const LEARN_KEY='learning-id';        // 沙坑课程进度用（与游戏 ID 同值）
@@ -680,6 +768,21 @@ function initLoginGate(){
     if(el)el.addEventListener('keydown',e=>{if(e.key==='Enter')doRegister()});
   });
 }
+
+// 初始化时读回上次选择的课程轨（2026-10-26）
+(function(){
+  try{
+    const k=localStorage.getItem('learning-track');
+    if(k&&k!==CUR_TRACK.key){
+      const tr=trackByKey(k);
+      if(tr&&tr.key!==CUR_TRACK.key){CUR_TRACK=tr;
+        document.querySelectorAll('.track-tab').forEach(b=>b.classList.toggle('active',b.dataset.track===tr.key));
+        document.querySelectorAll('.home-course').forEach(el=>el.classList.toggle('active',el.dataset.track===tr.key));
+      }
+    }
+  }catch(e){}
+})();
+
 initLoginGate();
 </script>
 </body>
