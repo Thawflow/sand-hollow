@@ -122,7 +122,6 @@ footer{text-align:center;color:var(--text2);font-size:.75rem;margin-top:30px}
     <h1>🏖️ 沙坑训练场</h1>
     <span class="sub">Skyclan 家庭 12 周课程 · 一套材料，两位学员（ThawPaw 🐱 × Tree 🌳）</span>
     <button class="id-badge" id="id-badge" title="点击切换账号">🔑 登录</button>
-    <button class="id-badge" id="mail-btn" title="信箱" style="display:none">✉ 信箱</button>
   </header>
   <div class="notice">
     <b>⭐ 最佳学习姿势 · 分屏边看边练：</b>左边开本站，右边开 Thonny，看一行写一行、写一行跑一行，不用靠记性来回切窗口。<br>
@@ -352,7 +351,7 @@ function renderWeek(w){
       +'<div class="ok-msg" style="display:none"></div>'
       +'</div></div>';
   }
-  html+='<div class="hw">🐾 <b>怎么交</b>：读完这周的课，在上面的「📝 交作业」里贴代码提交就行。提交完 mentor 会批改，评语会出现在你的账号信箱 ✉（首页右上角）。<br>文件名建议 <code>'+w.week_id+'-SXX-homework.py</code>。</div>';
+  html+='<div class="hw">🐾 <b>怎么交</b>：读完这周的课，在上面的「📝 交作业」里贴代码提交就行。提交完 mentor 会批改，评语会直接发给你 💌<br>文件名建议 <code>'+w.week_id+'-SXX-homework.py</code>。</div>';
   $('#content').innerHTML=html;
   // 课文内自查清单 checkbox：激活 marked 默认 disabled + 本机持久化（2026-08-30 Tree 反馈）
   // 注：本段必须活在 renderWeek 内——每次渲染后重新激活，放函数外只在首载空跑一次（本次修复的根因）
@@ -411,7 +410,7 @@ function renderWeek(w){
         okM.style.display='block';
         if(j.ok){
           okM.style.color='var(--ok)';
-          okM.textContent='✅ 作业已收到！mentor 会批改，评语稍后在信箱 ✉';
+          okM.textContent='✅ 作业已收到！mentor 会批改，评语会发给你 💌';
           codeT.value='';
         }else{
           okM.style.color='#ff8fa3';
@@ -681,75 +680,6 @@ function initLoginGate(){
   });
 }
 initLoginGate();
-
-// ── 信箱：收 mentor 评语（DM 通道 · 门牌号 94568945 = 沙坑 mentor 信箱）──
-const MENTOR_ID='94568945';
-async function loadMail(){
-  const id=getActiveId();
-  if(!id){$('#mail-btn').style.display='none';return}
-  const players=getPlayers();
-  const nick=(players[id]&&players[id].nickname)||'';
-  if(!nick){$('#mail-btn').style.display='none';return}
-  $('#mail-btn').style.display='';
-  try{
-    const j=await cfGet('/dm/history?id='+id+'&nickname='+encodeURIComponent(nick)+'&with='+MENTOR_ID+'&since=0');
-    if(j.ok&&Array.isArray(j.messages)&&j.messages.length){
-      $('#mail-btn').textContent='✉ 信箱 ('+j.messages.length+')';
-      const last=j.messages[j.messages.length-1];
-      const box=document.createElement('div');
-      box.className='notice';
-      box.style.borderColor='rgba(91,157,255,.4)';
-      box.innerHTML='<b>✉ mentor 评语（最新）</b><br>'+String(last.content||'').replace(/</g,'&lt;').replace(/\n/g,'<br>')
-        +'<br><span style="font-size:.75rem;color:var(--text2)">'+String(last.time||'').slice(0,16).replace('T',' ')+' · '+String(last.fromName||'mentor')+'</span>';
-      const content=$('#content');
-      if(content&&!content.querySelector('.mail-latest')){
-        box.classList.add('mail-latest');
-        content.insertBefore(box,content.firstChild);
-      }
-    }
-  }catch(e){/* 静默 */}
-}
-function initMail(){
-  const btn=$('#mail-btn');
-  btn.onclick=()=>{
-    const id=getActiveId();
-    const players=getPlayers();
-    const nick=(players[id]&&players[id].nickname)||'';
-    if(!id||!nick){alert('先登录才能看信箱');return}
-    openMailModal(id,nick);
-  };
-  loadMail();
-  setInterval(loadMail,60000);
-}
-// 信箱弹窗：全部评语
-async function openMailModal(id,nick){
-  const old=document.getElementById('mail-modal');
-  if(old)old.remove();
-  const wrap=document.createElement('div');
-  wrap.id='mail-modal';
-  wrap.className='login-gate';
-  wrap.innerHTML='<div class="login-card" style="max-width:520px">'
-    +'<h2>✉ 信箱</h2><div class="lg-sub">mentor 批改后的评语</div>'
-    +'<div id="mail-list" style="max-height:60vh;overflow-y:auto;text-align:left;font-size:.86rem;line-height:1.8">加载中…</div>'
-    +'<button class="lg-btn ghost" onclick="document.getElementById(\'mail-modal\').remove()">关闭</button></div>';
-  document.body.appendChild(wrap);
-  try{
-    const j=await cfGet('/dm/history?id='+id+'&nickname='+encodeURIComponent(nick)+'&with='+MENTOR_ID+'&since=0');
-    const list=$('#mail-list');
-    if(j.ok&&Array.isArray(j.messages)&&j.messages.length){
-      list.innerHTML=j.messages.slice().reverse().map(m=>
-        '<div style="border-bottom:1px solid var(--border);padding:10px 0">'
-        +String(m.content||'').replace(/</g,'&lt;').replace(/\n/g,'<br>')
-        +'<div style="font-size:.72rem;color:var(--text2);margin-top:6px">'+String(m.time||'').slice(0,16).replace('T',' ')+' · '+String(m.fromName||'mentor')+'</div></div>'
-      ).join('');
-    }else{
-      list.innerHTML='<div style="color:var(--text2);text-align:center;padding:30px 0">还没有评语。交完作业等 mentor 批改，评语会出现在这里 ✉</div>';
-    }
-  }catch(e){
-    $('#mail-list').innerHTML='<div style="color:#ff8fa3">网络不通，稍后再试</div>';
-  }
-}
-initMail();
 </script>
 </body>
 </html>
