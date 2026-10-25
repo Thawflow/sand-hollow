@@ -37,7 +37,7 @@ AI 训练 = 复盘上次错误再练。Python "再来一次"= **复盘** 练过�
 
 ## 二、项目 A：文字 RPG 完整版（50 分钟）
 
-> 📁 项目存 `~/learning-homework/<你的学员名>/homework/`，新建 `rpg_final.py`。
+> 📁 项目存 `~/sand-hollow/<你的学员ID>/homework/`，新建 `rpg_final.py`。
 
 ### 第 1 步 · 玩家和敌人数据（5 分钟）
 

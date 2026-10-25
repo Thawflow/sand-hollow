@@ -38,7 +38,7 @@ AI 画图 = 几何变换（旋转/缩放/平移）。Python 画图案 = 嵌套�
 
 ## 二、项目 A：倒圣诞树（10 分钟）
 
-> 📁 项目存 `~/learning-homework/<你的学员名>/homework/`，新建 `upside_down_tree.py`。
+> 📁 项目存 `~/sand-hollow/<你的学员ID>/homework/`，新建 `upside_down_tree.py`。
 
 需求：打一个倒过来的圣诞树（顶宽底尖），高度 5：
 
@@ -73,7 +73,7 @@ for row in range(height, 0, -1):
 
 ## 三、项目 B：镂空菱形（15 分钟）
 
-> 📁 项目存 `~/learning-homework/<你的学员名>/homework/`，新建 `hollow_diamond.py`。
+> 📁 项目存 `~/sand-hollow/<你的学员ID>/homework/`，新建 `hollow_diamond.py`。
 
 需求：打一个空心的菱形（中间是空的），边长 5：
 
@@ -133,7 +133,7 @@ for row in range(size - 1, 0, -1):
 
 ## 四、项目 C：九九乘法表（20 分钟）
 
-> 📁 项目存 `~/learning-homework/<你的学员名>/homework/`，新建 `multiplication_table.py`。
+> 📁 项目存 `~/sand-hollow/<你的学员ID>/homework/`，新建 `multiplication_table.py`。
 
 需求：打一个完整的九九乘法表（1×1 到 9×9）：
 

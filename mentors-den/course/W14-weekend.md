@@ -9,7 +9,7 @@
 
 ---
 
-> **📂 课前准备 · 随堂练习文件**: 先在 Thonny `文件 → 新建`, 立刻 `文件 → 另存为...` 存为 `~/sand-hollow/<你的学员名>/homework/W16-weekend-practice.py`.周末代码都写在这里.
+> **📂 课前准备 · 随堂练习文件**: 先在 Thonny `文件 → 新建`, 立刻 `文件 → 另存为...` 存为 `~/sand-hollow/<你的学员ID>/homework/W16-weekend-practice.py`.周末代码都写在这里.
 
 ## ⓪ 🤖 课前 AI 一分钟 · 第 39 颗: 递归 = 清晰, 迭代 = 性能(3 分钟)
 

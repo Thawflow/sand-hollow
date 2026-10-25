@@ -38,7 +38,7 @@ AI 推荐系统 = 增删改查用户偏好。购物清单项目 = **完整 CRUD 
 
 ## 二、项目 A：基础购物清单（25 分钟）
 
-> 📁 项目存 `~/learning-homework/<你的学员名>/homework/`，新建 `shopping_list.py`。
+> 📁 项目存 `~/sand-hollow/<你的学员ID>/homework/`，新建 `shopping_list.py`。
 
 需求：
 

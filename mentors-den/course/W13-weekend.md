@@ -37,7 +37,7 @@ AI 完整图鉴 = CRUD 字典 + 战斗系统。Python 综合项目 = **CRUD + �
 
 ## 二、项目：完整版图鉴（60 分钟）
 
-> 📁 项目存 `~/learning-homework/<你的学员名>/homework/`，新建 `pet_codex_v1.py`。
+> 📁 项目存 `~/sand-hollow/<你的学员ID>/homework/`，新建 `pet_codex_v1.py`。
 
 ### 完整代码
 

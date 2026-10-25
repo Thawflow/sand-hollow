@@ -37,7 +37,7 @@ AI 模型上线 = 完整工程化（train/eval/save/load 拆函数）。**实战
 
 ## 二、项目：函数化改造（40 分钟）
 
-> 📁 项目存 `~/learning-homework/<你的学员名>/homework/`，新建 `cat_adventure_v4.py`（基于 W07 改）。
+> 📁 项目存 `~/sand-hollow/<你的学员ID>/homework/`，新建 `cat_adventure_v4.py`（基于 W07 改）。
 
 ### 改造 1：抽 show_room 函数
 

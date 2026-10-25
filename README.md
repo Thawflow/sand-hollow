@@ -181,10 +181,9 @@ sand-hollow/
 │   │   └── sand-hollow-course-batch.SKILL.md
 │   └── onboarding/          ← mentor 入职手册
 ├── algopedia/               ← 算法规格字典（参考）
-├── thawpaw/                 ← 学员 A 的作业区
+├── <你的学员ID>/             ← 学员作业区（每人一个目录）
 │   ├── homework/            ← 上手练习 + 课后作业（gitignore）
 │   └── reviews/             ← mentor 评语（gitignore）
-└── tree/                    ← 学员 B 的作业区
 ```
 
 ## 本地作业
@@ -196,14 +195,14 @@ sand-hollow/
 
 W01 仍是 3 节制 L01-L03（`W01-L01-homework.py` 等），W17 毕业项目 L01-L03（`W17-L01-homework.py` 等）。
 
-全部平铺在 `thawpaw/homework/` 一层，**不建周子目录**。
+全部平铺在 `~/sand-hollow/<你的学员ID>/homework/` 一层，**不建周子目录**（学员ID = 注册沙坑用的 8 位数字）。
 
 ## 提交流程
 
 1. 在 Thonny 写代码 / 跑通
-2. 保存到 `~/sand-hollow/{学员文件夹}/homework/`
+2. 保存到 `~/sand-hollow/<你的学员ID>/homework/`
 3. **交完跟 mentor 说一声**才批改（不发 = 没交）
-4. mentor 在 `{学员文件夹}/reviews/{W##}-S#-review.md` 写评语
+4. mentor 在 `<你的学员ID>/reviews/{W##}-S#-review.md` 写评语
 5. tracker 自动记录练习时长与活跃度（不进 Git）
 
 > ⚠️ 学员文件夹已 `.gitignore`，**作业不会 commit 到 GitHub**。本地独有，私密保存。

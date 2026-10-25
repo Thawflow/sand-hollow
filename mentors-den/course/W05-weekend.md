@@ -38,7 +38,7 @@ AI 训练 = 反复用同一数据集训练。猜数字"再来一局"= **外层 w
 
 ## 二、项目 A：完整计分版（30 分钟）
 
-> 📁 项目存 `~/learning-homework/<你的学员名>/homework/`，新建 `guess_pro.py`。
+> 📁 项目存 `~/sand-hollow/<你的学员ID>/homework/`，新建 `guess_pro.py`。
 
 需求：
 

@@ -37,7 +37,7 @@ AI 画图鉴 = turtle 画（每个宠物画头像）。Python turtle + 字典 = 
 
 ## 二、项目：自由创作（60 分钟）
 
-> 📁 项目存 `~/learning-homework/<你的学员名>/homework/`，新建 `my_art.py`。
+> 📁 项目存 `~/sand-hollow/<你的学员ID>/homework/`，新建 `my_art.py`。
 
 任选一题（也可自己设计）：
 

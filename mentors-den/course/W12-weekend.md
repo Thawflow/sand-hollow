@@ -9,7 +9,7 @@
 
 ---
 
-> **📂 课前准备**：存为 `~/sand-hollow/<你的学员名>/homework/W16-weekend-practice.py`。
+> **📂 课前准备**：存为 `~/sand-hollow/<你的学员ID>/homework/W16-weekend-practice.py`。
 
 ## ⓪ 🤖 课前 AI 一分钟 · 第 36 颗：自己造轮子 vs 用标准库（3 分钟）
 

@@ -63,7 +63,7 @@ print(secret)
 
 ## 三、搭游戏（20 分钟）
 
-> 📁 项目存 `~/learning-homework/<你的学员名>/homework/`（与平日练习同目录，平铺不建周子目录）。
+> 📁 项目存 `~/sand-hollow/<你的学员ID>/homework/`（与平日练习同目录，平铺不建周子目录）。
 
 新建 `guess_game.py`，亲手敲：
 
