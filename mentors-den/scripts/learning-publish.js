@@ -7,8 +7,7 @@
  *   （凭据默认从 ~/.config/skyclan-chatroom/config.json 取；也可用 SKYCLAN_CONFIG=<路径> 覆盖）
  *
  * 数据源：mentors-den/course/<WEEK>-*.md（编程轨 code）
- *         mentors-den/phonics/<WEEK>-*.md（英语音标轨 phonics，2026-10-26 新增）
- * 轨选择：COURSE_TRACK=code|phonics 环境变量，或按周号前缀自动推断（W*→code，P*→phonics）
+ * 轨选择：COURSE_TRACK 环境变量显式指定，或按周号前缀自动推断（W*→code）
  * 行为：读 SYLLABUS 提取周标题 + 读所有课时 md → POST /learning/publish（覆盖式）
  *
  * Schema 见 docs/LEARNING-TAB-PRD.md §4/§5
@@ -23,7 +22,7 @@ const path = require('path');
 const os = require('os');
 const { execFileSync } = require('child_process');
 
-// 2026-10-26 多课程轨：W* = 编程轨（code），P* = 英语音标轨（phonics）
+// 多课程轨：W* = 编程轨（code）
 // 轨可用 COURSE_TRACK 环境变量显式指定；不指定时按周号前缀自动推断。
 // ★ 旗标位置无关：argv 里第一个匹配 /^[A-Z]\d+$/ 的参数当周ID
 //   （--check-only / --allow-divergent 放周ID前后都行 —— 位置写死会误判成「用法」并静默退 0）
@@ -31,23 +30,20 @@ const argvAll = process.argv.slice(2);
 const WEEK = argvAll.find(a => /^[A-Z]\d+$/.test(a));
 const CHECK_ONLY = argvAll.includes('--check-only');
 const ALLOW_DIVERGENT = argvAll.includes('--allow-divergent');
-const TRACK = (process.env.COURSE_TRACK || (WEEK && /^P/.test(WEEK) ? 'phonics' : 'code'))
+const TRACK = (process.env.COURSE_TRACK || 'code')
   .replace(/[^a-z0-9_-]/gi, '') || 'code';
 if (!WEEK) {
-  console.error('用法: SKYCLAN_CONFIG=<config.json 路径> node learning-publish.js <周ID，如 W01 或 P01> [--check-only] [--allow-divergent]');
-  console.error('  音标轨: COURSE_TRACK=phonics node learning-publish.js P01');
+  console.error('用法: SKYCLAN_CONFIG=<config.json 路径> node learning-publish.js <周ID，如 W01> [--check-only] [--allow-divergent]');
   console.error('  --check-only：只跑发布前对账，不发布');
   console.error('  --allow-divergent：跳过对账强制发布（须留痕，默认关）');
   process.exit(1);
 }
 
 // 沙坑仓自包含：COURSE_DIR 相对本脚本位置（mentors-den/scripts/ → ../course）
-// 课程目录按轨选择（2026-10-26 多课程轨）
+// 课程目录按轨选择（多课程轨机制保留：将来加新轨时在这里加一条分支）
 //  - code 轨   → mentors-den/course/     （编程 W01-W17）
-//  - phonics 轨 → mentors-den/phonics/    （英语音标 P00-P08）
-const COURSE_DIR = TRACK === 'phonics'
-    ? path.join(__dirname, '..', 'phonics')
-    : path.join(__dirname, '..', 'course');
+const TRACK_DIRS = { code: 'course' };
+const COURSE_DIR = path.join(__dirname, '..', (TRACK_DIRS[TRACK] || 'course'));
 
 // 凭据走环境变量（不存公开仓）：SKYCLAN_CONFIG 指向 config.json
 // ★ 修：默认路径原本写死 `~/projects/skyclan/projects/chatroom/config.json`，
@@ -69,7 +65,7 @@ const CONFIG = JSON.parse(fs.readFileSync(CONFIG_FILE, 'utf8'));
 const BASE = process.env.SKYCLAN_BASE_URL || 'https://tpg-hq.thawflow.com';
 
 // 1. 周标题：SYLLABUS 里 "### W01 · 起步：让程序开口说话"
-const syllabusFile = TRACK === 'phonics' ? 'SYLLABUS-PHONICS.md' : 'SYLLABUS.md';
+const syllabusFile = 'SYLLABUS.md';
 const syllabus = fs.readFileSync(path.join(COURSE_DIR, syllabusFile), 'utf8');
 const m = syllabus.match(new RegExp(`### ${WEEK} · (.+)`))
              || syllabus.match(new RegExp(`## ${WEEK} · (.+)`));

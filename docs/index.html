@@ -148,21 +148,13 @@ footer{text-align:center;color:var(--text2);font-size:.75rem;margin-top:30px}
     每周日晚发布下周内容。卡住随时跟你自己的智能体说一声 ❄️✨
   </div>
 
-    <!-- 📚 课程入口（2026-10-26 新增 · 多课程轨 · 未来加课只改 TRACKS） -->
+    <!-- 📚 课程入口 -->
     <div class="track-bar" id="track-bar">
       <div class="home-course active" data-track="code" onclick="switchTrack('code')">
         <div class="hc-icon">🐍</div>
         <div class="hc-body">
           <div class="hc-name">编程课程</div>
           <div class="hc-desc">17 周 Python 系统课 · 算法加餐 · AI 通识</div>
-        </div>
-        <div class="hc-go">进入 →</div>
-      </div>
-      <div class="home-course" data-track="phonics" onclick="switchTrack('phonics')">
-        <div class="hc-icon">🔤</div>
-        <div class="hc-body">
-          <div class="hc-name">英语音标</div>
-          <div class="hc-desc">9 单元速成 · 48 个国际音标（PEP 五上考纲）</div>
         </div>
         <div class="hc-go">进入 →</div>
       </div>
@@ -309,7 +301,7 @@ async function loadIndex(){
 function renderWeeks(){
   const box=$('#weeks');box.innerHTML='';
   const tr=CUR_TRACK;
-  // 按当前课程轨过滤周列表（编程=W*，音标=P*）
+  // 按当前课程轨过滤周列表（编程=W*）
   const all=[...weeksData].sort((a,b)=>(a.id<b.id?-1:1));
   const sorted=tr.filter?all.filter(w=>tr.filter(w)):all;
   if(!sorted.length){
@@ -535,11 +527,6 @@ const TRACKS=[
    desc:'17 周 Python 系统课 · 算法加餐 · AI 通识',
    weekPrefix:'W',syllPath:'/learning/syllabus?track=code',
    syllMeta:'17 周 · Python 编程 / AI 通识 / C++ 认脸',
-   filter:function(w){return !this.weekPrefix||String(w.id||'').indexOf(this.weekPrefix)===0;}},
-  {key:'phonics',name:'英语音标',icon:'🔤',color:'#7dd3fc',
-   desc:'9 单元速成 · 48 个国际音标（PEP 五上考纲）',
-   weekPrefix:'P',syllPath:'/learning/syllabus?track=phonics',
-   syllMeta:'9 单元 · 国际音标 IPA 48 个 · 速成',
    filter:function(w){return !this.weekPrefix||String(w.id||'').indexOf(this.weekPrefix)===0;}},
 ];
 let CUR_TRACK=TRACKS[0];
@@ -769,10 +756,11 @@ function initLoginGate(){
   });
 }
 
-// 初始化时读回上次选择的课程轨（2026-10-26）
+// 初始化时读回上次选择的课程轨
 (function(){
   try{
     const k=localStorage.getItem('learning-track');
+    if(k&&!trackByKey(k).key)localStorage.removeItem('learning-track'); // 已下线的轨，清残留
     if(k&&k!==CUR_TRACK.key){
       const tr=trackByKey(k);
       if(tr&&tr.key!==CUR_TRACK.key){CUR_TRACK=tr;
