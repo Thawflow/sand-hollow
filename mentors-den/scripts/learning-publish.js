@@ -70,11 +70,15 @@ const weekTitle = m[1].trim();
 // 从大纲推导出的标题不可能是占位符；一旦出现占位符 = 大纲被临时改坏了。
 // 闸门口径：空 / 短于 3 字 / 占位符词表 / 裸周号 → 拒绝发布（rc=2）。
 const TITLE_PLACEHOLDERS = new Set(['x', 'tbd', 'test', 'todo', 'xxx', '待定', '占位']);
+// 占位符**前缀变体**也要拦：「TBD计划」「待定：xxx」「TODO-选题」这类不是全等匹配，
+// 但同样是占位符。全等匹配只挡得住字面量本身 → 词表改成「前缀也算」。
+const TITLE_PLACEHOLDER_RE = /^(x+|tbd|test|todo|xxx|待定|占位|待补|未定)/i;
 function titleLooksSane(title, weekId) {
   const t = String(title || '').trim();
   if (!t) return '标题为空';
   if (t.length < 3) return `标题过短（${t.length} 字）：${t}`;
   if (TITLE_PLACEHOLDERS.has(t.toLowerCase())) return `标题是占位符：${t}`;
+  if (TITLE_PLACEHOLDER_RE.test(t)) return `标题是占位符（前缀变体）：${t}`;
   if (t.toUpperCase() === weekId.toUpperCase()) return `标题只是裸周号：${t}`;
   return null;
 }
@@ -92,6 +96,30 @@ const files = fs.readdirSync(COURSE_DIR)
   .filter(f => new RegExp(`^${WEEK}-.+\\.md$`).test(f))
   .sort();
 if (!files.length) { console.error(`${COURSE_DIR} 下没有 ${WEEK}-*.md`); process.exit(1); }
+
+// ── 课时标题体检闸（同一套判据，套到 lessons[].title 上）──────────────────────
+// ⚠️ 周标题闸有覆盖盲区 —— 学员在课程列表里
+// 看到的**课时标题**（各 md 的 `# ` 行）走的是另一条路径，Worker 端同样不校验，
+// 同一处占位符能从这条路漏进去（当初 W09 的 "x" 就是这种形状）。
+// 故同一判据必须同时套到 lessons 映射上：任一课时标题不过关 → 整周拒发。
+// ⚠️ 位置纪律：本闸**必须**在 `const files` 声明之后 —— 闸体遍历 files，
+//   放在声明之前 = TDZ（Cannot access 'files' before initialization）→ 脚本直接崩。
+const lessonTitleProblems = [];
+for (const f of files) {
+  const md = fs.readFileSync(path.join(COURSE_DIR, f), 'utf8');
+  const h = md.match(/^# (.+)$/m);
+  if (!h) { lessonTitleProblems.push(f + '：没有 `# ` 标题行'); continue; }
+  // 标题形状 = "W09-S1 · 贪心 ①：永远挑最大的硬币" → 取 `·` 之后的正文部分
+  const t = h[1].replace(/^[^·]+·\s*/, '').trim();
+  const p = titleLooksSane(t, WEEK);
+  if (p) lessonTitleProblems.push(`${f}：${p}`);
+}
+if (lessonTitleProblems.length) {
+  console.error('❌ 课时标题体检未通过 —— 拒绝发布 ' + WEEK);
+  for (const p of lessonTitleProblems) console.error('   - ' + p);
+  console.error('   修法：把对应 md 的 `# ` 标题行改成正式课时名再发（占位符标题会直接显示给学员）。');
+  process.exit(2);
+}
 
 const lessons = files.map(f => {
   const md = fs.readFileSync(path.join(COURSE_DIR, f), 'utf8');

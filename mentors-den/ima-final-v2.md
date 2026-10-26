@@ -44,7 +44,7 @@ W01-W06 基础 → W07 项目周「猫咪冒险岛」→ W08-W12 函数 / turtle
 
 ## 链路
 
-- 上游：`mentors-den/course/SYLLABUS.md`（12 周大纲权威）
+- 上游：`mentors-den/course/SYLLABUS.md`（完整大纲权威）
 - 中游：本 v2.1 终稿（教学方法）
 - 下游：learning.thawflow.com（线上）+ GitHub Pages 自动部署
 

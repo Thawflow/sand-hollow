@@ -532,7 +532,24 @@ const POST_BASE_TIMEOUT_MS=8000;
 // 学员明明有号有正确昵称却登不进来（学员端实测报障）。
 // ⚠️ 白名单**只放只读 POST**：/register /friends/add /learning/homework/submit /track
 // 等真写路径仍保持「超时即抛、不回落、不重试」（防双写，14ff6ce 的初衷不变）。
-const IDEMPOTENT_POSTS=new Set(['/verify','/load']);
+//
+// 2026-10-26 起：白名单收紧 —— **只留当前真实调用到的只读 POST**。
+// 原白名单含 '/load'，但**本站全站 cfPost 只有 /verify /register /track /friends/add /
+// learning/homework/submit**（逐点 grep 核对）→ '/load' 是死条目，本站永不调用。
+// 留着它有隐患：将来若把 '/load' 接成「存读档」写接口，白名单就等于给双写开了口子。
+// 故本版**移除 /load**，并在下面留注释写明条件：若将来真的接了 /load，
+// 必须先确认它是**只读**语义，一旦变成写接口，必须把它移出白名单。
+//
+// ⚠️ '/verify' 的零写入依据**已实测补证**：
+// Worker 源码 `cf-backend/src/index.js` 的 POST /verify 分支（读 playerKey + 读
+// chatroomMemberKey → 拼响应）**零 kvPut**（该文件全文件唯一的 .put( 是 caches.default.put，
+// 属缓存层非数据层）→ 回落备域 = 同字段读两次，不构成双写。
+// ⚠️ 但**这是「当前源码」的依据，不是「端点语义永久不变」的保证** —— 若将来 /verify
+// 加入 last_login/last_seen 之类落库，必须同时把本条移出白名单。
+const IDEMPOTENT_POSTS=new Set(['/verify']);
+// ⚠️ '/load' 当前是**死条目**（本站无调用点）。若将来接入且为**只读**语义，
+//   可重新加回白名单；一旦它是**写接口**（存读档），**必须移出** —— 否则回落备域 = 双写。
+// const IDEMPOTENT_POSTS=new Set(['/verify','/load']);  ← 故意注释留档（勿直接启用）
 async function cfPost(path,body){
   // 写操作**不并行**：两个域指向同一 Worker，并行 = 同一请求被执行两次。
   // 代价控制用「单域短超时 + 域序串行」，坏域最多烧 POST_BASE_TIMEOUT_MS 就回落。
@@ -569,6 +586,12 @@ async function cfPost(path,body){
   throw lastErr||new Error('network');
 }
 async function cfGet(path){
+  // ⚠️ 本函数**当前无任何调用点**（全站 grep 只有定义处，无调用处）—— 属死代码。
+  // 保留原因：域间并行竞速的 GET 读路径在需要时可复用；但**不要把它当成「已生效的读兜底」**。
+  // ⚠️ 口径不统一（2026-10-26 记录）：本函数用 40s × 3 次重试，而读路径真正在用的是
+  // raceJSON 的 90s + 失败重试一轮 —— **两套超时口径并存**，学员端最长要等约 3 分钟
+  // 才看到错误提示（原来 30s）。若将来重新启用 cfGet，请先把它统一到 raceJSON 的口径，
+  // 或直接删掉本函数，避免第三个口径。
   let lastErr=null;
   for(let attempt=0;attempt<3;attempt++){
     // 域间并行竞速（同 cfPost 理由：串行会先烧满坏域 40s 超时）

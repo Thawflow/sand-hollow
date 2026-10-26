@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """沙坑课程完整性检查 v3（猴哥 2026-10-19 指示全面纳入）
-- AI 胶囊 + C++ 认脸（基础 12 周必加，加餐 + W01/W02 豁免）
+- AI 胶囊 + C++ 认脸（基础课必加，加餐 + W01/W02 豁免）
 - frontmatter 完整性（每节必须有 slug + type）
 - type 合法性（base / addon / project）
 - slug 格式（kebab-case，不带 W##/week 数字）
