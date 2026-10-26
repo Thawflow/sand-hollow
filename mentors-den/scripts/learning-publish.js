@@ -62,6 +62,31 @@ const m = syllabus.match(new RegExp(`### ${WEEK} · (.+)`));
 if (!m) { console.error(`SYLLABUS 里没找到 ${WEEK}`); process.exit(1); }
 const weekTitle = m[1].trim();
 
+// ── 周标题体检闸 ───────────────────────────────────────────────
+// 线上曾出现某周标题 = "x"（占位符）而 6 节课正文完好，学员在课程列表里
+// 只看到一个字母。成因：手搓 payload 直调 /learning/publish 绕过了本脚本，
+// 而 Worker 端**不校验 title**，原样落库 + 镜像进 learning:index。
+// 症状可被脚本自身拦下 —— 标题来源只有 SYLLABUS 的 `### W0X · ` 行，
+// 从大纲推导出的标题不可能是占位符；一旦出现占位符 = 大纲被临时改坏了。
+// 闸门口径：空 / 短于 3 字 / 占位符词表 / 裸周号 → 拒绝发布（rc=2）。
+const TITLE_PLACEHOLDERS = new Set(['x', 'tbd', 'test', 'todo', 'xxx', '待定', '占位']);
+function titleLooksSane(title, weekId) {
+  const t = String(title || '').trim();
+  if (!t) return '标题为空';
+  if (t.length < 3) return `标题过短（${t.length} 字）：${t}`;
+  if (TITLE_PLACEHOLDERS.has(t.toLowerCase())) return `标题是占位符：${t}`;
+  if (t.toUpperCase() === weekId.toUpperCase()) return `标题只是裸周号：${t}`;
+  return null;
+}
+const titleProblem = titleLooksSane(weekTitle, WEEK);
+if (titleProblem) {
+  console.error('❌ 周标题体检未通过 —— 拒绝发布 ' + WEEK);
+  console.error('   问题：' + titleProblem);
+  console.error('   来源：' + path.join(COURSE_DIR, 'SYLLABUS.md') + ' 的 `### ' + WEEK + ' · ` 行');
+  console.error('   修法：把该行改成正式周标题再发（占位符标题会直接显示给学员）。');
+  process.exit(2);
+}
+
 // 2. 课时文件：W01-L01.md / W01-weekend.md（存在即发布）
 const files = fs.readdirSync(COURSE_DIR)
   .filter(f => new RegExp(`^${WEEK}-.+\\.md$`).test(f))
