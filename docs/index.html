@@ -524,6 +524,26 @@ function fillRandomId(){$('#rg-id').value=randId();}
 // 回退下域/重试会把「已落库只是回得慢」的写再执行一遍（实测 thawflow 首字节最慢 22.1s）。
 // 故写操作超时后**不回退、不重试**，直接抛错把「结果未知」交给用户（先刷新确认再手动重试）。
 const POST_BASE_TIMEOUT_MS=8000;
+// 学员端「慢网」提示：写路径单域 8s 超时 + 最多 3 轮（每轮 2 域）⇒ 最坏可达数分钟。
+// 白屏期间给一句「网络较慢，正在重试」比让学员盯白屏到错误提示友好。
+// 用法：在等待写请求期间调 `slowHint(true)`，请求结束调 `slowHint(false)`。
+let _slowHintTimer=null;
+function slowHint(on){
+  const box=document.getElementById('lg-msg');
+  if(!box)return;
+  if(on){
+    // 8s 还没回来 = 大概率慢网（不是立刻失败）→ 先给提示，不覆盖已有错误文案
+    if(_slowHintTimer)return;
+    _slowHintTimer=setTimeout(()=>{
+      _slowHintTimer=null;
+      const el=document.getElementById('lg-msg');
+      if(el&&!el.textContent.trim()){
+        el.textContent='🌐 网络较慢，正在重试…';
+        el.className='lg-msg show';   // .lg-msg 默认 display:none，必须带 show 才可见
+      }
+    },POST_BASE_TIMEOUT_MS);
+  }else if(_slowHintTimer){clearTimeout(_slowHintTimer);_slowHintTimer=null;}
+}
 // 幂等写的白名单：**只读语义**的 POST，回落到备域不会造成双写。
 // /verify 只校验「ID + 昵称(=口令)」并回读账号，**不写任何数据** —— 主域 8s 超时
 // 后回落备域 = 最多多问一次，绝不会重复执行同一笔写。
@@ -540,10 +560,14 @@ const POST_BASE_TIMEOUT_MS=8000;
 // 故本版**移除 /load**，并在下面留注释写明条件：若将来真的接了 /load，
 // 必须先确认它是**只读**语义，一旦变成写接口，必须把它移出白名单。
 //
-// ⚠️ '/verify' 的零写入依据**已实测补证**：
-// Worker 源码 `cf-backend/src/index.js` 的 POST /verify 分支（读 playerKey + 读
-// chatroomMemberKey → 拼响应）**零 kvPut**（该文件全文件唯一的 .put( 是 caches.default.put，
-// 属缓存层非数据层）→ 回落备域 = 同字段读两次，不构成双写。
+// ⚠️ '/verify' 的零写入依据**已实测补证**（Worker 源码行号，第三方可核）：
+//   `cf-backend/src/index.js` L536 `if (path === 'verify' && method === 'POST')` 分支：
+//   L544 `kvGet(playerKey(id))`      → 读
+//   L554 `kvGet(chatroomMemberKey(id))` → 读
+//   L548 `identityFailure(...)` / L559 `identitySuccess(...)` → 纯内存计数
+//     （identityFailure L175-181 / identitySuccess L184-186：只动内存 Map `_identityHits`，
+//      无 kvPut）；`identityThrottled` L153-160 同理只读内存计数。
+//   ⇒ 整个 POST /verify 分支**零 kvPut** → 回落备域 = 同字段读两次，不构成双写。
 // ⚠️ 但**这是「当前源码」的依据，不是「端点语义永久不变」的保证** —— 若将来 /verify
 // 加入 last_login/last_seen 之类落库，必须同时把本条移出白名单。
 const IDEMPOTENT_POSTS=new Set(['/verify']);
@@ -585,35 +609,11 @@ async function cfPost(path,body){
   }
   throw lastErr||new Error('network');
 }
-async function cfGet(path){
-  // ⚠️ 本函数**当前无任何调用点**（全站 grep 只有定义处，无调用处）—— 属死代码。
-  // 保留原因：域间并行竞速的 GET 读路径在需要时可复用；但**不要把它当成「已生效的读兜底」**。
-  // ⚠️ 口径不统一（2026-10-26 记录）：本函数用 40s × 3 次重试，而读路径真正在用的是
-  // raceJSON 的 90s + 失败重试一轮 —— **两套超时口径并存**，学员端最长要等约 3 分钟
-  // 才看到错误提示（原来 30s）。若将来重新启用 cfGet，请先把它统一到 raceJSON 的口径，
-  // 或直接删掉本函数，避免第三个口径。
-  let lastErr=null;
-  for(let attempt=0;attempt<3;attempt++){
-    // 域间并行竞速（同 cfPost 理由：串行会先烧满坏域 40s 超时）
-    const raced = CF_BASES.map(base => (async () => {
-      const ctl=new AbortController();
-      const timer=setTimeout(()=>ctl.abort(),40000);
-      try{
-        const res=await fetch(base+path,{signal:ctl.signal}).then(r=>r.json());
-        if(res&&res.ok!==false)return res;
-        throw new Error((res&&res.error)||'bad response');
-      }finally{clearTimeout(timer);}
-    })());
-    try{
-      return await Promise.any(raced);
-    }catch(e){
-      const errs=(e&&e.errors)?e.errors.filter(Boolean):[e];
-      lastErr=errs[0]||e;
-    }
-    if(attempt<2)await new Promise(r=>setTimeout(r,1000*(attempt+1)));
-  }
-  throw lastErr||new Error('network');
-}
+// ✅ 2026-10-27 删除死函数 cfGet：此前**全站零调用点**（grep 只有定义处），
+// 且它自带第三套超时口径（40s × 3 轮），与实际在用的 raceJSON（90s + 失败重试一轮）
+// 并存 → 学员端最长要等约 3 分钟才看到错误提示（原来 30s）。
+// 删除后 GET 读路径只剩**一套口径**（raceJSON），不再有「改哪个」的歧义。
+// 若将来确需独立 GET 兜底，请复用 raceJSON（传 timeout 参数），不要另写一套。
 // 登录成功：写 localStorage（游戏小窝同 key 共享）+ 关门
 function acceptLogin(id,nickname,role){
   const players=getPlayers();
@@ -647,6 +647,7 @@ async function doLogin(){
   if(!isValidId(id)){lgMsg('ID 必须是 8 位数字','err');return}
   if(!nick){lgMsg('请输入这个号的名字（昵称就是密码）','err');return}
   btn.disabled=true;btn.textContent='🔍 验证中…';
+  slowHint(true);
   try{
     const j=await cfPost('/verify',{id:id,nickname:nick});
     if(j.ok){
@@ -671,6 +672,7 @@ async function doLogin(){
     lgMsg((e&&/可能已送达/.test(e.message||''))?e.message:'网络不通 —— 检查网络后重试','err');
   }
   btn.disabled=false;btn.textContent='🔑 登录';
+  slowHint(false);
 }
 async function doRegister(){
   const btn=$('#lg-reg-btn');
@@ -679,6 +681,7 @@ async function doRegister(){
   if(!isValidId(id)){lgMsg('ID 必须是 8 位数字','err');return}
   if(!nick){nick='学员'+id;}   // 留空 = 学员XXXXXXXX
   btn.disabled=true;btn.textContent='✨ 注册中…';
+  slowHint(true);
   try{
     const j=await cfPost('/register',{id:id,nickname:nick});
     if(j.ok){
@@ -698,6 +701,7 @@ async function doRegister(){
     lgMsg((e&&/可能已送达/.test(e.message||''))?e.message:'网络不通 —— 检查网络后重试','err');
   }
   btn.disabled=false;btn.textContent='✨ 注册并进入';
+  slowHint(false);
 }
 // 顶栏徽章：点击 = 退出 / 换号
 function initLoginGate(){
