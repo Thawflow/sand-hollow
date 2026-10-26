@@ -196,8 +196,13 @@ const API='https://tpg-hq.thawflow.com';
 const $=s=>document.querySelector(s);
 let weeksData=[],curWeek=null,lessonCache={};
 function lessonCacheAdd(w){
-  if(!w||!w.week_id)return;
-  lessonCache[w.week_id]=w.lessons||[];
+  if(!w)return;
+  // 归一化周标识：week 详情结构是 {week_id,...}，但 localStorage 缓存
+  // learning-c:wk:* 里可能存着老结构（只有 id 没 week_id），index 结构也是 {id,...}。
+  // 统一取 wid，后文不再直接摸 w.week_id（否则渲染出 undefined-SXX-homework.py）。
+  const wid=w.week_id||w.id||'';
+  if(!wid)return;
+  lessonCache[wid]=w.lessons||[];
 }
 
 async function fetchJSON(url,timeout){
@@ -212,7 +217,7 @@ function lsSet(k,v){try{localStorage.setItem('learning-c:'+k,JSON.stringify(v))}
 // 记录学员上次停的章节（2026-09-08 Tree 提需求、小马 v1.8 实现）：默认页 localStorage key；intersection observer 50% 可见即写。
 function posGet(){try{return JSON.parse(localStorage.getItem('learning-pos'))}catch(e){return null}}
 function posSet(p){try{localStorage.setItem('learning-pos',JSON.stringify({...p,ts:Date.now()}))}catch(e){}}
-function posResolve(){const p=posGet();if(!p||!weeksData.length)return null;const w=weeksData.find(x=>x.id===p.weekId);if(!w)return null;return {week:w,lessonId:p.lessonId||null}}
+function posResolve(){const p=posGet();if(!p||!weeksData.length)return null;const w=weeksData.find(x=>(x.week_id||x.id)===p.weekId);if(!w)return null;return {week:w,lessonId:p.lessonId||null}}
 // 滚到上次停留的课（lesson 级恢复）：复用侧边栏 lesson-link 同款 scrollIntoView 模式，元素不存在时 no-op
 function _scrollToLesson(lid){setTimeout(()=>{const t=document.querySelector('#content .md[data-lid="'+lid+'"]');if(t)t.scrollIntoView({behavior:'smooth',block:'start'})},80)}
 function raceJSON(path,timeout){
@@ -274,21 +279,24 @@ async function loadIndex(){
 }
 function renderWeeks(){
   const box=$('#weeks');box.innerHTML='';
-  const sorted=[...weeksData].sort((a,b)=>(a.id<b.id?-1:1));
+  const sorted=[...weeksData].sort((a,b)=>((a.week_id||a.id||'')<(b.week_id||b.id||'')?-1:1));
   for(const w of sorted){
-    const done=weekDone(w.id);
+    const wid=w.week_id||w.id||'';
+    if(!wid)continue;
+    const done=weekDone(wid);
     const el=document.createElement('div');
-    el.className='wk'+(w.current?' current':'')+(done?' done':'')+(curWeek===w.id?' active':'');
-    el.innerHTML='<span class="id">'+w.id+'</span><span class="t">'+(w.title||'')+'</span><span class="dot"></span>';
-    el.onclick=()=>loadWeek(w.id);
+    el.className='wk'+(w.current?' current':'')+(done?' done':'')+(curWeek===wid?' active':'');
+    el.innerHTML='<span class="id">'+wid+'</span><span class="t">'+(w.title||'')+'</span><span class="dot"></span>';
+    el.onclick=()=>loadWeek(wid);
     box.appendChild(el);
     // 周点击后拿到 lessons：展开课的迷你链接（v1.3.2 ThawPaw 8/30 20:47 加）
-    if(curWeek===w.id && lessonCache[w.id]){
-      for(const L of lessonCache[w.id]){
+    if(curWeek===wid && lessonCache[wid]){
+      for(const L of lessonCache[wid]){
+        const lid=L.id||'';
         const sub=document.createElement('div');
-        sub.className='lesson-link'+(document.querySelector('.md[data-lid="'+(L.id||'')+'"]')?' active':'');
-        sub.textContent='↳ '+L.id+(L.title?' · '+L.title:'');
-        sub.onclick=ev=>{ev.stopPropagation();loadWeek(w.id);setTimeout(()=>{const t=document.querySelector('.md[data-lid="'+(L.id||'')+'"]');if(t)t.scrollIntoView({behavior:'smooth',block:'start'});},200);};
+        sub.className='lesson-link'+(document.querySelector('.md[data-lid="'+lid+'"]')?' active':'');
+        sub.textContent='↳ '+lid+(L.title?' · '+L.title:'');
+        sub.onclick=ev=>{ev.stopPropagation();loadWeek(wid);setTimeout(()=>{const t=document.querySelector('.md[data-lid="'+lid+'"]');if(t)t.scrollIntoView({behavior:'smooth',block:'start'});},200);};
         box.appendChild(sub);
       }
     }
@@ -338,13 +346,16 @@ async function loadWeek(id,scrollToLid){
   }
 }
 function renderWeek(w){
+  // 归一化周标识（week 详情 {week_id,...} / 旧缓存 {id,...} 都可能出现）
+  const wid=w.week_id||w.id||'';
   const lessons=w.lessons||[];
-  let html='<div class="wk-title">'+(w.title||w.week_id)+'</div><div class="wk-meta">发布：'+(w.published_at?w.published_at.slice(0,10):'—')+' · '+lessons.length+' 课</div>';
+  let html='<div class="wk-title">'+(w.title||wid||'课程')+'</div><div class="wk-meta">发布：'+(w.published_at?String(w.published_at).slice(0,10):'—')+' · '+lessons.length+' 课</div>';
   for(const L of lessons){
+    const lid=L.id||'';
     html+='<div class="lesson">'
-      +'<div class="lesson-head"><span class="lt">'+(L.title||L.id)+'</span></div>'
-      +'<div class="md" data-lid="'+L.id+'">'+(window.marked?marked.parse(L.markdown||'内容待补'):'<pre>'+String(L.markdown||'内容待补').replace(/</g,'&lt;')+'</pre>')+'</div>'
-      +'<div class="hw-upload" data-lid="'+L.id+'">'
+      +'<div class="lesson-head"><span class="lt">'+(L.title||lid)+'</span></div>'
+      +'<div class="md" data-lid="'+lid+'">'+(window.marked?marked.parse(L.markdown||'内容待补'):'<pre>'+String(L.markdown||'内容待补').replace(/</g,'&lt;')+'</pre>')+'</div>'
+      +'<div class="hw-upload" data-lid="'+lid+'">'
       +'<h4>📝 交作业</h4>'
       +'<textarea class="hw-code" placeholder="粘贴代码，或点「选 .py 文件」自动填入"></textarea>'
       +'<div class="row" style="margin-top:8px"><button class="btn hw-file-btn">📄 选 .py 文件</button><button class="btn hw-send-btn">🚀 提交作业</button></div>'
@@ -352,7 +363,7 @@ function renderWeek(w){
       +'<div class="ok-msg" style="display:none"></div>'
       +'</div></div>';
   }
-  html+='<div class="hw">🐾 <b>怎么交</b>：读完这周的课，在上面的「📝 交作业」里贴代码提交就行。提交完 mentor 会批改，评语会直接发给你 💌<br>文件名建议 <code>'+w.week_id+'-SXX-homework.py</code>（跟你的智能体说一声「修完了」它才会去取）。</div>';
+  html+='<div class="hw">🐾 <b>怎么交</b>：读完这周的课，在上面的「📝 交作业」里贴代码提交就行。提交完 mentor 会批改，评语会直接发给你 💌<br>文件名建议 <code>'+(wid||'WXX')+'-SXX-homework.py</code>（跟你的智能体说一声「修完了」它才会去取）。</div>';
   $('#content').innerHTML=html;
   // 课文内自查清单 checkbox：激活 marked 默认 disabled + 本机持久化（2026-08-30 Tree 反馈）
   // 注：本段必须活在 renderWeek 内——每次渲染后重新激活，放函数外只在首载空跑一次（本次修复的根因）
@@ -360,7 +371,7 @@ function renderWeek(w){
   const checks=JSON.parse(localStorage.getItem('learning-checks')||'{}');
   $('#content').querySelectorAll('.md input[type=checkbox]').forEach(cb=>{
     const li=cb.closest('li'),mdDiv=cb.closest('.md');
-    const k=w.week_id+':'+(mdDiv?mdDiv.dataset.lid:'?')+':'+hsh(li?li.textContent.trim().slice(0,60):'x');
+    const k=wid+':'+(mdDiv?mdDiv.dataset.lid:'?')+':'+hsh(li?li.textContent.trim().slice(0,60):'x');
     cb.disabled=false;
     cb.checked=!!checks[k];
     cb.onchange=()=>{
@@ -379,7 +390,7 @@ function renderWeek(w){
       le.classList.toggle('done',done);
       if(!done)allDone=false;
     });
-    localStorage.setItem('learning-week-'+w.week_id,allDone?'1':'0');
+    localStorage.setItem('learning-week-'+wid,allDone?'1':'0');
     renderWeeks();
   }
   syncDone();
