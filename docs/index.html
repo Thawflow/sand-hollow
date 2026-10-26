@@ -524,6 +524,15 @@ function fillRandomId(){$('#rg-id').value=randId();}
 // 回退下域/重试会把「已落库只是回得慢」的写再执行一遍（实测 thawflow 首字节最慢 22.1s）。
 // 故写操作超时后**不回退、不重试**，直接抛错把「结果未知」交给用户（先刷新确认再手动重试）。
 const POST_BASE_TIMEOUT_MS=8000;
+// 幂等写的白名单：**只读语义**的 POST，回落到备域不会造成双写。
+// /verify 只校验「ID + 昵称(=口令)」并回读账号，**不写任何数据** —— 主域 8s 超时
+// 后回落备域 = 最多多问一次，绝不会重复执行同一笔写。
+// 实测（10-26）：主域 /verify 首字节 4.2-13.9s，6 次里 2 次超 8s + 1 次握手超时；
+// 备域 6/6 全 200（1.1-2.7s）。旧逻辑主域一超时就直接抛「提交超时」，
+// 学员明明有号有正确昵称却登不进来（学员端实测报障）。
+// ⚠️ 白名单**只放只读 POST**：/register /friends/add /learning/homework/submit /track
+// 等真写路径仍保持「超时即抛、不回落、不重试」（防双写，14ff6ce 的初衷不变）。
+const IDEMPOTENT_POSTS=new Set(['/verify','/load']);
 async function cfPost(path,body){
   // 写操作**不并行**：两个域指向同一 Worker，并行 = 同一请求被执行两次。
   // 代价控制用「单域短超时 + 域序串行」，坏域最多烧 POST_BASE_TIMEOUT_MS 就回落。
@@ -547,6 +556,9 @@ async function cfPost(path,body){
         // 写超时（abort）≠ 没送达：请求可能已落库、只是回得慢。此时回退其他域或重试
         // = 可能把同一次写再执行一遍 —— 写操作一律停手，让用户先刷新确认结果再决定。
         if(e&&e.name==='AbortError'){
+          // 例外：幂等（只读语义）POST 在白名单里 —— 回落备域无双写风险。
+          // 两域是同一个 Worker，备域上重问 = 同一次只读校验，答案必然相同。
+          if(IDEMPOTENT_POSTS.has(path)){ lastErr=e; continue; }
           throw new Error('提交超时：请求可能已送达，请先刷新确认是否已记录，没有记录再重试');
         }
         lastErr=e;
