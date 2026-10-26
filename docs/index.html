@@ -120,7 +120,7 @@ footer{text-align:center;color:var(--text2);font-size:.75rem;margin-top:30px}
 <div class="wrap">
   <header>
     <h1>🏖️ 沙坑训练场</h1>
-    <span class="sub">Skyclan 家庭 12 周课程 · 一套材料，两位学员（ThawPaw 🐱 × Tree 🌳）</span>
+    <span class="sub">Skyclan 家庭 17 周课程 · 一套材料，两位学员（ThawPaw 🐱 × Tree 🌳）</span>
     <button class="id-badge" id="id-badge" title="点击切换账号">🔑 登录</button>
   </header>
   <div class="notice">
@@ -328,7 +328,7 @@ async function loadSyllabus(){
   }
 }
 function renderSyll(md){
-  $('#content').innerHTML='<div class="wk-title">📑 课程总大纲</div><div class="wk-meta">12 周 · 一套材料，两位学员</div><div class="md">'+(window.marked?marked.parse(md):md)+'</div>';
+  $('#content').innerHTML='<div class="wk-title">📑 课程总大纲</div><div class="wk-meta">17 周 · 一套材料，两位学员</div><div class="md">'+(window.marked?marked.parse(md):md)+'</div>';
 }
 async function loadWeek(id,scrollToLid){
   curWeek=id;
