@@ -224,17 +224,22 @@ function raceJSON(path,timeout){
   // 10/20 23:4x 修正：恢复双域备援（主域 thawflow，备域 workers.dev）。
   // 上一版因「本机 workers.dev 不可达」把备域整个删掉 = 把单机网络现象写成全局口径
   // （龙井 BW 机实测 workers.dev 3/3 HTTP 200）。串行竞速：任一域先成功即返回。
+  // 10/26 晚：Worker→PostgREST 链路抖动（6-60s），30s 超时撞线就白屏 →
+  // GET 读操作放宽到 90s + 失败自动重试一轮（读是幂等的，重试无副作用）。
   const bases=[API].concat(CF_BASES.filter(b=>b!==API));
-  return new Promise((res,rej)=>{
-    let pend=bases.length,won=false;
-    for(const b of bases){
-      fetchJSON(b+path,timeout||30000).then(j=>{
-        if(won)return;
-        if(j&&j.ok!==false){won=true;res(j)}
-        else if(--pend===0)rej(new Error('api ok:false'));
-      }).catch(()=>{if(!won&&--pend===0)rej(new Error('all bases failed'))});
-    }
-  });
+  const attempt=async()=>{
+    return new Promise((res,rej)=>{
+      let pend=bases.length,won=false;
+      for(const b of bases){
+        fetchJSON(b+path,timeout||90000).then(j=>{
+          if(won)return;
+          if(j&&j.ok!==false){won=true;res(j)}
+          else if(--pend===0)rej(new Error('api ok:false'));
+        }).catch(()=>{if(!won&&--pend===0)rej(new Error('all bases failed'))});
+      }
+    });
+  };
+  return attempt().catch(()=>new Promise(r=>setTimeout(r,1500)).then(attempt));
 }
 async function loadIndex(){
   // 缓存优先：本地秒开 → 后台竞速刷新（网络挂了也照常用旧数据）
