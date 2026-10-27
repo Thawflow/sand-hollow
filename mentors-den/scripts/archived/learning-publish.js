@@ -135,6 +135,35 @@ if (lessonTitleProblems.length) {
   process.exit(2);
 }
 
+// ── 作业文件名串号闸（周号必须 = 本课周）─────────────────────────────
+// 病灶（2026-10-27 复盘）：10-19 加餐前插把 W12/W14 从 W16 位置切出，正文里
+// `W16-weekend-practice.py` 这类文件名串号随「加餐头串号」同批遗留（46 处债
+// 的残余 6 处），学员在 W12 周末课把作业存成 W16 文件名，批改对不上号。
+// 病根：窄正则/人眼扫漏 weekend-practice 连字形态 → 判据落在不变量
+// 「文件名引用的周号 = 本课自己的周」上，而不是扫特定字面量。
+// 闸门口径：课时 md 内所有 /W\d\d-[A-Za-z0-9-]*\.py/ 引用，周号 ≠ 本课周 → 拒发（rc=2）。
+// 全仓扫描配套脚本：mentors-den/scripts/scan-week-refs.py（同一套正则）。
+// ⚠️ 逃生阀 `--allow-week-refs`：确有合法跨周 .py 引用时显式开（须留痕），默认关。
+const ALLOW_WEEK_REFS = argvAll.includes('--allow-week-refs');
+const WEEK_REF_RE = /W\d\d-[A-Za-z0-9-]*\.py/g;
+if (!ALLOW_WEEK_REFS) {
+  const weekRefProblems = [];
+  for (const f of files) {
+    const own = (f.match(/^W\d\d/) || [''])[0];
+    const md = fs.readFileSync(path.join(COURSE_DIR, f), 'utf8');
+    for (const m of md.matchAll(WEEK_REF_RE)) {
+      if (m[0].slice(0, 3) !== own) weekRefProblems.push(`${f}：${m[0]}（本课周=${own || '?'}）`);
+    }
+  }
+  if (weekRefProblems.length) {
+    console.error('❌ 作业文件名串号闸未通过 —— 拒绝发布 ' + WEEK);
+    for (const p of weekRefProblems) console.error('   - ' + p);
+    console.error('   修法：把文件名改成对应课自己的周号（全仓复查：python3 mentors-den/scripts/scan-week-refs.py）。');
+    console.error('   合法跨周引用确属有意 → --allow-week-refs 显式开（须留痕）。');
+    process.exit(2);
+  }
+}
+
 const lessons = files.map(f => {
   const md = fs.readFileSync(path.join(COURSE_DIR, f), 'utf8');
   const h = md.match(/^# (.+)$/m); // "W01-L01 · 认识终端 + 装 Thonny + 第一行代码"
