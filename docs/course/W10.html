@@ -1,0 +1,770 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>W10 · 函数 def：打包一段代码（前置 W07/W08 列表/画地图 + W09 加餐②）</title>
+<style>
+:root{--bg:#0f1420;--card:#171e2e;--card2:#1e2740;--border:#2a3550;--text:#e8ecf4;--text2:#8b96ad;--accent:#5b9dff;--ok:#3ecf8e}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+.wrap{max-width:900px;margin:0 auto;padding:28px 20px 60px}
+h1{font-size:1.5rem}
+.wk-meta{color:var(--text2);font-size:.85rem;margin:4px 0 20px}
+.lesson{border:1px solid var(--border);border-radius:12px;padding:16px 18px;margin-bottom:14px;background:var(--card2)}
+.lesson-head{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.lesson-head .lt{font-weight:700;font-size:1rem;flex:1}
+.md{font-size:.92rem;line-height:1.8;color:var(--text);overflow-wrap:break-word}
+.md h1,.md h2,.md h3{margin:14px 0 8px;font-size:1.05rem}
+.md p{margin:8px 0}
+.md code{background:rgba(91,157,255,.12);border-radius:5px;padding:2px 6px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.85em;color:#a8c8ff}
+.md pre{background:#0b0f18;border:1px solid var(--border);border-radius:10px;padding:12px 14px;overflow-x:auto;margin:10px 0}
+.md pre code{background:none;padding:0;color:#c9d7f0}
+.md ul,.md ol{margin:8px 0 8px 22px}
+.md blockquote{border-left:3px solid var(--accent);padding:4px 12px;color:var(--text2);margin:10px 0}
+.md a{color:var(--accent)}
+.md table{border-collapse:collapse;margin:10px 0;font-size:.85rem}
+.md td,.md th{border:1px solid var(--border);padding:6px 10px}
+.md input[type=checkbox]{width:15px;height:15px;accent-color:var(--ok);cursor:pointer;margin-right:6px;vertical-align:-2px}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+<h1 class="wk-title">函数 def：打包一段代码（前置 W07/W08 列表/画地图 + W09 加餐②）</h1>
+<div class="wk-meta">W10 · 6 课</div>
+</header>
+<div class="week-body" data-week="W10">
+<section class="lesson" data-lid="W10-S1">
+<div class="lesson-head"><span class="lt">def 初见：为什么要打包</span></div>
+<div class="md" data-lid="W10-S1"><!-- slug: function-def, type: base -->
+<h2>⓪ 🤖 课前 AI 一分钟 · 第 31 颗：AI 也会&quot;打包&quot;——函数（3 分钟）</h2>
+<blockquote>
+<p><strong>第 31 颗</strong></p>
+</blockquote>
+<p>AI 训练 = 把&quot;训模型&quot;打包成 <code>def train():</code> 函数。Python <code>def</code> = <strong>打包一段代码</strong>。</p>
+<p><strong>今日口诀</strong>：AI 训练 = 把&quot;训模型&quot;打包成 <code>def train():</code> 函数。</p>
+<p><strong>⚔️ 判一判</strong>（AI 营线上测评题型热身，先自己答再看答案）：</p>
+<blockquote>
+<ol>
+<li>def 用来打包一段代码</li>
+<li>AI 训练代码也是函数</li>
+</ol>
+</blockquote>
+<details><summary>答案</summary>
+
+<p><strong>1.</strong> ✓ def train(): ...<br><strong>2.</strong> ✓ 重复代码变函数 = 打包</p>
+</details>
+
+<hr>
+<h1>W10-S1 · def 初见：为什么要打包</h1>
+<blockquote>
+<p><strong>每日节奏（v1.9）：</strong> 本篇纯阅读 ≈10 分钟，读完做当天作业 ≈10 分钟，总共 ≤25 分钟
+<strong>不需要 Thonny</strong>——正文一个字都不用敲，作业时间才开编辑器
+难度：⭐⭐ · 本篇是原 W08-L01 的前半（函数概念 + def 的样子）</p>
+</blockquote>
+<hr>
+<h2>一、你早就在用函数了（3 分钟）</h2>
+<p>W07 的 <code>battle(player, wolf)</code>、每天的 <code>print(...)</code>、<code>input(...)</code>——全是<strong>函数</strong>：一段有名字的代码，可以反复调用。区别只是：print 是别人写好的，这周开始<strong>写你自己的</strong>。</p>
+<p>为什么非要打包？三个理由：</p>
+<ul>
+<li><strong>不重复</strong>：同一段代码不抄 10 遍</li>
+<li><strong>改一处</strong>：函数改好，10 个调用点全部生效</li>
+<li><strong>读得懂</strong>：<code>battle(player, wolf)</code> 一行，胜过 30 行战斗代码摊在眼前</li>
+</ul>
+<h2>二、def 的样子（4 分钟）</h2>
+<pre><code class="language-python">def greet(name):
+    print(f&quot;Hello, {name}!&quot;)
+    print(&quot;Welcome to Python.&quot;)
+
+greet(&quot;Alice&quot;)
+greet(&quot;Bob&quot;)
+</code></pre>
+<p>四件套拆解：</p>
+<ul>
+<li><code>def</code>：定义（define）的缩写——「我要造积木了」</li>
+<li><code>greet</code>：函数名，自己起，最好用动词</li>
+<li><code>(name)</code>：<strong>参数</strong>，调用时传进来的数据（明天专门学）</li>
+<li><code>:</code> + 缩进：冒号下面缩进 4 格的，都是函数体</li>
+</ul>
+<h2>三、定义 ≠ 执行（3 分钟）</h2>
+<p>最反直觉的一点：<code>def</code> 那一刻<strong>什么都不执行</strong>，只是把函数记进了 Python 的名册。真正执行的是<strong>调用</strong>——顶格写的 <code>greet(&quot;Alice&quot;)</code>：</p>
+<pre><code class="language-python">def say_hello():
+    print(&quot;Hello!&quot;)
+
+say_hello
+say_hello()
+</code></pre>
+<p><code>say_hello</code>（没括号）只是指着这块积木，不执行、不报错；<code>say_hello()</code>（带括号）才是「执行它」。<strong>忘写括号 = 新手第一大坑</strong>：程序安静跑完，一行 Hello 都没有。</p>
+<p><strong>今日口诀：</strong> def 造积木，调用才出发；括号不写，万物静默。</p>
+<hr>
+<h2>✅ 今天的阅读完成自查</h2>
+<ul>
+<li><input disabled="" type="checkbox"> 我能说出用函数的三个好处（不重复 / 改一处 / 读得懂）</li>
+<li><input disabled="" type="checkbox"> 我能指出 def 四件套各是什么</li>
+<li><input disabled="" type="checkbox"> 我知道 <code>greet</code> 和 <code>greet()</code> 的区别</li>
+</ul>
+<p>三格全勾 → 打开作业 🐾</p>
+<hr>
+<blockquote>
+<p><strong>📁 作业保存规则</strong>：本课课后练习写进一个文件 <code>W10-S1-homework.py</code>（存 <code>~/sand-hollow/&lt;你的学员ID&gt;/homework/</code>），每道题开头用刚学的备注分隔：<code># --- 题 1 ---</code>、<code># --- 题 2 ---</code>……<strong>交完作业要跟你的智能体说一声</strong>才会批改，评语出现在 <code>reviews/*.review.md</code>。<strong>回报触发词：交完作业或修完坑，都回一句「修完了」</strong>——不回这句 mentor 不知道，坑会一直挂着等。</p>
+</blockquote>
+<h2>📝 今日作业（≈10 分钟）</h2>
+<p>新建 <code>W10-S1-homework.py</code>，3 道题：</p>
+<ol>
+<li><strong>greet</strong>：定义 <code>greet(name)</code> 打印 <code>Hello, &lt;name&gt;!</code>，调用 3 次传不同名字</li>
+<li><strong>print_menu</strong>：定义无参数菜单函数（打 3 个选项），调用 2 次</li>
+<li><strong>踩坑</strong>：只写 <code>greet</code> 不带括号再「调用」一次，观察零输出；补上括号跑通——把两种结果写成注释</li>
+</ol>
+<blockquote>
+<p>交完说「<strong>修完了</strong>」。明天学参数：给积木装凹槽 🐾</p>
+</blockquote>
+<h2>👀 C++ 认脸时刻（1 分钟 · 只看不敲）</h2>
+<p>C++ 的对应写法：</p>
+<pre><code class="language-cpp">#include &lt;iostream&gt;
+void greet() {
+    std::cout &lt;&lt; &quot;hello!&quot; &lt;&lt; std::endl;
+}
+int main() {
+    greet();
+    greet();
+    return 0;
+}
+</code></pre>
+<p>三个认脸：</p>
+<ol>
+<li><code>void greet()</code> 函数定义（C++ 用 <code>void</code>）</li>
+<li>Python <code>def greet():</code> 更简洁</li>
+<li>调用两次 = 函数复用</li>
+</ol>
+<blockquote>
+<p>AI 营笔试的编程题用 C++ 出。不用会写，<strong>认得脸</strong>就行。</p>
+</blockquote>
+</div>
+</section>
+<section class="lesson" data-lid="W10-S2">
+<div class="lesson-head"><span class="lt">参数：积木的凹槽</span></div>
+<div class="md" data-lid="W10-S2"><!-- slug: function-params, type: base -->
+<h2>⓪ 🤖 课前 AI 一分钟 · 第 32 颗：AI 也会&quot;参数&quot;——超参（3 分钟）</h2>
+<blockquote>
+<p><strong>第 32 颗</strong></p>
+</blockquote>
+<p>AI 训练 = 调超参（learning rate、batch size）。Python 函数参数 = <strong>给函数喂数据</strong>。</p>
+<p><strong>今日口诀</strong>：AI 训练 = 调超参（learning rate、batch size）。</p>
+<p><strong>⚔️ 判一判</strong>（AI 营线上测评题型热身，先自己答再看答案）：</p>
+<blockquote>
+<ol>
+<li>函数参数 = 喂数据</li>
+<li>AI 超参也是函数参数</li>
+</ol>
+</blockquote>
+<details><summary>答案</summary>
+
+<p><strong>1.</strong> ✓ def train(lr=0.01, batch=32):<br><strong>2.</strong> ✓ learning rate 是超参</p>
+</details>
+
+<hr>
+<h1>W10-S2 · 参数：积木的凹槽</h1>
+<blockquote>
+<p><strong>每日节奏（v1.9）：</strong> 本篇纯阅读 ≈10 分钟，读完做当天作业 ≈10 分钟，总共 ≤25 分钟
+<strong>不需要 Thonny</strong>——正文一个字都不用敲，作业时间才开编辑器
+难度：⭐⭐ · 本篇是原 W08-L02 的前半（位置参数 + 多参数）</p>
+</blockquote>
+<hr>
+<h2>一、凹槽：函数接住外面的数据（3 分钟）</h2>
+<p>调用时<strong>塞值进去</strong>，函数定义时<strong>挖槽接住</strong>——参数让一段代码变通用：</p>
+<pre><code class="language-python">def introduce(name, age, hobby):
+    print(f&quot;I&#39;m {name}, {age} years old.&quot;)
+    print(f&quot;I like {hobby}.&quot;)
+
+introduce(&quot;Alice&quot;, 12, &quot;drawing&quot;)
+introduce(&quot;Bob&quot;, 11, &quot;coding&quot;)
+</code></pre>
+<p>同一个函数，两份数据，两种输出。塞进去的叫<strong>实参</strong>（实际的值），接住它们的凹槽叫<strong>形参</strong>（形式上的名字）——新手期记不住术语没关系，记住「塞值 → 凹槽」就行。</p>
+<h2>二、按位置对应：第一坑（3 分钟）</h2>
+<p><code>introduce(&quot;Alice&quot;, 12, &quot;drawing&quot;)</code> → name=&quot;Alice&quot;、age=12、hobby=&quot;drawing&quot;。<strong>按位置一一对应</strong>——所以顺序错了语义就错：</p>
+<pre><code class="language-text">introduce(12, &quot;Alice&quot;, &quot;drawing&quot;)
+</code></pre>
+<p>不报错！但输出变成「I&#39;m 12, Alice years old」——程序很听话，错的是你。<strong>参数错位是「安静的 bug」</strong>，比报错难抓。</p>
+<h2>三、按名字传：关键字参数（3 分钟）</h2>
+<p>不想记顺序？用名字指定，顺序随意：</p>
+<pre><code class="language-python">introduce(hobby=&quot;coding&quot;, name=&quot;Bob&quot;, age=11)
+</code></pre>
+<p>混用规则只有一条：<strong>没名字的（位置参数）必须在前</strong>。</p>
+<pre><code class="language-text">introduce(name=&quot;Alice&quot;, 12, &quot;drawing&quot;)
+</code></pre>
+<p>这行是 SyntaxError——关键字参数后面不能再跟裸的位置参数。</p>
+<h2>四、数量必须对上：第二坑（2 分钟）</h2>
+<p>函数挖两个槽，你塞三个值（或只塞一个）→ <code>TypeError: introduce() takes 3 positional arguments but 2 were given</code>。报错其实很友善：槽几个、给了几个，写得明明白白。<strong>见到 TypeError 先数参数。</strong></p>
+<p><strong>今日口诀：</strong> 塞值进凹槽，位置一一咬；按名传也行，名字不能少。</p>
+<hr>
+<h2>✅ 今天的阅读完成自查</h2>
+<ul>
+<li><input disabled="" type="checkbox"> 我能说出位置参数「按位置对应」、错位是安静 bug</li>
+<li><input disabled="" type="checkbox"> 我知道关键字参数顺序随意，但位置参数必须在前</li>
+<li><input disabled="" type="checkbox"> 我知道 TypeError 报参数数量问题时先数槽</li>
+</ul>
+<p>三格全勾 → 打开作业 🐾</p>
+<hr>
+<blockquote>
+<p><strong>📁 作业保存规则</strong>：本课课后练习写进一个文件 <code>W10-S2-homework.py</code>（存 <code>~/sand-hollow/&lt;你的学员ID&gt;/homework/</code>），每道题开头用刚学的备注分隔：<code># --- 题 1 ---</code>、<code># --- 题 2 ---</code>……<strong>交完作业要跟你的智能体说一声</strong>才会批改，评语出现在 <code>reviews/*.review.md</code>。<strong>回报触发词：交完作业或修完坑，都回一句「修完了」</strong>——不回这句 mentor 不知道，坑会一直挂着等。</p>
+</blockquote>
+<h2>📝 今日作业（≈10 分钟）</h2>
+<p>新建 <code>W10-S2-homework.py</code>，3 道题：</p>
+<ol>
+<li><strong>describe_pet(name, animal)</strong>：定义并调用两次（如 Whiskers/cat、Rex/dog）</li>
+<li><strong>错位实验</strong>：把 describe_pet 的两个参数故意反着传一次，把错误输出抄成注释</li>
+<li><strong>关键字传参</strong>：用 <code>animal=... , name=...</code> 的顺序（反着）调 describe_pet，验证输出正确</li>
+</ol>
+<blockquote>
+<p>交完说「<strong>修完了</strong>」。明天进阶：参数还能有默认值 🐾</p>
+</blockquote>
+<h2>👀 C++ 认脸时刻（1 分钟 · 只看不敲）</h2>
+<p>C++ 的对应写法：</p>
+<pre><code class="language-cpp">#include &lt;iostream&gt;
+void greet(std::string name) {
+    std::cout &lt;&lt; &quot;hi, &quot; &lt;&lt; name &lt;&lt; std::endl;
+}
+int main() {
+    greet(&quot;Alice&quot;);
+    return 0;
+}
+</code></pre>
+<p>三个认脸：</p>
+<ol>
+<li><code>std::string name</code> 参数声明类型</li>
+<li>调用 <code>greet(&quot;Alice&quot;)</code> 传实参</li>
+<li>Python <code>def greet(name):</code> 不声明类型</li>
+</ol>
+<blockquote>
+<p>AI 营笔试的编程题用 C++ 出。不用会写，<strong>认得脸</strong>就行。</p>
+</blockquote>
+</div>
+</section>
+<section class="lesson" data-lid="W10-S3">
+<div class="lesson-head"><span class="lt">默认值：不传就用默认</span></div>
+<div class="md" data-lid="W10-S3"><!-- slug: function-default, type: base -->
+<h2>⓪ 🤖 课前 AI 一分钟 · 第 33 颗：AI 也会&quot;默认值&quot;——默认超参（3 分钟）</h2>
+<blockquote>
+<p><strong>第 33 颗</strong></p>
+</blockquote>
+<p>AI 默认 learning_rate=0.01（不改就用默认）。Python 默认参数 = <strong>不传就用默认</strong>。</p>
+<p><strong>今日口诀</strong>：AI 默认 learning_rate=0.01（不改就用默认）。</p>
+<p><strong>⚔️ 判一判</strong>（AI 营线上测评题型热身，先自己答再看答案）：</p>
+<blockquote>
+<ol>
+<li>函数参数有默认值</li>
+<li>AI 训练有默认超参</li>
+</ol>
+</blockquote>
+<details><summary>答案</summary>
+
+<p><strong>1.</strong> ✓ def f(x=10): 不传 x=10<br><strong>2.</strong> ✓ Adam 优化器默认 lr=0.001</p>
+</details>
+
+<hr>
+<h1>W10-S3 · 默认值：不传就用默认</h1>
+<blockquote>
+<p><strong>每日节奏（v1.9）：</strong> 本篇纯阅读 ≈10 分钟，读完做当天作业 ≈10 分钟，总共 ≤25 分钟
+<strong>不需要 Thonny</strong>——正文一个字都不用敲，作业时间才开编辑器
+难度：⭐⭐ · 本篇是原 W08-L02 的后半（默认值参数）</p>
+</blockquote>
+<hr>
+<h2>一、给凹槽预设一个值（3 分钟）</h2>
+<p>参数可以带<strong>默认值</strong>——调用时不传，就自动用默认：</p>
+<pre><code class="language-python">def greet(name, greeting=&quot;Hello&quot;):
+    print(f&quot;{greeting}, {name}!&quot;)
+
+greet(&quot;Alice&quot;)
+greet(&quot;Alice&quot;, &quot;Hi&quot;)
+greet(&quot;Bob&quot;, greeting=&quot;Hey&quot;)
+</code></pre>
+<p>三次调用：第一次 greeting 用默认 Hello；第二次位置传 Hi；第三次按名传 Hey。<strong>一个函数，三种口味</strong>——常用值不用每次写。</p>
+<h2>二、咖啡机实战（4 分钟）</h2>
+<pre><code class="language-python">def make_coffee(size=&quot;medium&quot;, sugar=0):
+    print(f&quot;Coffee: {size}, sugar: {sugar} spoons&quot;)
+
+make_coffee()
+make_coffee(&quot;large&quot;)
+make_coffee(sugar=2)
+make_coffee(&quot;small&quot;, sugar=1)
+</code></pre>
+<p>读懂四种点单方式：全默认 / 只传第一个 / 只传第二个（必须带名字）/ 混着传。<strong>只改后面参数、跳过前面参数时，必须用名字</strong>——<code>make_coffee(sugar=2)</code> 不能写成 <code>make_coffee(2)</code>（那会把 2 当成 size）。</p>
+<h2>三、默认值放最后（2 分钟）</h2>
+<p>规矩：<strong>有默认值的参数必须排在没默认值的后面</strong>。想想为什么——按位置传参时 Python 从左往右填槽，如果中间的槽有默认值，后面的必传参数就永远收不到值了。</p>
+<pre><code class="language-text">def greet(greeting=&quot;Hello&quot;, name):
+</code></pre>
+<p>SyntaxError。改成 <code>def greet(name, greeting=&quot;Hello&quot;)</code> 才合法。</p>
+<h2>四、实战：print_scores 升级（3 分钟）</h2>
+<p>W06 的统计代码 + 默认值 = 专业味十足的报表函数：</p>
+<pre><code class="language-python">def print_scores(scores, label=&quot;Scores&quot;, show_total=True):
+    print(f&quot;--- {label} ---&quot;)
+    for s in scores:
+        print(f&quot;- {s}&quot;)
+    if show_total:
+        print(f&quot;Total: {sum(scores)}, Avg: {sum(scores)/len(scores):.1f}&quot;)
+
+print_scores([85, 92, 78])
+print_scores([85, 92, 78], label=&quot;Math Test&quot;, show_total=False)
+</code></pre>
+<p><strong>今日口诀：</strong> 不传用默认，传了就覆盖；默认排最后，跳着传要带名。</p>
+<hr>
+<h2>✅ 今天的阅读完成自查</h2>
+<ul>
+<li><input disabled="" type="checkbox"> 我能说出 <code>make_coffee(sugar=2)</code> 为什么必须带名字</li>
+<li><input disabled="" type="checkbox"> 我知道有默认值的参数必须排最后、以及为什么</li>
+<li><input disabled="" type="checkbox"> 我能读懂 print_scores 升级版的两次调用各用了什么参数</li>
+</ul>
+<p>三格全勾 → 打开作业 🐾</p>
+<hr>
+<blockquote>
+<p><strong>📁 作业保存规则</strong>：本课课后练习写进一个文件 <code>W10-S3-homework.py</code>（存 <code>~/sand-hollow/&lt;你的学员ID&gt;/homework/</code>），每道题开头用刚学的备注分隔：<code># --- 题 1 ---</code>、<code># --- 题 2 ---</code>……<strong>交完作业要跟你的智能体说一声</strong>才会批改，评语出现在 <code>reviews/*.review.md</code>。<strong>回报触发词：交完作业或修完坑，都回一句「修完了」</strong>——不回这句 mentor 不知道，坑会一直挂着等。</p>
+</blockquote>
+<h2>📝 今日作业（≈10 分钟）</h2>
+<p>新建 <code>W10-S3-homework.py</code>，2 道题：</p>
+<ol>
+<li><strong>四次点单</strong>：抄 make_coffee 函数，再用四种方式各点一次（全默认/只 size/只 sugar/都传），把四行输出抄成注释</li>
+<li><strong>battle 升级</strong>：给 <code>def battle(player, enemy, max_rounds=10)</code> 加第三个参数默认 10，战斗循环加「回合数超过 max_rounds 就算平局撤退」——先只改签名和一行判断，跑通即可</li>
+</ol>
+<blockquote>
+<p>交完说「<strong>修完了</strong>」。明天学 return：函数交货 🐾</p>
+</blockquote>
+<h2>👀 C++ 认脸时刻（1 分钟 · 只看不敲）</h2>
+<p>C++ 的对应写法：</p>
+<pre><code class="language-cpp">#include &lt;iostream&gt;
+void greet(std::string name = &quot;World&quot;) {
+    std::cout &lt;&lt; &quot;hi, &quot; &lt;&lt; name &lt;&lt; std::endl;
+}
+int main() {
+    greet();          // 不传，用默认
+    greet(&quot;Alice&quot;);   // 传，覆盖默认
+    return 0;
+}
+</code></pre>
+<p>三个认脸：</p>
+<ol>
+<li>C++ 默认参数 <code>std::string name = &quot;World&quot;</code></li>
+<li>调用 <code>greet()</code> 不传 = 默认</li>
+<li>Python <code>def greet(name=&quot;World&quot;):</code> 一样</li>
+</ol>
+<blockquote>
+<p>AI 营笔试的编程题用 C++ 出。不用会写，<strong>认得脸</strong>就行。</p>
+</blockquote>
+</div>
+</section>
+<section class="lesson" data-lid="W10-S4">
+<div class="lesson-head"><span class="lt">返回值：函数交货</span></div>
+<div class="md" data-lid="W10-S4"><!-- slug: function-return, type: base -->
+<h2>⓪ 🤖 课前 AI 一分钟 · 第 34 颗：AI 也会&quot;返回值&quot;——预测（3 分钟）</h2>
+<blockquote>
+<p><strong>第 34 颗</strong></p>
+</blockquote>
+<p>AI 模型 <code>model(x)</code> 返回预测。Python <code>return</code> = <strong>函数交货</strong>。</p>
+<p><strong>今日口诀</strong>：AI 模型 <code>model(x)</code> 返回预测。</p>
+<p><strong>⚔️ 判一判</strong>（AI 营线上测评题型热身，先自己答再看答案）：</p>
+<blockquote>
+<ol>
+<li>return 是函数返回值</li>
+<li>AI 模型调用也是返回预测</li>
+</ol>
+</blockquote>
+<details><summary>答案</summary>
+
+<p><strong>1.</strong> ✓ def add(a, b): return a + b<br><strong>2.</strong> ✓ pred = model(x); return pred</p>
+</details>
+
+<hr>
+<h1>W10-S4 · 返回值：函数交货</h1>
+<blockquote>
+<p><strong>每日节奏（v1.9）：</strong> 本篇纯阅读 ≈11 分钟，读完做当天作业 ≈10 分钟，总共 ≤25 分钟
+<strong>不需要 Thonny</strong>——正文一个字都不用敲，作业时间才开编辑器
+难度：⭐⭐ · 本篇是原 W08-L03 的前半（return + 多个 return）</p>
+</blockquote>
+<hr>
+<h2>一、函数不只干活，还要交货（3 分钟）</h2>
+<p>前几天的函数都是 print 完就走。更多时候函数要<strong>返回一个值</strong>给调用方用：</p>
+<ul>
+<li><code>input(...)</code> → 返回用户输入</li>
+<li><code>random.randint(1, 100)</code> → 返回随机数</li>
+<li>W07 的 <code>battle(...)</code> → 返回 True/False（你早就用过 return 了）</li>
+</ul>
+<h2>二、return 的样子（4 分钟）</h2>
+<pre><code class="language-python">def add(a, b):
+    return a + b
+
+result = add(3, 5)
+print(result)
+print(add(10, 20))
+</code></pre>
+<p>关键认知：<strong><code>add(3, 5)</code> 本身就是一个值</strong>（8）。可以接住存变量、可以直接丢给 print、还可以继续参与计算——<code>add(3, 5) * 2</code> 就是 16。</p>
+<h2>三、return vs print：新手分水岭（4 分钟）</h2>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>print</th>
+<th>return</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>给谁</td>
+<td>显示给人看</td>
+<td>交给程序用</td>
+</tr>
+<tr>
+<td>能赋值吗</td>
+<td>不能（得到 None）</td>
+<td>能</td>
+</tr>
+<tr>
+<td>能参与计算吗</td>
+<td>不能</td>
+<td>能</td>
+</tr>
+</tbody></table>
+<pre><code class="language-python">def add_print(a, b):
+    print(a + b)
+
+def add_return(a, b):
+    return a + b
+
+double = add_return(3, 5) * 2
+</code></pre>
+<p>上面 double 能算出 16；换成 add_print，它「打印了 8」但交出来的东西是 None——None 乘 2 直接 TypeError。<strong>原则：要接住就用 return，纯展示才用 print。</strong></p>
+<h2>四、多个 return：见好就收（3 分钟）</h2>
+<pre><code class="language-python">def find_biggest(nums):
+    if not nums:
+        return None
+    biggest = nums[0]
+    for n in nums:
+        if n &gt; biggest:
+            biggest = n
+    return biggest
+
+print(find_biggest([3, 7, 2, 9, 4]))
+print(find_biggest([]))
+</code></pre>
+<ul>
+<li><code>if not nums: return None</code>——空列表提前撤退（None = Python 的「无」）</li>
+<li><strong>第一个碰到的 return 立刻执行</strong>，后面的代码不再跑</li>
+<li>一个函数可以写多个 return，各管一条出口——跟 W07-S5「出口清点」一个思路</li>
+</ul>
+<p><strong>今日口诀：</strong> return 交货，print 展示；碰谁谁走，货能再算。</p>
+<hr>
+<h2>✅ 今天的阅读完成自查</h2>
+<ul>
+<li><input disabled="" type="checkbox"> 我能说出「add(3,5) 本身就是值」意味着什么</li>
+<li><input disabled="" type="checkbox"> 我能解释为什么 add_print 的返回值乘 2 会炸</li>
+<li><input disabled="" type="checkbox"> 我知道多个 return 谁先碰到谁生效</li>
+</ul>
+<p>三格全勾 → 打开作业 🐾</p>
+<hr>
+<blockquote>
+<p><strong>📁 作业保存规则</strong>：本课课后练习写进一个文件 <code>W10-S4-homework.py</code>（存 <code>~/sand-hollow/&lt;你的学员ID&gt;/homework/</code>），每道题开头用刚学的备注分隔：<code># --- 题 1 ---</code>、<code># --- 题 2 ---</code>……<strong>交完作业要跟你的智能体说一声</strong>才会批改，评语出现在 <code>reviews/*.review.md</code>。<strong>回报触发词：交完作业或修完坑，都回一句「修完了」</strong>——不回这句 mentor 不知道，坑会一直挂着等。</p>
+</blockquote>
+<h2>📝 今日作业（≈10 分钟）</h2>
+<p>新建 <code>W10-S4-homework.py</code>，3 道题：</p>
+<ol>
+<li><strong>damage 函数</strong>：写 <code>def damage(attack, defense): return max(1, attack - defense)</code>，调用三次手算验证</li>
+<li><strong>find_biggest 复刻</strong>：抄第四节函数，用 [5, 12, 3, 8] 和 [] 各测一次，抄下输出</li>
+<li><strong>对照实验</strong>：写一个只 print 不 return 的 add 版本，尝试 <code>x = add_print(3,5)</code> 后打印 x——把结果（None）写进注释，解释原因</li>
+</ol>
+<blockquote>
+<p>交完说「<strong>修完了</strong>」。明天把 W07 冒险岛改造成函数版 🐾</p>
+</blockquote>
+<h2>👀 C++ 认脸时刻（1 分钟 · 只看不敲）</h2>
+<p>C++ 的对应写法：</p>
+<pre><code class="language-cpp">#include &lt;iostream&gt;
+int add(int a, int b) {
+    return a + b;
+}
+int main() {
+    int result = add(3, 5);
+    std::cout &lt;&lt; result &lt;&lt; std::endl;
+    return 0;
+}
+</code></pre>
+<p>三个认脸：</p>
+<ol>
+<li><code>int add(...)</code> 声明返回类型</li>
+<li><code>return a + b;</code> 返回值</li>
+<li>Python <code>def add(a, b): return a + b</code> 不声明类型</li>
+</ol>
+<blockquote>
+<p>AI 营笔试的编程题用 C++ 出。不用会写，<strong>认得脸</strong>就行。</p>
+</blockquote>
+</div>
+</section>
+<section class="lesson" data-lid="W10-S5">
+<div class="lesson-head"><span class="lt">改造冒险岛：重复代码变函数</span></div>
+<div class="md" data-lid="W10-S5"><!-- slug: function-refactor, type: base -->
+<h2>⓪ 🤖 课前 AI 一分钟 · 第 35 颗：AI 也会&quot;改造&quot;——重构（3 分钟）</h2>
+<blockquote>
+<p><strong>第 35 颗</strong></p>
+</blockquote>
+<p>AI 代码 = 跑通后<strong>重构</strong>（抽函数/改类名/清理）。Python 重构 = <strong>改造</strong>重复代码。</p>
+<p><strong>今日口诀</strong>：AI 代码 = 跑通后<strong>重构</strong>（抽函数/改类名/清理）。</p>
+<p><strong>⚔️ 判一判</strong>（AI 营线上测评题型热身，先自己答再看答案）：</p>
+<blockquote>
+<ol>
+<li>重构是改造重复代码</li>
+<li>AI 工程也常重构</li>
+</ol>
+</blockquote>
+<details><summary>答案</summary>
+
+<p><strong>1.</strong> ✓ 抽函数 / 改类名 / 清理<br><strong>2.</strong> ✓ refactoring</p>
+</details>
+
+<hr>
+<h1>W10-S5 · 改造冒险岛：重复代码变函数</h1>
+<blockquote>
+<p><strong>每日节奏（v1.9）：</strong> 本篇纯阅读 ≈11 分钟，读完做当天作业 ≈10 分钟，总共 ≤25 分钟
+<strong>不需要 Thonny</strong>——正文一个字都不用敲，作业时间才开编辑器
+难度：⭐⭐⭐ · 本篇是原 W08-L03 后半（use_item + 提前退出）+ 周末改造预告</p>
+</blockquote>
+<hr>
+<h2>一、use_item：return 交出「成没成功」（4 分钟）</h2>
+<p>W07 的道具系统升级版——函数用 return 告诉调用方结果：</p>
+<pre><code class="language-python">def use_item(player, item_name):
+    if item_name not in player[&quot;inventory&quot;]:
+        print(f&quot;You don&#39;t have {item_name}&quot;)
+        return False
+    player[&quot;inventory&quot;].remove(item_name)
+    print(f&quot;Used {item_name}!&quot;)
+    return True
+
+if use_item(player, &quot;herb&quot;):
+    print(&quot;Healing done!&quot;)
+else:
+    print(&quot;No herb left&quot;)
+</code></pre>
+<p>调用方拿到 True/False，就能接着写 if——<strong>函数之间用 return 递话</strong>，主循环只管提问和分支，逻辑全住进函数里。</p>
+<h2>二、提前退出：return 是传送门（3 分钟）</h2>
+<pre><code class="language-python">def divide(a, b):
+    if b == 0:
+        print(&quot;Cannot divide by zero&quot;)
+        return None
+    return a / b
+</code></pre>
+<p><code>return None</code> 一执行，函数<strong>立刻结束</strong>，后面一行都不跑——像传送门，碰到就回城。这就是「提前退出」：先处理异常（除零），正常逻辑再往下写，主路径不缩进、读着清爽。</p>
+<h2>三、改造清单：冒险岛函数化（4 分钟）</h2>
+<p>周末项目全景——把 W07 的冒险岛按这个清单重构：</p>
+<ol>
+<li><code>def show_status(player)</code> —— 打血条（原主循环开头两行 print）</li>
+<li><code>def damage(attack, defense)</code> —— return <code>max(1, attack - defense)</code>（S4 作业写过，直接搬）</li>
+<li><code>def battle(player, enemy)</code> —— 战斗，return &quot;won&quot;/&quot;lost&quot;/&quot;ran&quot;</li>
+<li><code>def use_item(player, item_name)</code> —— 用道具，return True/False</li>
+</ol>
+<p>改造前主循环 80 行，改造后大约 25 行——<strong>短的代码不是删功能，是把功能请进函数</strong>。每搬一块就跑一遍游戏，别全部搬完才测。</p>
+<p><strong>对比法验收</strong>：改造前后各跑一遍相同路线（进森林→打狼→回神社），输出应该一模一样。行为没变、结构变了——这叫重构。</p>
+<p><strong>今日口诀：</strong> 功能进函数，return 递话；先搬再跑，行为不差。</p>
+<p><strong>🎉 W08 结业！</strong> def / 参数 / 默认值 / return 四板斧齐了——你已经会造自己的积木了。周末项目：完成上面四块改造 + 前后对比表 🐾</p>
+<hr>
+<h2>✅ 今天的阅读完成自查</h2>
+<ul>
+<li><input disabled="" type="checkbox"> 我能说出 use_item 的两个 return 各在什么条件下触发</li>
+<li><input disabled="" type="checkbox"> 我知道「提前退出」为什么能让主路径不缩进</li>
+<li><input disabled="" type="checkbox"> 我能复述重构验收标准：行为不变、结构变短</li>
+</ul>
+<p>三格全勾 → 打开作业 🐾</p>
+<hr>
+<blockquote>
+<p><strong>📁 作业保存规则</strong>：本课课后练习写进一个文件 <code>W10-S5-homework.py</code>（存 <code>~/sand-hollow/&lt;你的学员ID&gt;/homework/</code>），每道题开头用刚学的备注分隔：<code># --- 题 1 ---</code>、<code># --- 题 2 ---</code>……<strong>交完作业要跟你的智能体说一声</strong>才会批改，评语出现在 <code>reviews/*.review.md</code>。<strong>回报触发词：交完作业或修完坑，都回一句「修完了」</strong>——不回这句 mentor 不知道，坑会一直挂着等。</p>
+</blockquote>
+<h2>📝 今日作业（≈10 分钟）</h2>
+<p>新建 <code>W10-S5-homework.py</code>，2 道题：</p>
+<ol>
+<li><strong>safe_divide</strong>：写 <code>safe_divide(a, b)</code>——b=0 返回 None 并打印提示，否则返回 a/b；测 (10,2)、(10,0) 两组</li>
+<li><strong>小改造起步</strong>：把 W07 冒险岛的血条打印抽成 <code>show_status(player)</code> 函数，主循环里改成调用它——先搬这一块，跑通记录行数变化（改造前 X 行 → 后 Y 行，写进注释）</li>
+</ol>
+<blockquote>
+<p>交完说「<strong>修完了</strong>」。W08 结业——周末「改造收官 + 前后对比」见 🐾</p>
+</blockquote>
+<h2>👀 C++ 认脸时刻（1 分钟 · 只看不敲）</h2>
+<p>C++ 的对应写法：</p>
+<pre><code class="language-cpp">#include &lt;iostream&gt;
+// 改造前：3 处重复代码
+// 改造后：抽成函数
+void print_score(int s) {
+    std::cout &lt;&lt; &quot;score = &quot; &lt;&lt; s &lt;&lt; std::endl;
+}
+int main() {
+    print_score(85);
+    print_score(92);
+    return 0;
+}
+</code></pre>
+<p>三个认脸：</p>
+<ol>
+<li>抽函数消除重复</li>
+<li><code>print_score</code> 复用于两个分数</li>
+<li>Python 一样：def print_score(s): print(s)</li>
+</ol>
+<blockquote>
+<p>AI 营笔试的编程题用 C++ 出。不用会写，<strong>认得脸</strong>就行。</p>
+</blockquote>
+</div>
+</section>
+<section class="lesson" data-lid="W10-weekend">
+<div class="lesson-head"><span class="lt">用函数改造冒险游戏里的重复代码</span></div>
+<div class="md" data-lid="W10-weekend"><!-- slug: function-adventure-refactor, type: project -->
+<h2>⓪ 🤖 课前 AI 一分钟 · 第 36 颗：AI 也会&quot;工程化&quot;——实战重构（3 分钟）</h2>
+<blockquote>
+<p><strong>第 36 颗</strong></p>
+</blockquote>
+<p>AI 模型上线 = 完整工程化（train/eval/save/load 拆函数）。<strong>实战重构</strong>是 AI 工程师的核心能力。</p>
+<p><strong>今日口诀</strong>：AI 模型上线 = 完整工程化（train/eval/save/load 拆函数）。</p>
+<p><strong>⚔️ 判一判</strong>（AI 营线上测评题型热身，先自己答再看答案）：</p>
+<blockquote>
+<ol>
+<li>AI 训练要拆 train/eval 函数</li>
+<li>实战重构 = 工程化</li>
+</ol>
+</blockquote>
+<details><summary>答案</summary>
+
+<p><strong>1.</strong> ✓ def train(); def eval(); def save()<br><strong>2.</strong> ✓ 重复代码变函数 = 重构</p>
+</details>
+
+<hr>
+<h1>W10-weekend · 用函数改造冒险游戏里的重复代码</h1>
+<blockquote>
+<p>用时：60-90 分钟 · 难度：⭐⭐⭐ · 前置：W08 三课</p>
+</blockquote>
+<hr>
+<h2>一、本周武功盘点（3 分钟）</h2>
+<ul>
+<li>def 函数定义：写一次，处处调用</li>
+<li>参数：挖凹槽 + 默认值 + 关键字调用</li>
+<li>return：函数交货，调用方能接力</li>
+</ul>
+<p>今天把这些用上——把 W07 猫咪冒险岛里的「复制粘贴」抽成函数。</p>
+<h2>二、项目：函数化改造（40 分钟）</h2>
+<blockquote>
+<p>📁 项目存 <code>~/sand-hollow/&lt;你的学员ID&gt;/homework/</code>，新建 <code>cat_adventure_v4.py</code>（基于 W07 改）。</p>
+</blockquote>
+<h3>改造 1：抽 show_room 函数</h3>
+<p>每个房间的 print 重复结构，<strong>抽成一个函数</strong>：</p>
+<pre><code class="language-python">def show_room(name, description, choices):
+    print(f&quot;\n--- {name} ---&quot;)
+    print(description)
+    print(f&quot;Choices: {choices}&quot;)
+    return input(&quot;&gt; &quot;).strip().lower()
+</code></pre>
+<p>调用：</p>
+<pre><code class="language-python">if room == &quot;shrine&quot;:
+    choice = show_room(
+        &quot;Cat Shrine&quot;,
+        &quot;You stand at the old shrine. Paths lead north and east.&quot;,
+        &quot;(north/east)&quot;,
+    )
+</code></pre>
+<p>跑两遍：相同 print 结构，输入不同的 choice。</p>
+<h3>改造 2：抽 print_status 函数</h3>
+<p>玩家状态经常要 print：</p>
+<pre><code class="language-python">def print_status(player):
+    print(f&quot;\n=== {player[&#39;name&#39;]} ===&quot;)
+    print(f&quot;HP: {player[&#39;hp&#39;]}/{player[&#39;max_hp&#39;]}&quot;)
+    print(f&quot;ATK: {player[&#39;attack&#39;]}&quot;)
+    print(f&quot;DEF: {player[&#39;defense&#39;]}&quot;)
+    if player[&quot;inventory&quot;]:
+        print(f&quot;Inventory: {&#39;, &#39;.join(player[&#39;inventory&#39;])}&quot;)
+    else:
+        print(&quot;Inventory: (empty)&quot;)
+</code></pre>
+<p>战斗前后各调一次。</p>
+<h3>改造 3：抽 use_item 函数（已 W07 写过）</h3>
+<p>复用 W07-L03 的版本，加 return True/False。</p>
+<h3>改造 4：抽 save_game / load_game（进阶）</h3>
+<pre><code class="language-python">import json
+
+def save_game(player, room):
+    data = {&quot;player&quot;: player, &quot;room&quot;: room}
+    with open(&quot;save.json&quot;, &quot;w&quot;) as f:
+        json.dump(data, f)
+    print(&quot;Game saved!&quot;)
+
+def load_game():
+    with open(&quot;save.json&quot;) as f:
+        data = json.load(f)
+    print(&quot;Game loaded!&quot;)
+    return data[&quot;player&quot;], data[&quot;room&quot;]
+</code></pre>
+<p><code>json.dump</code> / <code>json.load</code> 是 Python 自带的「对象 ↔ 文件」转换。<strong>重点不是 JSON 本身，是 use 函数 + 文件读写 + try-except 错误处理</strong>。</p>
+<p>主循环里：</p>
+<pre><code class="language-python">if choice == &quot;save&quot;:
+    save_game(player, room)
+elif choice == &quot;load&quot;:
+    player, room = load_game()
+</code></pre>
+<h2>三、实战：清点重复（20 分钟）</h2>
+<p>把 W07 的 v3 找一遍「重复出现 2 次以上」的代码段：</p>
+<table>
+<thead>
+<tr>
+<th>重复模式</th>
+<th>抽函数</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>print(f&quot;\n--- {name} ---&quot;)</code> 多次</td>
+<td><code>show_room()</code></td>
+</tr>
+<tr>
+<td><code>print(f&quot;HP: {hp}/{max}&quot;)</code> 多次</td>
+<td><code>print_status()</code></td>
+</tr>
+<tr>
+<td>战斗后回血判断</td>
+<td><code>clamp(value, max)</code>（封顶）</td>
+</tr>
+<tr>
+<td>玩家 + 敌人攻击伤害公式</td>
+<td><code>calc_dmg(attacker_atk, defender_def)</code></td>
+</tr>
+</tbody></table>
+<p>把每处都抽出来，<strong>改造前后跑通测试</strong>，确认行为一致。</p>
+<h2>四、验收标准（自助验收）</h2>
+<ul>
+<li><input disabled="" type="checkbox"> 至少抽 3 个函数（show_room / print_status / 至少一个战斗相关）</li>
+<li><input disabled="" type="checkbox"> 每个函数有 def + 文档（&quot;&quot;&quot;一句话说清做什么&quot;&quot;&quot;）</li>
+<li><input disabled="" type="checkbox"> 函数改造前后跑通测试，行为不变</li>
+<li><input disabled="" type="checkbox"> 调用方代码可读性明显提升（少 30%+ 行数）</li>
+<li><input disabled="" type="checkbox"> 进阶：save_game / load_game 跑通</li>
+</ul>
+<h2>五、W08 全周自查</h2>
+<ul>
+<li><input disabled="" type="checkbox"> L01：def 写函数，调用加 ()</li>
+<li><input disabled="" type="checkbox"> L02：参数 / 关键字参数 / 默认值 分得清</li>
+<li><input disabled="" type="checkbox"> L03：return vs print 分得清，能写提前退出</li>
+<li><input disabled="" type="checkbox"> 周末：至少 3 个函数抽出来，代码更清爽</li>
+<li><input disabled="" type="checkbox"> 我能给家人解释「函数 = 写一次、处处调用、还能交货」</li>
+</ul>
+<p>W08 毕业 🎓 → 进入 W09「turtle：编程画画」。<strong>视觉化编程</strong>登场——前面的代码都是数字 + 文字，turtle 让你看到自己写的代码画出一幅画。</p>
+<h2>👀 C++ 认脸时刻（1 分钟 · 只看不敲）</h2>
+<p>C++ 的对应写法：</p>
+<pre><code class="language-cpp">#include &lt;iostream&gt;
+void train() { std::cout &lt;&lt; &quot;training...&quot; &lt;&lt; std::endl; }
+void eval()  { std::cout &lt;&lt; &quot;eval...&quot; &lt;&lt; std::endl; }
+void save()  { std::cout &lt;&lt; &quot;save...&quot; &lt;&lt; std::endl; }
+int main() {
+    train(); eval(); save();
+    return 0;
+}
+</code></pre>
+<p>三个认脸：</p>
+<ol>
+<li>3 个函数 = 工程化</li>
+<li>main 里调用 3 个步骤</li>
+<li>Python 一样：def train/eval/save()</li>
+</ol>
+<blockquote>
+<p>AI 营笔试的编程题用 C++ 出。不用会写，<strong>认得脸</strong>就行。</p>
+</blockquote>
+</div>
+</section>
+</div>
+</div>
+</body>
+</html>

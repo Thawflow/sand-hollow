@@ -1,0 +1,784 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>W16 · 🏆 毕业选题：四选一（前置 W13 字典 + W15 random）</title>
+<style>
+:root{--bg:#0f1420;--card:#171e2e;--card2:#1e2740;--border:#2a3550;--text:#e8ecf4;--text2:#8b96ad;--accent:#5b9dff;--ok:#3ecf8e}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+.wrap{max-width:900px;margin:0 auto;padding:28px 20px 60px}
+h1{font-size:1.5rem}
+.wk-meta{color:var(--text2);font-size:.85rem;margin:4px 0 20px}
+.lesson{border:1px solid var(--border);border-radius:12px;padding:16px 18px;margin-bottom:14px;background:var(--card2)}
+.lesson-head{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.lesson-head .lt{font-weight:700;font-size:1rem;flex:1}
+.md{font-size:.92rem;line-height:1.8;color:var(--text);overflow-wrap:break-word}
+.md h1,.md h2,.md h3{margin:14px 0 8px;font-size:1.05rem}
+.md p{margin:8px 0}
+.md code{background:rgba(91,157,255,.12);border-radius:5px;padding:2px 6px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.85em;color:#a8c8ff}
+.md pre{background:#0b0f18;border:1px solid var(--border);border-radius:10px;padding:12px 14px;overflow-x:auto;margin:10px 0}
+.md pre code{background:none;padding:0;color:#c9d7f0}
+.md ul,.md ol{margin:8px 0 8px 22px}
+.md blockquote{border-left:3px solid var(--accent);padding:4px 12px;color:var(--text2);margin:10px 0}
+.md a{color:var(--accent)}
+.md table{border-collapse:collapse;margin:10px 0;font-size:.85rem}
+.md td,.md th{border:1px solid var(--border);padding:6px 10px}
+.md input[type=checkbox]{width:15px;height:15px;accent-color:var(--ok);cursor:pointer;margin-right:6px;vertical-align:-2px}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+<h1 class="wk-title">🏆 毕业选题：四选一（前置 W13 字典 + W15 random）</h1>
+<div class="wk-meta">W16 · 6 课</div>
+</header>
+<div class="week-body" data-week="W16">
+<section class="lesson" data-lid="W16-S1">
+<div class="lesson-head"><span class="lt">毕业选题：四选一</span></div>
+<div class="md" data-lid="W16-S1"><!-- slug: grad-topic, type: base -->
+<h2>⓪ 🤖 课前 AI 一分钟 · 第 55 颗：AI 也会&quot;选题&quot;——项目立项（3 分钟）</h2>
+<blockquote>
+<p><strong>第 55 颗</strong></p>
+</blockquote>
+<p>AI 工程师 = 选一个项目（游戏/工具/数据）→ 做完整。Python 毕业选题 = <strong>项目立项</strong>。</p>
+<p><strong>今日口诀</strong>：AI 工程师 = 选一个项目（游戏/工具/数据）→ 做完整。</p>
+<p><strong>⚔️ 判一判</strong>（AI 营线上测评题型热身，先自己答再看答案）：</p>
+<blockquote>
+<ol>
+<li>毕业要选一个项目</li>
+<li>AI 工程师也是选项目</li>
+</ol>
+</blockquote>
+<details><summary>答案</summary>
+
+<p><strong>1.</strong> ✓ 选游戏/工具/数据/AI<br><strong>2.</strong> ✓ capstone project</p>
+</details>
+
+<hr>
+<h1>W16-S1 · 毕业选题：四选一</h1>
+<blockquote>
+<p><strong>每日节奏（v1.9）：</strong> 本篇纯阅读 ≈10 分钟，读完做当天作业 ≈10 分钟，总共 ≤25 分钟
+<strong>不需要 Thonny</strong>——正文一个字都不用敲，作业时间才开编辑器
+难度：⭐⭐ · 本篇对应原 W12 三课毕业周的第一步——选题（原 L0Y 无对应节，按点位表新叙）</p>
+</blockquote>
+<hr>
+<h2>一、概念：毕业周到了（2 分钟）</h2>
+<p>十二周前你连 print 都没写过；今天你手里已经有：循环、判断、列表、字典、函数、random、文件……毕业项目 = 把这些<strong>自己组装成一个完整作品</strong>。</p>
+<p>通过标准只有三条：<strong>100+ 行自己写的代码、能讲清每一部分、报错自己修</strong>。不求花哨，求「真是我写的」。</p>
+<h2>二、四类候选项目（5 分钟）</h2>
+<table>
+<thead>
+<tr>
+<th>项目</th>
+<th>一句话</th>
+<th>主要武功</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>宠物图鉴 v2</td>
+<td>W10 图鉴升级：存档+搜索+战斗</td>
+<td>字典嵌套 + json</td>
+</tr>
+<tr>
+<td>RPG 完整版</td>
+<td>W11 骨架加血瓶、Boss、商店</td>
+<td>random + 函数</td>
+</tr>
+<tr>
+<td>猜数字传奇版</td>
+<td>W05 猜数字加难度、排行榜、存档</td>
+<td>循环 + 文件</td>
+</tr>
+<tr>
+<td>自创主题</td>
+<td>上面任选一个做底、换皮重设计</td>
+<td>全部</td>
+</tr>
+</tbody></table>
+<p>四类的<strong>骨架都是老朋友</strong>——毕业项目不是从零发明，是「选一个最想写完的，把它做到底」。</p>
+<h2>三、决策三问（3 分钟）</h2>
+<p>拿不准选哪个？依次问自己：</p>
+<ol>
+<li><strong>哪个我最想给家人玩？</strong>——动力第一，兴趣撑过五天</li>
+<li><strong>哪块我最熟？</strong>——图鉴熟选图鉴、战斗熟选 RPG；毕业周不适合硬啃全新领域</li>
+<li><strong>范围砍得动吗？</strong>——先写「最小版」功能清单，砍到 3-4 个功能；「以后再加」的写进清单末尾，不进第一版</li>
+</ol>
+<p>第三问最重要：<strong>大项目死于贪心</strong>。5 天 × 25 分钟 + 周末一小时，装 3-4 个功能刚刚好。</p>
+<h2>四、本周路线图（2 分钟）</h2>
+<table>
+<thead>
+<tr>
+<th>节</th>
+<th>干什么</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>S2</td>
+<td>画设计图：功能 / 数据 / 函数 / 界面</td>
+</tr>
+<tr>
+<td>S3</td>
+<td>最小骨架跑起来 + 做完第一块</td>
+</tr>
+<tr>
+<td>S4</td>
+<td>逐块实现 2-3 块</td>
+</tr>
+<tr>
+<td>S5</td>
+<td>save/load + 收尾打磨</td>
+</tr>
+</tbody></table>
+<p>节奏像族里的作战会议：先定猎物（今天）、再画地盘（S2）、然后逐段巡逻（S3-S5）。每天一小步，周末端出成品。</p>
+<p><strong>今日口诀：</strong> 选熟的、选想玩的、砍到三四个功能。</p>
+<hr>
+<h2>✅ 今天的阅读完成自查</h2>
+<ul>
+<li><input disabled="" type="checkbox"> 我能说出毕业通过标准三条</li>
+<li><input disabled="" type="checkbox"> 我知道四类候选各自的主力武功</li>
+<li><input disabled="" type="checkbox"> 我明白「范围砍到 3-4 个功能」是防什么</li>
+</ul>
+<p>三格全勾 → 打开作业</p>
+<hr>
+<blockquote>
+<p><strong>📁 作业保存规则</strong>：本课课后练习写进一个文件 <code>W16-S1-homework.py</code>（存 <code>~/sand-hollow/&lt;你的学员ID&gt;/homework/</code>），每道题开头用刚学的备注分隔：<code># --- 题 1 ---</code>、<code># --- 题 2 ---</code>……<strong>交完作业要跟你的智能体说一声</strong>才会批改，评语出现在 <code>reviews/*.review.md</code>。<strong>回报触发词：交完作业或修完坑，都回一句「修完了」</strong>——不回这句 mentor 不知道，坑会一直挂着等。</p>
+</blockquote>
+<h2>📝 今日作业（≈10 分钟）</h2>
+<p>新建 <code>W16-S1-homework.py</code>，2 道题：</p>
+<ol>
+<li><strong>选题宣言</strong>：在文件开头注释里写下——选哪个项目、为什么（一句话）、打算给谁玩；然后列出<strong>第一版功能清单</strong>（3-4 个）和「以后再加」清单（不限）</li>
+<li><strong>热身小码</strong>：写一个 <code>print</code> 欢迎屏——项目名 + 版本号 <code>v0.1</code> + 一句话介绍（例：<code>=== Pet Codex v0.1 === Track and battle your pets!</code>）。这是你项目的第一行，S3 骨架会用上</li>
+</ol>
+<blockquote>
+<p>交完说「<strong>修完了</strong>」。明天 S2：把功能清单画成设计图 🐾</p>
+</blockquote>
+<h2>👀 C++ 认脸时刻（1 分钟 · 只看不敲）</h2>
+<p>C++ 的对应写法：</p>
+<pre><code class="language-cpp">#include &lt;iostream&gt;
+#include &lt;string&gt;
+int main() {
+    // 选题：四选一
+    std::string topic = &quot;game&quot;;  // 选游戏
+    std::cout &lt;&lt; &quot;topic: &quot; &lt;&lt; topic &lt;&lt; std::endl;
+    return 0;
+}
+</code></pre>
+<p>三个认脸：</p>
+<ol>
+<li><code>std::string topic</code> 选题</li>
+<li>四选一赋值</li>
+<li>Python <code>topic = &quot;game&quot;</code></li>
+</ol>
+<blockquote>
+<p>AI 营笔试的编程题用 C++ 出。不用会写，<strong>认得脸</strong>就行。</p>
+</blockquote>
+</div>
+</section>
+<section class="lesson" data-lid="W16-S2">
+<div class="lesson-head"><span class="lt">设计图：先想后写</span></div>
+<div class="md" data-lid="W16-S2"><!-- slug: grad-design, type: base -->
+<h2>⓪ 🤖 课前 AI 一分钟 · 第 56 颗：AI 也会&quot;设计图&quot;——架构（3 分钟）</h2>
+<blockquote>
+<p><strong>第 56 颗</strong></p>
+</blockquote>
+<p>AI 工程 = 画架构图（数据流/模块/接口）。Python 毕业设计图 = <strong>架构</strong>。</p>
+<p><strong>今日口诀</strong>：AI 工程 = 画架构图（数据流/模块/接口）。</p>
+<p><strong>⚔️ 判一判</strong>（AI 营线上测评题型热身，先自己答再看答案）：</p>
+<blockquote>
+<ol>
+<li>设计图 = 架构设计</li>
+<li>AI 工程先画架构</li>
+</ol>
+</blockquote>
+<details><summary>答案</summary>
+
+<p><strong>1.</strong> ✓ 数据 + 函数 + 类 + 界面<br><strong>2.</strong> ✓ architecture diagram</p>
+</details>
+
+<hr>
+<h1>W16-S2 · 设计图：先想后写</h1>
+<blockquote>
+<p><strong>每日节奏（v1.9）：</strong> 本篇纯阅读 ≈11 分钟，读完做当天作业 ≈10 分钟，总共 ≤25 分钟
+<strong>不需要 Thonny</strong>——正文一个字都不用敲，作业时间才开编辑器
+难度：⭐⭐⭐ · 本篇对应原 W07-L01 的「画地图」方法（毕业周复用：设计先行）</p>
+</blockquote>
+<hr>
+<h2>一、概念：写代码前先画图（2 分钟）</h2>
+<p>W07 冒险岛你干过一件事：<strong>先画房间地图，再写代码</strong>——结果三房间一次跑通。毕业项目同理：<strong>先画设计图，再动键盘</strong>。</p>
+<p>W07 地图画的是房间和连线；今天设计图画四样：<strong>功能、数据、函数、界面</strong>。设计图不用漂亮，纸上或注释里歪歪扭扭都行——想清楚最重要。</p>
+<h2>二、四格设计图（5 分钟）</h2>
+<p>以「宠物图鉴 v2」为例，一张设计图长这样（作业里换成你自己的项目）：</p>
+<pre><code class="language-text"># === 我的设计图 ===
+# 功能：1.看全家福  2.加宠物  3.查详情  4.退出
+# 数据：codex 字典（宠物名 -&gt; {species, stats, skills}）
+# 函数：list_all(codex) / add_pet(codex) / show_pet(codex)
+# 界面：菜单循环，输入数字选功能
+</code></pre>
+<p>逐格拆解：</p>
+<table>
+<thead>
+<tr>
+<th>格子</th>
+<th>回答的问题</th>
+<th>老朋友</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>功能</td>
+<td>玩家能做哪几件事？</td>
+<td>就是昨天的功能清单</td>
+</tr>
+<tr>
+<td>数据</td>
+<td>用什么变量装？</td>
+<td>字典/列表/嵌套（W10）</td>
+</tr>
+<tr>
+<td>函数</td>
+<td>每件事对应哪个函数？</td>
+<td>def + 参数 + return（W08）</td>
+</tr>
+<tr>
+<td>界面</td>
+<td>玩家怎么选？</td>
+<td>菜单 + input + while（W04/W05）</td>
+</tr>
+</tbody></table>
+<h2>三、函数小传单（3 分钟）</h2>
+<p>每个函数写一行「小传单」，S3 动工时照单开工：</p>
+<pre><code class="language-python">def list_all(codex):
+    &quot;&quot;&quot;打印所有宠物的一行摘要&quot;&quot;&quot;
+</code></pre>
+<pre><code class="language-python">def add_pet(codex):
+    &quot;&quot;&quot;问名字和属性，安检后加进 codex&quot;&quot;&quot;
+</code></pre>
+<pre><code class="language-python">def show_pet(codex):
+    &quot;&quot;&quot;问名字，打印该宠物全部档案&quot;&quot;&quot;
+</code></pre>
+<p>三引号字符串叫 <strong>docstring</strong>——函数说明书，写在 def 第一行。现在只需写名字 + 一句说明，<strong>身体 S3 再填</strong>。</p>
+<h2>四、界面先画草稿（2 分钟）</h2>
+<p>菜单循环的骨架（W11-weekend 见过同款）：</p>
+<pre><code class="language-python">while True:
+    print(&quot;1. List all   2. Add pet   3. Show pet   4. Quit&quot;)
+    choice = input(&quot;&gt; &quot;).strip()
+    if choice == &quot;1&quot;:
+        list_all(codex)
+    elif choice == &quot;4&quot;:
+        break
+</code></pre>
+<p>设计图上画到这一步就够——每个数字接哪个函数，一眼看清。</p>
+<p><strong>今日口诀：</strong> 功能定范围、数据定地基、函数定分工、界面定通道。</p>
+<hr>
+<h2>✅ 今天的阅读完成自查</h2>
+<ul>
+<li><input disabled="" type="checkbox"> 我能说出设计图四格各回答什么问题</li>
+<li><input disabled="" type="checkbox"> 我知道 docstring 是什么、写在 def 的哪里</li>
+<li><input disabled="" type="checkbox"> 我能看懂菜单骨架里数字选项怎么接函数</li>
+</ul>
+<p>三格全勾 → 打开作业</p>
+<hr>
+<blockquote>
+<p><strong>📁 作业保存规则</strong>：本课课后练习写进一个文件 <code>W16-S2-homework.py</code>（存 <code>~/sand-hollow/&lt;你的学员ID&gt;/homework/</code>），每道题开头用刚学的备注分隔：<code># --- 题 1 ---</code>、<code># --- 题 2 ---</code>……<strong>交完作业要跟你的智能体说一声</strong>才会批改，评语出现在 <code>reviews/*.review.md</code>。<strong>回报触发词：交完作业或修完坑，都回一句「修完了」</strong>——不回这句 mentor 不知道，坑会一直挂着等。</p>
+</blockquote>
+<h2>📝 今日作业（≈10 分钟）</h2>
+<p>新建 <code>W16-S2-homework.py</code>，2 道题：</p>
+<ol>
+<li><strong>我的设计图</strong>：照第二节格式，在文件开头注释里写<strong>你自己项目</strong>的四格设计图（功能砍到 3-4 个）</li>
+<li><strong>函数小传单</strong>：把每个函数写成 def + docstring（身体先 <code>pass</code> 占位）——pass 是「占位符」，告诉 Python「这里以后填」。运行文件应无报错无输出</li>
+</ol>
+<blockquote>
+<p>交完说「<strong>修完了</strong>」。明天 S3：最小骨架跑起来 + 第一块完工 🐾</p>
+</blockquote>
+<h2>👀 C++ 认脸时刻（1 分钟 · 只看不敲）</h2>
+<p>C++ 的对应写法：</p>
+<pre><code class="language-cpp">#include &lt;iostream&gt;
+// 设计图：需要什么模块？
+// 1. 数据模块
+// 2. 逻辑模块
+// 3. 界面模块
+int main() { return 0; }
+</code></pre>
+<p>三个认脸：</p>
+<ol>
+<li>注释 = 设计图</li>
+<li>3 个模块拆开</li>
+<li>Python 一样：注释说明模块</li>
+</ol>
+<blockquote>
+<p>AI 营笔试的编程题用 C++ 出。不用会写，<strong>认得脸</strong>就行。</p>
+</blockquote>
+</div>
+</section>
+<section class="lesson" data-lid="W16-S3">
+<div class="lesson-head"><span class="lt">最小骨架 + 第一块</span></div>
+<div class="md" data-lid="W16-S3"><!-- slug: grad-skeleton, type: base -->
+<h2>⓪ 🤖 课前 AI 一分钟 · 第 57 颗：AI 也会&quot;骨架&quot;——最小可运行（3 分钟）</h2>
+<blockquote>
+<p><strong>第 57 颗</strong></p>
+</blockquote>
+<p>AI 工程 = 先写最小骨架（1 个按钮）→ 跑通 → 慢慢加功能。Python 最小骨架 = <strong>Hello 项目</strong>。</p>
+<p><strong>今日口诀</strong>：AI 工程 = 先写最小骨架（1 个按钮）→ 跑通 → 慢慢加功能。</p>
+<p><strong>⚔️ 判一判</strong>（AI 营线上测评题型热身，先自己答再看答案）：</p>
+<blockquote>
+<ol>
+<li>最小骨架先跑通</li>
+<li>AI 工程先建最小模型</li>
+</ol>
+</blockquote>
+<details><summary>答案</summary>
+
+<p><strong>1.</strong> ✓ Hello world 项目<br><strong>2.</strong> ✓ 1 层神经网络先跑通</p>
+</details>
+
+<hr>
+<h1>W16-S3 · 最小骨架 + 第一块</h1>
+<blockquote>
+<p><strong>每日节奏（v1.9）：</strong> 本篇纯阅读 ≈12 分钟，读完做当天作业 ≈10 分钟，总共 ≤25 分钟
+<strong>不需要 Thonny</strong>——正文一个字都不用敲，作业时间才开编辑器
+难度：⭐⭐⭐ · 本篇对应原 W07-L02 的「最小骨架」方法（毕业周复用：先跑起来）</p>
+</blockquote>
+<hr>
+<h2>一、概念：先让空房子通电（2 分钟）</h2>
+<p>W07 冒险岛第二步是<strong>最小骨架</strong>：三个房间空着，但玩家能走通。毕业项目同理——今天的目标不是做完任何功能，是让程序<strong>从启动到退出整条路跑通</strong>：</p>
+<p>欢迎屏 → 菜单循环 → 选退出 → 说再见</p>
+<p>空房子通了电，之后每块功能都是「往房间里搬家具」，搬一块测一块。</p>
+<h2>二、最小骨架长什么样（5 分钟）</h2>
+<p>以图鉴 v2 为例（换成你自己的项目，结构不变）：</p>
+<pre><code class="language-python">def list_all(codex):
+    &quot;&quot;&quot;打印所有宠物的一行摘要&quot;&quot;&quot;
+    pass
+
+def show_pet(codex):
+    &quot;&quot;&quot;打印指定宠物全部档案&quot;&quot;&quot;
+    pass
+
+codex = {}
+
+print(&quot;=== Pet Codex v0.1 ===&quot;)
+while True:
+    print(&quot;1. List all   2. Quit&quot;)
+    choice = input(&quot;&gt; &quot;).strip()
+    if choice == &quot;1&quot;:
+        list_all(codex)
+    elif choice == &quot;2&quot;:
+        print(&quot;Bye!&quot;)
+        break
+</code></pre>
+<p>对账四件事：</p>
+<ul>
+<li>函数们带着 docstring + <code>pass</code> 站好队（昨天小传单）</li>
+<li><strong>数据地基</strong>：<code>codex = {}</code> 空字典先立住——数据结构定了，函数才有家</li>
+<li>while True 菜单：唯一出口是 break（W05 的规矩：活循环必须有门）</li>
+<li><strong>此刻运行</strong>：程序能循环出菜单、选 2 退出——没有任何报错</li>
+</ul>
+<h2>三、搬第一块家具（3 分钟）</h2>
+<p>骨架通电后只做<strong>一块</strong>功能（挑最简单、最能在屏幕上看到效果的）——list_all：</p>
+<pre><code class="language-python">def list_all(codex):
+    &quot;&quot;&quot;打印所有宠物的一行摘要&quot;&quot;&quot;
+    if not codex:
+        print(&quot;(codex is empty)&quot;)
+        return
+    for name in codex:
+        print(f&quot;- {name}&quot;)
+</code></pre>
+<p>两个新细节：</p>
+<ul>
+<li><code>if not codex:</code> ——空字典也能跑：第一次进游戏图鉴是空的，礼貌提示而不是冷场</li>
+<li><strong>return 提前退场</strong>——W10-S5 的安检门思路，行不通就撤，不硬走</li>
+</ul>
+<p>搬完立刻测：菜单选 1 → 看到 <code>(codex is empty)</code>；选 2 → 退出。<strong>一块家具一块测试</strong>，绝不连搬三块再一起测。</p>
+<h2>四、今日进度感（2 分钟）</h2>
+<p>写代码像巡逻：今天圈下了地盘（骨架）+ 守住了第一段边界（list_all）。剩下几块功能明后天各搬一块，周五接存档。<strong>每天结束时程序必须能跑</strong>——这是毕业周的铁律，坏代码不过夜。</p>
+<p><strong>今日口诀：</strong> 骨架先通电、地基空着也立住、一块家具一块测。</p>
+<hr>
+<h2>✅ 今天的阅读完成自查</h2>
+<ul>
+<li><input disabled="" type="checkbox"> 我知道最小骨架 = 启动到退出整条路跑通、功能全空</li>
+<li><input disabled="" type="checkbox"> 我明白「每天结束时程序必须能跑」防的是什么</li>
+<li><input disabled="" type="checkbox"> 我会处理空字典分支，第一次进游戏不冷场</li>
+</ul>
+<p>三格全勾 → 打开作业</p>
+<hr>
+<blockquote>
+<p><strong>📁 作业保存规则</strong>：本课课后练习写进一个文件 <code>W16-S3-homework.py</code>（存 <code>~/sand-hollow/&lt;你的学员ID&gt;/homework/</code>），每道题开头用刚学的备注分隔：<code># --- 题 1 ---</code>、<code># --- 题 2 ---</code>……<strong>交完作业要跟你的智能体说一声</strong>才会批改，评语出现在 <code>reviews/*.review.md</code>。<strong>回报触发词：交完作业或修完坑，都回一句「修完了」</strong>——不回这句 mentor 不知道，坑会一直挂着等。</p>
+</blockquote>
+<h2>📝 今日作业（≈10 分钟）</h2>
+<p>新建 <code>W16-S3-homework.py</code>，2 道题：</p>
+<ol>
+<li><strong>骨架通电</strong>：把正文最小骨架换成你自己的项目敲出来（欢迎屏 + 菜单 + 退出；函数 pass 占位）——运行，走一遍「选 1 → 选 2 退出」，确认无报错</li>
+<li><strong>第一块完工</strong>：把你项目里最简单的那块功能填实（参考 list_all 的空值安检 + return 写法），填完立刻运行测试——注释里写下测试时看到了什么</li>
+</ol>
+<blockquote>
+<p>交完说「<strong>修完了</strong>」。明天 S4：逐块实现剩下的 2-3 块 🐾</p>
+</blockquote>
+<h2>👀 C++ 认脸时刻（1 分钟 · 只看不敲）</h2>
+<p>C++ 的对应写法：</p>
+<pre><code class="language-cpp">#include &lt;iostream&gt;
+int main() {
+    // 最小骨架：先跑通
+    std::cout &lt;&lt; &quot;Project starts!&quot; &lt;&lt; std::endl;
+    return 0;
+}
+</code></pre>
+<p>三个认脸：</p>
+<ol>
+<li>最小骨架</li>
+<li><code>int main()</code> 入口</li>
+<li>Python <code>if __name__ == &quot;__main__&quot;:</code></li>
+</ol>
+<blockquote>
+<p>AI 营笔试的编程题用 C++ 出。不用会写，<strong>认得脸</strong>就行。</p>
+</blockquote>
+</div>
+</section>
+<section class="lesson" data-lid="W16-S4">
+<div class="lesson-head"><span class="lt">逐块实现：每天搬两块</span></div>
+<div class="md" data-lid="W16-S4"><!-- slug: grad-block, type: base -->
+<h2>⓪ 🤖 课前 AI 一分钟 · 第 58 颗：AI 也会&quot;逐块实现&quot;——分模块（3 分钟）</h2>
+<blockquote>
+<p><strong>第 58 颗</strong></p>
+</blockquote>
+<p>AI 工程 = 拆模块（数据/模型/训练/评估）逐个实现。Python 毕业 = <strong>逐块搬砖</strong>。</p>
+<p><strong>今日口诀</strong>：AI 工程 = 拆模块（数据/模型/训练/评估）逐个实现。</p>
+<p><strong>⚔️ 判一判</strong>（AI 营线上测评题型热身，先自己答再看答案）：</p>
+<blockquote>
+<ol>
+<li>逐块实现 = 每天搬两块</li>
+<li>AI 工程也分模块</li>
+</ol>
+</blockquote>
+<details><summary>答案</summary>
+
+<p><strong>1.</strong> ✓ day 1: 数据 + 模型; day 2: 训练 + 评估<br><strong>2.</strong> ✓ modular engineering</p>
+</details>
+
+<hr>
+<h1>W16-S4 · 逐块实现：每天搬两块</h1>
+<blockquote>
+<p><strong>每日节奏（v1.9）：</strong> 本篇纯阅读 ≈11 分钟，读完做当天作业 ≈10 分钟，总共 ≤25 分钟
+<strong>不需要 Thonny</strong>——正文一个字都不用敲，作业时间才开编辑器
+难度：⭐⭐⭐ · 本篇对应原 W07-L03~W08 的「逐块 + 测试」节奏（毕业周复用）</p>
+</blockquote>
+<hr>
+<h2>一、概念：搬家式的写法（2 分钟）</h2>
+<p>昨天骨架通电 + 第一块完工。今天接着搬剩下 2-3 块，节奏是铁打的四步循环：</p>
+<p><strong>填一块 → 运行 → 测一条路 → 再下一块</strong></p>
+<p>每块功能就这四步，块与块之间绝不连写。听起来慢——实际最快：报错永远只出在<strong>刚写的那块</strong>，两分钟定位；连写三块再测，报错藏在三块里翻半天。</p>
+<h2>二、示例：add_pet 这块怎么搬（5 分钟）</h2>
+<p>以图鉴 v2 的「加宠物」为例（你的项目对应你的功能）：</p>
+<pre><code class="language-python">def add_pet(codex):
+    &quot;&quot;&quot;问名字和属性，安检后加进 codex&quot;&quot;&quot;
+    name = input(&quot;Pet name: &quot;).strip()
+    if name == &quot;&quot;:
+        print(&quot;Name cannot be empty&quot;)
+        return
+    if name in codex:
+        print(f&quot;{name} already exists&quot;)
+        return
+    species = input(&quot;Species: &quot;).strip()
+    codex[name] = {&quot;species&quot;: species, &quot;skills&quot;: []}
+    print(f&quot;Added {name}!&quot;)
+</code></pre>
+<p>三层安检全是老朋友叠罗汉：<strong>空名检查</strong>——直接回车想混进来？拦住；<strong>重名检查</strong>——<code>in codex</code> 防整宠覆盖（W10-S5 的坑）；空技能列表先立着——<strong>数据结构一次到位</strong>，之后 add_skill 直接往里 append。</p>
+<h2>三、示例：show_pet 接着搬（3 分钟）</h2>
+<pre><code class="language-python">def show_pet(codex):
+    &quot;&quot;&quot;打印指定宠物全部档案&quot;&quot;&quot;
+    name = input(&quot;Pet name: &quot;).strip()
+    if name not in codex:
+        print(f&quot;{name} not in codex&quot;)
+        return
+    pet = codex[name]
+    print(f&quot;=== {name} ({pet[&#39;species&#39;]}) ===&quot;)
+    print(f&quot;Skills: {&#39;, &#39;.join(pet[&#39;skills&#39;]) or &#39;none&#39;}&quot;)
+</code></pre>
+<p><code>or &#39;none&#39;</code> 小技巧：空列表 join 出空串，<code>空串 or &#39;none&#39;</code> 取后者，屏幕显示 <code>Skills: none</code> 不干瞪眼——玩家感大不同。</p>
+<p>别忘了把新函数<strong>接进菜单</strong>：菜单加一行 <code>3. Show pet</code>，while 里加 <code>elif choice == &quot;3&quot;: show_pet(codex)</code>。功能做完不接菜单 = 搬了家具没开门。</p>
+<h2>四、卡住了怎么办（1 分钟）</h2>
+<p>逐块写一定会撞报错，三步自救（W12 毕业标准之一就是「报错自己修」）：读报错<strong>最后一行</strong>（错误类型 + 原因）→ 看报错<strong>行号</strong>（先怀疑刚写的那块）→ 印不出就 print（变量前后各 print 一次）。三步无解再求助 mentor——带上报错原文 + 你猜的原因。会猜错也比不猜强。</p>
+<p><strong>今日口诀：</strong> 填一块测一块、安检叠罗汉、功能必须接菜单。</p>
+<hr>
+<h2>✅ 今天的阅读完成自查</h2>
+<ul>
+<li><input disabled="" type="checkbox"> 我能说出「填一块测一块」比连写三块快在哪</li>
+<li><input disabled="" type="checkbox"> 我知道 add_pet 的三层安检各拦什么</li>
+<li><input disabled="" type="checkbox"> 卡住时我会先走三步自救再求助</li>
+</ul>
+<p>三格全勾 → 打开作业</p>
+<hr>
+<blockquote>
+<p><strong>📁 作业保存规则</strong>：本课课后练习写进一个文件 <code>W16-S4-homework.py</code>（存 <code>~/sand-hollow/&lt;你的学员ID&gt;/homework/</code>），每道题开头用刚学的备注分隔：<code># --- 题 1 ---</code>、<code># --- 题 2 ---</code>……<strong>交完作业要跟你的智能体说一声</strong>才会批改，评语出现在 <code>reviews/*.review.md</code>。<strong>回报触发词：交完作业或修完坑，都回一句「修完了」</strong>——不回这句 mentor 不知道，坑会一直挂着等。</p>
+</blockquote>
+<h2>📝 今日作业（≈10 分钟）</h2>
+<p>新建 <code>W16-S4-homework.py</code>（把 W16-S3 的骨架复制过来继续），2 道题：</p>
+<ol>
+<li><strong>搬两块</strong>：把剩下功能里的两块填实（参考正文两层安检写法），每块完工立刻运行测一条完整路径——注释里各记一行测试结果</li>
+<li><strong>菜单接线</strong>：每块功能接进菜单，把菜单 print 更新成完整选项表；最后从启动到退出完整玩一遍，确认每条路都通</li>
+</ol>
+<blockquote>
+<p>交完说「<strong>修完了</strong>」。明天 S5：save/load——让数据活过关机 🐾</p>
+</blockquote>
+<h2>👀 C++ 认脸时刻（1 分钟 · 只看不敲）</h2>
+<p>C++ 的对应写法：</p>
+<pre><code class="language-cpp">#include &lt;iostream&gt;
+void data_module() { std::cout &lt;&lt; &quot;load data&quot; &lt;&lt; std::endl; }
+void model_module() { std::cout &lt;&lt; &quot;build model&quot; &lt;&lt; std::endl; }
+int main() {
+    data_module();
+    model_module();
+    return 0;
+}
+</code></pre>
+<p>三个认脸：</p>
+<ol>
+<li>分模块函数</li>
+<li>main 调用各模块</li>
+<li>Python 一样：def data_module(): ...</li>
+</ol>
+<blockquote>
+<p>AI 营笔试的编程题用 C++ 出。不用会写，<strong>认得脸</strong>就行。</p>
+</blockquote>
+</div>
+</section>
+<section class="lesson" data-lid="W16-S5">
+<div class="lesson-head"><span class="lt">save/load：让作品活下去</span></div>
+<div class="md" data-lid="W16-S5"><!-- slug: grad-save, type: base -->
+<h2>⓪ 🤖 课前 AI 一分钟 · 第 59 颗：AI 也会&quot;save/load&quot;——持久化（3 分钟）</h2>
+<blockquote>
+<p><strong>第 59 颗</strong></p>
+</blockquote>
+<p>AI 模型 = 训练后 save()，用时 load()。Python 毕业 = <strong>save/load</strong> 让作品活下去。</p>
+<p><strong>今日口诀</strong>：AI 模型 = 训练后 save()，用时 load()。</p>
+<p><strong>⚔️ 判一判</strong>（AI 营线上测评题型热身，先自己答再看答案）：</p>
+<blockquote>
+<ol>
+<li>AI 模型要 save/load</li>
+<li>毕业作品要 save/load</li>
+</ol>
+</blockquote>
+<details><summary>答案</summary>
+
+<p><strong>1.</strong> ✓ model.save(&quot;model.h5&quot;)<br><strong>2.</strong> ✓ save data to file</p>
+</details>
+
+<hr>
+<h1>W16-S5 · save/load：让作品活下去</h1>
+<blockquote>
+<p><strong>每日节奏（v1.9）：</strong> 本篇纯阅读 ≈10 分钟，读完做当天作业 ≈10 分钟，总共 ≤25 分钟
+<strong>不需要 Thonny</strong>——正文一个字都不用敲，作业时间才开编辑器
+难度：⭐⭐⭐ · 本篇是原 W12-L03 的收尾段（数据存盘 + 毕业打磨）</p>
+</blockquote>
+<hr>
+<h2>一、程序一关，数据就没了？（3 分钟）</h2>
+<p>你的游戏、图鉴、对战记录——全住在内存里。程序一关，内存清空，一切归零。让数据活过关机的办法：<strong>写进文件</strong>。</p>
+<pre><code class="language-python">scores = {&quot;paw&quot;: 3, &quot;win&quot;: 2}
+file = open(&quot;save.txt&quot;, &quot;w&quot;, encoding=&quot;utf-8&quot;)
+file.write(str(scores))
+file.close()
+print(&quot;Saved!&quot;)
+</code></pre>
+<p>三步曲：<code>open</code>（开文件，<code>&quot;w&quot;</code> = 写模式）→ <code>write</code>（写入）→ <code>close</code>（关门）。<strong>忘了 close，数据可能还悬在半路</strong>——养成三步连写的肌肉记忆。</p>
+<h2>二、读回来：load（4 分钟）</h2>
+<pre><code class="language-python">file = open(&quot;save.txt&quot;, &quot;r&quot;, encoding=&quot;utf-8&quot;)
+text = file.read()
+file.close()
+print(text)
+</code></pre>
+<p><code>&quot;r&quot;</code> = 读模式。读回来的永远是<strong>字符串</strong>——<code>&#39;{&quot;paw&quot;: 3}&#39;</code> 长得像字典，其实是文本。要用 eval？新手期先不碰，直接把它当「存档展示」用就够了：游戏开场 <code>print</code> 出上次的战绩，仪式感拉满。</p>
+<h2>三、存什么、何时存（3 分钟）</h2>
+<p>设计你的存档点：</p>
+<ul>
+<li><strong>存什么</strong>：玩家名、最高分、图鉴收集进度——「值得跨局记住的」</li>
+<li><strong>何时存</strong>：一局结束、打败 Boss、退出前——「自然的停靠点」</li>
+<li><strong>格式</strong>：一行一个 <code>名字:值</code>，或整个字典 str 存——新手期怎么简单怎么来</li>
+</ul>
+<p><strong>今日口诀：</strong> open、write、close 三连；读回是文本，别当字典用。</p>
+<p><strong>🎓 W12 结业 · 12 周旅程的最后一节正课！</strong> 从 print 第一行字，到 if/循环/列表/字典/函数/项目周，到你此刻拥有一个能存档、能展示、自己讲得出每一行的作品。周末毕业项目：README + 家族展示会——站在你的作品旁边，讲给全家听 🐾</p>
+<hr>
+<h2>✅ 今天的阅读完成自查</h2>
+<ul>
+<li><input disabled="" type="checkbox"> 我能背出文件三步曲：open → write → close</li>
+<li><input disabled="" type="checkbox"> 我知道读回来的内容是字符串，不是字典</li>
+<li><input disabled="" type="checkbox"> 我为我的项目想好了存什么、何时存</li>
+</ul>
+<p>三格全勾 → 打开作业 🐾</p>
+<hr>
+<blockquote>
+<p><strong>📁 作业保存规则</strong>：本课课后练习写进一个文件 <code>W16-S5-homework.py</code>（存 <code>~/sand-hollow/&lt;你的学员ID&gt;/homework/</code>），每道题开头用刚学的备注分隔：<code># --- 题 1 ---</code>、<code># --- 题 2 ---</code>……<strong>交完作业要跟你的智能体说一声</strong>才会批改，评语出现在 <code>reviews/*.review.md</code>。<strong>回报触发词：交完作业或修完坑，都回一句「修完了」</strong>——不回这句 mentor 不知道，坑会一直挂着等。</p>
+</blockquote>
+<h2>📝 今日作业（≈10 分钟）</h2>
+<p>新建 <code>W16-S5-homework.py</code>，2 道题：</p>
+<ol>
+<li><strong>存档</strong>：把你的项目核心数据（名字 + 一项纪录）写进 <code>save.txt</code>，用 cat（或 Thonny 里 open+read）亲眼确认文件存在</li>
+<li><strong>读档横幅</strong>：程序开场读 <code>save.txt</code>，存在就打印「欢迎回来，上次的纪录是 …」；文件不存在就打印「新冒险者，欢迎第一次光临」（用 try/except 或先判断文件，任选）</li>
+</ol>
+<blockquote>
+<p>交完说「<strong>修完了</strong><strong>」</strong>。这是 12 周最后一交——周末毕业展示会，全家等你开讲 🎓🐾</p>
+</blockquote>
+<h2>👀 C++ 认脸时刻（1 分钟 · 只看不敲）</h2>
+<p>C++ 的对应写法：</p>
+<pre><code class="language-cpp">#include &lt;iostream&gt;
+#include &lt;fstream&gt;
+int main() {
+    std::ofstream f(&quot;save.txt&quot;);
+    f &lt;&lt; &quot;saved!&quot; &lt;&lt; std::endl;
+    return 0;
+}
+</code></pre>
+<p>三个认脸：</p>
+<ol>
+<li><code>std::ofstream</code> 写文件</li>
+<li><code>f &lt;&lt; &quot;saved!&quot;</code> 写</li>
+<li>Python <code>f = open(&quot;save.txt&quot;, &quot;w&quot;); f.write(&quot;saved!&quot;)</code></li>
+</ol>
+<blockquote>
+<p>AI 营笔试的编程题用 C++ 出。不用会写，<strong>认得脸</strong>就行。</p>
+</blockquote>
+</div>
+</section>
+<section class="lesson" data-lid="W16-weekend">
+<div class="lesson-head"><span class="lt">打磨 + 家人对战赛</span></div>
+<div class="md" data-lid="W16-weekend"><!-- slug: grad-final, type: project -->
+<h2>⓪ 🤖 课前 AI 一分钟 · 第 60 颗：AI 也会&quot;打磨&quot;——家人对战（3 分钟）</h2>
+<blockquote>
+<p><strong>第 60 颗</strong></p>
+</blockquote>
+<p>AI 上线前 = 收集用户反馈打磨。Python 毕业 = <strong>家人对战赛</strong> 收集体验。</p>
+<p><strong>今日口诀</strong>：AI 上线前 = 收集用户反馈打磨。</p>
+<p><strong>⚔️ 判一判</strong>（AI 营线上测评题型热身，先自己答再看答案）：</p>
+<blockquote>
+<ol>
+<li>家人对战 = 收集反馈</li>
+<li>AI 模型要用户测试</li>
+</ol>
+</blockquote>
+<details><summary>答案</summary>
+
+<p><strong>1.</strong> ✓ play with family, collect feedback<br><strong>2.</strong> ✓ beta testing</p>
+</details>
+
+<hr>
+<h1>W16-weekend · 打磨 + 家人对战赛</h1>
+<blockquote>
+<p>用时：60-90 分钟 · 难度：⭐⭐⭐ · 前置：W11 三课</p>
+</blockquote>
+<hr>
+<h2>一、本周武功盘点（3 分钟）</h2>
+<ul>
+<li>W11-L01：random 模块（randint / choice / shuffle / sample）</li>
+<li>W11-L02：石头剪刀布（多局 + 计分 + emoji）</li>
+<li>W11-L03：文字 RPG 战斗（玩家 + 敌人 + 升级）</li>
+</ul>
+<p>今天：打磨 + 邀请家人对战。</p>
+<h2>二、打磨清单（30 分钟）</h2>
+<h3>打磨 1：菜单清晰</h3>
+<pre><code class="language-python">def main():
+    print(&quot;=== Game Menu ===&quot;)
+    print(&quot;1. Single battle&quot;)
+    print(&quot;2. Tournament (5 battles)&quot;)
+    print(&quot;3. Quit&quot;)
+
+    choice = input(&quot;&gt; &quot;).strip()
+    if choice == &quot;1&quot;:
+        play_round()
+    elif choice == &quot;2&quot;:
+        play_tournament()
+    elif choice == &quot;3&quot;:
+        print(&quot;Bye!&quot;)
+</code></pre>
+<h3>打磨 2：清晰反馈</h3>
+<p>每一步都要 print 让玩家知道发生了什么：</p>
+<pre><code class="language-python"># Before:
+enemy[&quot;hp&quot;] -= dmg
+
+# After:
+old_hp = enemy[&quot;hp&quot;]
+enemy[&quot;hp&quot;] -= dmg
+print(f&quot;You hit {enemy[&#39;name&#39;]} for {dmg}! ({old_hp} -&gt; {enemy[&#39;hp&#39;]})&quot;)
+</code></pre>
+<h3>打磨 3：保存战绩</h3>
+<pre><code class="language-python">import json
+import os
+
+STATS_FILE = &quot;rpg_stats.json&quot;
+
+def save_stats(stats):
+    with open(STATS_FILE, &quot;w&quot;) as f:
+        json.dump(stats, f)
+
+def load_stats():
+    if os.path.exists(STATS_FILE):
+        with open(STATS_FILE) as f:
+            return json.load(f)
+    return {&quot;wins&quot;: 0, &quot;losses&quot;: 0, &quot;highest_level&quot;: 1}
+</code></pre>
+<h3>打磨 4：随机事件</h3>
+<p>战斗间隙可触发随机事件：</p>
+<pre><code class="language-python">def random_event(player):
+    roll = random.random()
+    if roll &lt; 0.3:
+        print(&quot;You found a herb! +30 HP&quot;)
+        player[&quot;hp&quot;] = min(player[&quot;max_hp&quot;], player[&quot;hp&quot;] + 30)
+    elif roll &lt; 0.4:
+        print(&quot;You tripped! -10 HP&quot;)
+        player[&quot;hp&quot;] = max(1, player[&quot;hp&quot;] - 10)
+    # 60% chance of nothing
+</code></pre>
+<h2>三、家人对战赛（30 分钟）</h2>
+<h3>流程</h3>
+<ol>
+<li>给家人演示你的 RPG 战斗，让他们玩 1-2 局</li>
+<li>听他们反馈：哪里卡？哪里好？</li>
+<li>改一轮（同样只改细节，不重写）</li>
+</ol>
+<h3>常见反馈</h3>
+<ul>
+<li>「我看不懂能选什么」 → 加选项提示</li>
+<li>「战斗太短不过瘾」 → 加更多敌人 / 加 boss</li>
+<li>「死了想重来」 → 加重玩机制</li>
+<li>「想升级但不知道规则」 → 加 help 命令</li>
+</ul>
+<h2>四、验收标准（自助验收）</h2>
+<ul>
+<li><input disabled="" type="checkbox"> 打磨清单至少做 2 项</li>
+<li><input disabled="" type="checkbox"> 至少 2 个真人玩过</li>
+<li><input disabled="" type="checkbox"> 反馈改一轮（至少 3 处）</li>
+<li><input disabled="" type="checkbox"> 玩家能完整通关 + 升级</li>
+</ul>
+<h2>五、W11 全周自查</h2>
+<ul>
+<li><input disabled="" type="checkbox"> L01：random 模块四件套</li>
+<li><input disabled="" type="checkbox"> L02：石头剪刀布</li>
+<li><input disabled="" type="checkbox"> L03：文字 RPG 战斗</li>
+<li><input disabled="" type="checkbox"> 周末：打磨 + 2 真人测试 + 改一轮</li>
+<li><input disabled="" type="checkbox"> 我能给家人完整玩一局 RPG</li>
+</ul>
+<p>W11 毕业 🎮 → 进入 W12「🏆 毕业项目 🎓」。自选主题，从设计图到作品，100+ 行代码，向家人展示。</p>
+<h2>👀 C++ 认脸时刻（1 分钟 · 只看不敲）</h2>
+<p>C++ 的对应写法：</p>
+<pre><code class="language-cpp">#include &lt;iostream&gt;
+#include &lt;vector&gt;
+int main() {
+    std::vector&lt;int&gt; feedback = {5, 4, 5, 3, 5};
+    int sum = 0;
+    for (int s : feedback) sum += s;
+    std::cout &lt;&lt; &quot;avg = &quot; &lt;&lt; sum / feedback.size() &lt;&lt; std::endl;
+    return 0;
+}
+</code></pre>
+<p>三个认脸：</p>
+<ol>
+<li>收集反馈评分</li>
+<li>算平均</li>
+<li>Python 一样：sum(feedback) / len(feedback)</li>
+</ol>
+<blockquote>
+<p>AI 营笔试的编程题用 C++ 出。不用会写，<strong>认得脸</strong>就行。</p>
+</blockquote>
+</div>
+</section>
+</div>
+</div>
+</body>
+</html>

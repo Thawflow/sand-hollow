@@ -1,0 +1,1041 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>W12 · 加餐③：数组 vs 链表 + 选择排序（前置 W06 列表）</title>
+<style>
+:root{--bg:#0f1420;--card:#171e2e;--card2:#1e2740;--border:#2a3550;--text:#e8ecf4;--text2:#8b96ad;--accent:#5b9dff;--ok:#3ecf8e}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+.wrap{max-width:900px;margin:0 auto;padding:28px 20px 60px}
+h1{font-size:1.5rem}
+.wk-meta{color:var(--text2);font-size:.85rem;margin:4px 0 20px}
+.lesson{border:1px solid var(--border);border-radius:12px;padding:16px 18px;margin-bottom:14px;background:var(--card2)}
+.lesson-head{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.lesson-head .lt{font-weight:700;font-size:1rem;flex:1}
+.md{font-size:.92rem;line-height:1.8;color:var(--text);overflow-wrap:break-word}
+.md h1,.md h2,.md h3{margin:14px 0 8px;font-size:1.05rem}
+.md p{margin:8px 0}
+.md code{background:rgba(91,157,255,.12);border-radius:5px;padding:2px 6px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.85em;color:#a8c8ff}
+.md pre{background:#0b0f18;border:1px solid var(--border);border-radius:10px;padding:12px 14px;overflow-x:auto;margin:10px 0}
+.md pre code{background:none;padding:0;color:#c9d7f0}
+.md ul,.md ol{margin:8px 0 8px 22px}
+.md blockquote{border-left:3px solid var(--accent);padding:4px 12px;color:var(--text2);margin:10px 0}
+.md a{color:var(--accent)}
+.md table{border-collapse:collapse;margin:10px 0;font-size:.85rem}
+.md td,.md th{border:1px solid var(--border);padding:6px 10px}
+.md input[type=checkbox]{width:15px;height:15px;accent-color:var(--ok);cursor:pointer;margin-right:6px;vertical-align:-2px}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+<h1 class="wk-title">加餐③：数组 vs 链表 + 选择排序（前置 W06 列表）</h1>
+<div class="wk-meta">W12 · 6 课</div>
+</header>
+<div class="week-body" data-week="W12">
+<section class="lesson" data-lid="W12-S1">
+<div class="lesson-head"><span class="lt">数组 vs 链表：两种"排队"方式</span></div>
+<div class="md" data-lid="W12-S1"><!-- slug: array-vs-list, type: addon -->
+<h1>W12-S1 · 数组 vs 链表：两种&quot;排队&quot;方式</h1>
+<blockquote>
+<p><strong>一句话核心</strong>：<strong>数组 = 火车站（O(1) 找），链表 = 接力赛（O(1) 插）</strong>。Python list = 动态数组，不是链表。</p>
+</blockquote>
+<blockquote>
+<p><strong>每日节奏（v1.9）：</strong> 阅读 ≈10 分钟，作业 ≈15 分钟
+<strong>需要 Thonny</strong>
+难度：⭐⭐ · W16 加餐③ 第 1 课（前置：W07 列表）</p>
+</blockquote>
+<hr>
+<blockquote>
+<p><strong>📂 课前准备</strong>：先在 Thonny <code>文件 → 新建</code>，立刻 <code>文件 → 另存为...</code> 存为 <code>~/sand-hollow/&lt;你的学员ID&gt;/homework/W12-S1-practice.py</code>（ID 就是你注册沙坑用的 8 位数字）。本课所有亲手敲的代码都写进这个文件；课后作业写进同目录的 <code>W12-S1-homework.py</code>，两个文件严格分开，别混。</p>
+</blockquote>
+<h2>一、核心想法（3 分钟）</h2>
+<p><strong>数组 = 火车站</strong>：座位连号（1, 2, ..., 100），找第 50 号 → 立刻知道。</p>
+<ul>
+<li>找第 N 个：O(1)</li>
+<li>中间插入：O(n)</li>
+</ul>
+<p><strong>链表 = 接力赛</strong>：每人只记得下一个。找第 50 号 → 从 1 数到 50。</p>
+<ul>
+<li>找第 N 个：O(n)</li>
+<li>中间插入：O(1)</li>
+</ul>
+<h2>二、Python list 实际是数组（3 分钟）</h2>
+<pre><code class="language-python">my_list = [10, 20, 30, 40, 50]
+print(my_list[2])   # 30  (O(1) instant access)
+</code></pre>
+<p><strong>Python 标准库没&quot;纯链表&quot;</strong>——list 是数组。要链表用 <code>collections.deque</code>。</p>
+<h2>三、Python list 的插入代价（3 分钟）</h2>
+<pre><code class="language-python">my_list = [10, 20, 30, 40, 50]
+my_list.insert(2, 25)
+# my_list is now [10, 20, 25, 30, 40, 50]
+</code></pre>
+<p><strong>内部做了什么</strong>：</p>
+<ol>
+<li>25 占位到位置 2</li>
+<li>30, 40, 50 全部后挪一格（O(3)）</li>
+</ol>
+<p>N 个元素 + 中间插入 = O(n) 后挪。</p>
+<h2>四、手写简单链表（5 分钟）</h2>
+<pre><code class="language-python">class Node:
+    &#39;&#39;&#39;A linked list node: holds data and points to next.&#39;&#39;&#39;
+    def __init__(self, data):
+        self.data = data
+        self.next = None
+
+# Build: 1 -&gt; 2 -&gt; 3 -&gt; None
+node1 = Node(1)
+node2 = Node(2)
+node3 = Node(3)
+node1.next = node2
+node2.next = node3
+
+# Walk: print all
+current = node1
+while current is not None:
+    print(current.data, end=&#39; &#39;)
+    current = current.next
+# 1 2 3
+</code></pre>
+<h2>五、深入了解：选对数据结构 = 性能翻倍（3 分钟）</h2>
+<p><strong>AI 工程师面试必问</strong>：&quot;这个场景用什么数据结构？&quot;——选错 = 慢 10 倍。</p>
+<table>
+<thead>
+<tr>
+<th>场景</th>
+<th>选</th>
+<th>原因</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>随机访问（下标）</td>
+<td>数组</td>
+<td>O(1)</td>
+</tr>
+<tr>
+<td>中间插入删除</td>
+<td>链表</td>
+<td>O(1)</td>
+</tr>
+<tr>
+<td>数据小（&lt; 100）</td>
+<td>都行</td>
+<td>差距忽略</td>
+</tr>
+<tr>
+<td>内存紧张</td>
+<td>数组</td>
+<td>链表每个节点要 2 个指针</td>
+</tr>
+</tbody></table>
+<p><strong>Python 默认 list = 数组</strong>——别自己造链表。</p>
+<h2>六、何时用（3 分钟）</h2>
+<ul>
+<li>📊 <strong>存一批数据</strong>：成绩、姓名、像素、向量</li>
+<li>🔄 <strong>循环遍历</strong>：<code>for item in my_list</code></li>
+<li>🗂️ <strong>配合字典</strong>：dict 的 value 是 list</li>
+<li>📚 <strong>栈/队列</strong>：<code>append</code> 进 / <code>pop</code> 出</li>
+</ul>
+<h2>七、动手练习</h2>
+<ol>
+<li>跑 Node 代码看 1 2 3 输出</li>
+<li>在 Node 3 后加 Node 4，让它指向 None</li>
+<li>写 while 循环数链表长度</li>
+</ol>
+<h2>八、答案</h2>
+<ol>
+<li>✓ 输出 1 2 3</li>
+<li><code>node3.next = Node(4)</code></li>
+<li>步数 = 节点数 = O(n)</li>
+</ol>
+<h2>九、今日口诀 + 下一节预告</h2>
+<p><strong>今日口诀</strong>：<strong>数组 = 火车站（O(1) 找），链表 = 接力赛（O(1) 插）</strong>。</p>
+<p><strong>下节预告</strong>：选择排序——O(N²) 但简单稳。</p>
+<hr>
+<h2>✅ 自查</h2>
+<ul>
+<li><input disabled="" type="checkbox"> 我能讲数组和链表的区别</li>
+<li><input disabled="" type="checkbox"> 我知道 Python list 是数组</li>
+<li><input disabled="" type="checkbox"> 我能写一个简单 Node 类</li>
+</ul>
+<hr>
+<blockquote>
+<p><strong>📁 作业保存规则</strong>：本课课后练习写进一个文件 <code>W12-S1-homework.py</code>（存 <code>~/sand-hollow/&lt;你的学员ID&gt;/homework/</code>），每道题开头用刚学的备注分隔：<code># --- 题 1 ---</code>、<code># --- 题 2 ---</code>……<strong>交完作业要跟你的智能体说一声</strong>才会批改，评语出现在 <code>reviews/*.review.md</code>。<strong>回报触发词：交完作业或修完坑，都回一句「修完了」</strong>——不回这句 mentor 不知道，坑会一直挂着等。</p>
+</blockquote>
+<h2>📝 今日作业</h2>
+<p>新建 <code>W12-S1-homework.py</code>，3 道题：</p>
+<ol>
+<li><strong>数组查找</strong>：10000 元素 Python list，<code>list[5000]</code> 要几步？</li>
+<li><strong>链表查找</strong>：10000 节点链表，找第 5000 个要几步？</li>
+<li><strong>插入比较</strong>：10000 元素 list 中间插入 vs 10000 节点链表中间插入——哪个快？</li>
+</ol>
+<hr>
+</div>
+</section>
+<section class="lesson" data-lid="W12-S2">
+<div class="lesson-head"><span class="lt">数组 ②：Python list 内部实现</span></div>
+<div class="md" data-lid="W12-S2"><!-- slug: list-internals, type: addon -->
+<h1>W12-S2 · 数组 ②：Python list 内部实现</h1>
+<blockquote>
+<p><strong>一句话核心</strong>：<strong>Python list = 动态数组（C 数组 + 容量翻倍）</strong>。知道底层 = 知道为什么 <code>append</code> 是 O(1) 而 <code>insert(0)</code> 是 O(n)。</p>
+</blockquote>
+<blockquote>
+<p><strong>每日节奏（v1.9）：</strong> 阅读 ≈10 分钟，作业 ≈15 分钟
+<strong>需要 Thonny</strong>
+难度：⭐⭐ · W16 加餐③ 第 2 课（前置：W16-S1）</p>
+</blockquote>
+<hr>
+<blockquote>
+<p><strong>📂 课前准备</strong>：先在 Thonny <code>文件 → 新建</code>，立刻 <code>文件 → 另存为...</code> 存为 <code>~/sand-hollow/&lt;你的学员ID&gt;/homework/W12-S2-practice.py</code>（ID 就是你注册沙坑用的 8 位数字）。本课所有亲手敲的代码都写进这个文件；课后作业写进同目录的 <code>W12-S2-homework.py</code>，两个文件严格分开，别混。</p>
+</blockquote>
+<h2>一、动态数组核心（3 分钟）</h2>
+<p>Python list 内部 = <strong>C 数组</strong>（连续内存） + <strong>容量管理</strong>。</p>
+<pre><code>Operation     | Complexity | Why
+--------------|--------|----------------------
+list[i]       | O(1)   | direct jump
+list.append(x)| O(1)*  | capacity enough
+list.insert(0)| O(n)   | all shift right
+list.pop()    | O(1)   | tail pop
+list.remove(x)| O(n)   | find + shift
+x in list     | O(n)   | scan one by one
+</code></pre>
+<p>*Amortized O(1) = average O(1), occasionally O(n) (capacity double).</p>
+<h2>二、容量翻倍策略（5 分钟）</h2>
+<p><strong>为什么 <code>append</code> 是 O(1) 摊销</strong>？</p>
+<pre><code class="language-python"># simplified list implementation
+class SimpleList:
+    def __init__(self):
+        self.capacity = 1
+        self.size = 0
+        self.data = [None] * self.capacity
+
+    def append(self, x):
+        if self.size == self.capacity:
+            self._resize()
+        self.data[self.size] = x
+        self.size += 1
+
+    def _resize(self):
+        &#39;&#39;&#39;Double capacity when full.&#39;&#39;&#39;
+        new_capacity = self.capacity * 2
+        new_data = [None] * new_capacity
+        for i in range(self.size):
+            new_data[i] = self.data[i]
+        self.data = new_data
+        self.capacity = new_capacity
+</code></pre>
+<p><strong>为什么 O(1) 摊销</strong>：resize 罕见（按对数频次），平均下来每步 O(1)。</p>
+<h2>三、示例演算：append 8 次（3 分钟）</h2>
+<table>
+<thead>
+<tr>
+<th>步</th>
+<th>size</th>
+<th>capacity</th>
+<th>操作</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>1</td>
+<td>1</td>
+<td>1</td>
+<td>append → fill</td>
+</tr>
+<tr>
+<td>2</td>
+<td>2</td>
+<td>2</td>
+<td>append → resize 1→2</td>
+</tr>
+<tr>
+<td>3</td>
+<td>3</td>
+<td>4</td>
+<td>append → resize 2→4</td>
+</tr>
+<tr>
+<td>4</td>
+<td>4</td>
+<td>4</td>
+<td>append</td>
+</tr>
+<tr>
+<td>5</td>
+<td>5</td>
+<td>8</td>
+<td>append → resize 4→8</td>
+</tr>
+<tr>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+</tr>
+</tbody></table>
+<p><strong>resize 总次数</strong>：log₂(8) = 3 次。8 个 append 8 步 + 3 步 resize = 11 步。平均 11/8 ≈ 1.4 步 = <strong>O(1) 摊销</strong>。</p>
+<h2>四、深入了解：为什么不用链表（3 分钟）</h2>
+<p>链表在 Python 里<strong>几乎没用</strong>：</p>
+<ul>
+<li>链表多 2x 内存（每个节点要 2 个指针）</li>
+<li>链表 cache 不友好（节点不连续）</li>
+<li>Python list 已经够用</li>
+</ul>
+<p><strong>什么时候用链表</strong>：</p>
+<ul>
+<li>需要频繁中间插入（数据库 B 树）</li>
+<li>大数据（&gt; 10⁹）放不进内存</li>
+</ul>
+<p><strong>AI 工程师原则</strong>：<strong>99% 用 list</strong>。</p>
+<h2>五、何时用：性能对比（3 分钟）</h2>
+<pre><code class="language-python">import time
+
+def benchmark():
+    lst = []
+    N = 100000
+    # append
+    start = time.time()
+    for i in range(N):
+        lst.append(i)
+    print(f&#39;append {N} times: {time.time()-start:.4f}s&#39;)
+
+    # insert(0, x)
+    start = time.time()
+    for i in range(N):
+        lst.insert(0, i)
+    print(f&#39;insert(0) {N} times: {time.time()-start:.4f}s&#39;)
+
+benchmark()
+</code></pre>
+<p>跑一下。<strong>insert(0) 慢 1000 倍</strong>。</p>
+<h2>六、动手练习</h2>
+<ol>
+<li>跑上面的 benchmark</li>
+<li>写 <code>SimpleList</code>，加 <code>insert(0, x)</code> 测试</li>
+<li>用 <code>sys.getsizeof([])</code> 看 list 内存增长</li>
+</ol>
+<h2>七、答案</h2>
+<pre><code class="language-python">import time, sys
+
+# 1
+benchmark()  # append fast, insert(0) slow
+
+# 2
+class SimpleList:
+    def __init__(self):
+        self.capacity = 1
+        self.size = 0
+        self.data = [None]
+    def append(self, x):
+        if self.size == self.capacity:
+            self.capacity *= 2
+            self.data = self.data + [None]
+        self.data[self.size] = x
+        self.size += 1
+    def insert(self, i, x):
+        # Shift right
+        self.append(None)  # make room
+        for j in range(self.size - 1, i, -1):
+            self.data[j] = self.data[j-1]
+        self.data[i] = x
+
+# 3
+sizes = [0, 1, 10, 100, 1000, 10000]
+for s in sizes:
+    lst = list(range(s))
+    print(f&#39;len={s}: size={sys.getsizeof(lst)} bytes&#39;)
+</code></pre>
+<h2>八、今日口诀 + 下一节预告</h2>
+<p><strong>今日口诀</strong>：<strong>list = 动态数组</strong>。append O(1) 摊销，insert(0) O(n)。</p>
+<p><strong>下节预告</strong>：数组 vs 链表性能实测——量出 1000x 差距。</p>
+<hr>
+<h2>✅ 自查</h2>
+<ul>
+<li><input disabled="" type="checkbox"> 我能解释 list 怎么扩容</li>
+<li><input disabled="" type="checkbox"> 我能预测 append vs insert(0) 性能</li>
+<li><input disabled="" type="checkbox"> 我能用 <code>sys.getsizeof</code> 看内存</li>
+</ul>
+<hr>
+<blockquote>
+<p><strong>📁 作业保存规则</strong>：本课课后练习写进一个文件 <code>W12-S2-homework.py</code>（存 <code>~/sand-hollow/&lt;你的学员ID&gt;/homework/</code>），每道题开头用刚学的备注分隔：<code># --- 题 1 ---</code>、<code># --- 题 2 ---</code>……<strong>交完作业要跟你的智能体说一声</strong>才会批改，评语出现在 <code>reviews/*.review.md</code>。<strong>回报触发词：交完作业或修完坑，都回一句「修完了」</strong>——不回这句 mentor 不知道，坑会一直挂着等。</p>
+</blockquote>
+<h2>📝 今日作业</h2>
+<p>新建 <code>W12-S2-homework.py</code>，3 道题：</p>
+<ol>
+<li><strong>benchmark</strong>：append vs insert(0) 跑 1 万次</li>
+<li><strong>实现 SimpleList</strong>：加 insert(0, x) 测 O(n)</li>
+<li><strong>内存测试</strong>：用 <code>sys.getsizeof</code> 看 list 增长</li>
+</ol>
+<hr>
+</div>
+</section>
+<section class="lesson" data-lid="W12-S3">
+<div class="lesson-head"><span class="lt">选择排序：每次挑最小的放前面</span></div>
+<div class="md" data-lid="W12-S3"><!-- slug: selection-sort, type: addon -->
+<h1>W12-S3 · 选择排序：每次挑最小的放前面</h1>
+<blockquote>
+<p><strong>一句话核心</strong>：<strong>选择排序 = N 次&quot;找最小&quot;</strong>。简单、O(N²)，慢但稳。<strong>生产用快排</strong>（O(N log N)）。</p>
+</blockquote>
+<blockquote>
+<p><strong>每日节奏（v1.9）：</strong> 阅读 ≈8 分钟，作业 ≈17 分钟
+<strong>需要 Thonny</strong>
+难度：⭐⭐ · W16 加餐③ 第 2 课（前置：W16-S1 + W07 列表）</p>
+</blockquote>
+<hr>
+<blockquote>
+<p><strong>📂 课前准备</strong>：先在 Thonny <code>文件 → 新建</code>，立刻 <code>文件 → 另存为...</code> 存为 <code>~/sand-hollow/&lt;你的学员ID&gt;/homework/W12-S3-practice.py</code>（ID 就是你注册沙坑用的 8 位数字）。本课所有亲手敲的代码都写进这个文件；课后作业写进同目录的 <code>W12-S3-homework.py</code>，两个文件严格分开，别混。</p>
+</blockquote>
+<h2>一、核心想法：每次找最小的放前面（3 分钟）</h2>
+<pre><code>[3, 1, 4, 1, 5, 9, 2, 6]  -&gt; find min: 1 -&gt; swap
+[1, 3, 4, 1, 5, 9, 2, 6]  -&gt; find min: 1 -&gt; swap
+[1, 1, 3, 4, 5, 9, 2, 6]  -&gt; find min: 2 -&gt; swap
+... 7 DONE ...
+[1, 1, 2, 3, 4, 5, 6, 9]  DONE
+</code></pre>
+<p>7 步（n-1 = 8-1 = 7）。每步&quot;找最小 + 交换&quot;。</p>
+<h2>二、Python 代码（5 分钟）</h2>
+<pre><code class="language-python">def selection_sort(arr):
+    &#39;&#39;&#39;Sort arr in place using selection sort.&#39;&#39;&#39;
+    n = len(arr)
+    for i in range(n - 1):           # i is the position to fill
+        min_idx = i
+        for j in range(i + 1, n):
+            if arr[j] &lt; arr[min_idx]:
+                min_idx = j
+        if min_idx != i:
+            arr[i], arr[min_idx] = arr[min_idx], arr[i]
+    return arr
+
+nums = [3, 1, 4, 1, 5, 9, 2, 6]
+print(selection_sort(nums))   # [1, 1, 2, 3, 4, 5, 6, 9]
+</code></pre>
+<h2>三、复杂度（3 分钟）</h2>
+<p>N 个元素：外层 N 次 + 内层 N/2 次 + 每次 O(1) = <strong>N²/2 = O(N²)</strong>。</p>
+<p>10 元素 ~50 比较；100 元素 ~5000；10000 元素 ~5000 万。</p>
+<h2>四、排序算法全家福（3 分钟）</h2>
+<table>
+<thead>
+<tr>
+<th>排序</th>
+<th>时间</th>
+<th>空间</th>
+<th>稳定性</th>
+<th>何时用</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>选择排序</td>
+<td>O(N²)</td>
+<td>O(1)</td>
+<td>✗</td>
+<td>教学</td>
+</tr>
+<tr>
+<td>冒泡排序</td>
+<td>O(N²)</td>
+<td>O(1)</td>
+<td>✓</td>
+<td>教学</td>
+</tr>
+<tr>
+<td>插入排序</td>
+<td>O(N²)</td>
+<td>O(1)</td>
+<td>✓</td>
+<td>小数据</td>
+</tr>
+<tr>
+<td><strong>快排</strong></td>
+<td><strong>O(N log N)</strong></td>
+<td>O(log N)</td>
+<td>✗</td>
+<td><strong>生产默认</strong></td>
+</tr>
+<tr>
+<td>归并排序</td>
+<td>O(N log N)</td>
+<td>O(N)</td>
+<td>✓</td>
+<td>大数据 / 链表</td>
+</tr>
+<tr>
+<td>Timsort (Python)</td>
+<td>O(N log N)</td>
+<td>O(N)</td>
+<td>✓</td>
+<td><strong>Python 默认</strong></td>
+</tr>
+</tbody></table>
+<p><strong>AI 工程师用什么</strong>：训练数据预处理用归并，实时推荐用堆，一般业务用 Timsort。</p>
+<h2>五、何时用：选择排序 3 个使用场景（3 分钟）</h2>
+<table>
+<thead>
+<tr>
+<th>场景</th>
+<th>用？</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>教学</td>
+<td>✓</td>
+</tr>
+<tr>
+<td>小数据 (&lt; 100)</td>
+<td>✓</td>
+</tr>
+<tr>
+<td>生产 (&gt; 100 元素)</td>
+<td>✗ 用快排 / Timsort</td>
+</tr>
+<tr>
+<td>嵌入式（内存小）</td>
+<td>✓</td>
+</tr>
+<tr>
+<td>已排好序几乎不变</td>
+<td>✗ 插入排序更快</td>
+</tr>
+</tbody></table>
+<h2>六、动手练习</h2>
+<ol>
+<li>跑代码验证 [1, 1, 2, 3, 4, 5, 6, 9]</li>
+<li>倒序 [5, 4, 3, 2, 1] 跑选择排序</li>
+<li>100 元素 list，数比较次数</li>
+</ol>
+<h2>七、答案</h2>
+<ol>
+<li>✓ 输出 [1, 1, 2, 3, 4, 5, 6, 9]</li>
+<li>输出 [1, 2, 3, 4, 5]</li>
+<li>~10000 次比较（≈ N²/2）</li>
+</ol>
+<h2>八、今日口诀 + 下一节预告</h2>
+<p><strong>今日口诀</strong>：<strong>选择排序 = N 次&quot;找最小&quot;</strong>。O(N²) 慢但稳，AI 生产用快排 / Timsort。</p>
+<p><strong>下节预告</strong>：周末项目——选择 vs Python 内置 sort 比赛。</p>
+<hr>
+<h2>✅ 自查</h2>
+<ul>
+<li><input disabled="" type="checkbox"> 我能写选择排序</li>
+<li><input disabled="" type="checkbox"> 我能解释为什么 O(N²)</li>
+<li><input disabled="" type="checkbox"> 我知道 AI 用 O(N log N) 排序</li>
+</ul>
+<hr>
+<blockquote>
+<p><strong>📁 作业保存规则</strong>：本课课后练习写进一个文件 <code>W12-S3-homework.py</code>（存 <code>~/sand-hollow/&lt;你的学员ID&gt;/homework/</code>），每道题开头用刚学的备注分隔：<code># --- 题 1 ---</code>、<code># --- 题 2 ---</code>……<strong>交完作业要跟你的智能体说一声</strong>才会批改，评语出现在 <code>reviews/*.review.md</code>。<strong>回报触发词：交完作业或修完坑，都回一句「修完了」</strong>——不回这句 mentor 不知道，坑会一直挂着等。</p>
+</blockquote>
+<h2>📝 今日作业</h2>
+<p>新建 <code>W12-S3-homework.py</code>，3 道题：</p>
+<ol>
+<li><strong>倒序挑战</strong>：[5, 4, 3, 2, 1] 数选择排序比较次数</li>
+<li><strong>Python sort 对比</strong>：100 元素，selection_sort vs <code>list.sort()</code> 用 <code>time.time()</code> 量</li>
+<li><strong>变种</strong>：写<strong>冒泡排序</strong>（O(N²)，交换相邻）</li>
+</ol>
+<hr>
+</div>
+</section>
+<section class="lesson" data-lid="W12-S4">
+<div class="lesson-head"><span class="lt">数组 ③：数组 vs 链表性能实测</span></div>
+<div class="md" data-lid="W12-S4"><!-- slug: array-vs-list-benchmark, type: addon -->
+<h1>W12-S4 · 数组 ③：数组 vs 链表性能实测</h1>
+<blockquote>
+<p><strong>一句话核心</strong>：<strong>N=10000 时，数组访问快 1000 倍，链表插入快 10 倍</strong>。亲量 = 真知。</p>
+</blockquote>
+<blockquote>
+<p><strong>每日节奏（v1.9）：</strong> 阅读 ≈8 分钟，作业 ≈17 分钟
+<strong>需要 Thonny</strong>
+难度：⭐⭐⭐ · W16 加餐③ 第 3 课（前置：W16-S1 + S2 + S3）</p>
+</blockquote>
+<hr>
+<blockquote>
+<p><strong>📂 课前准备</strong>：先在 Thonny <code>文件 → 新建</code>，立刻 <code>文件 → 另存为...</code> 存为 <code>~/sand-hollow/&lt;你的学员ID&gt;/homework/W12-S4-practice.py</code>（ID 就是你注册沙坑用的 8 位数字）。本课所有亲手敲的代码都写进这个文件；课后作业写进同目录的 <code>W12-S4-homework.py</code>，两个文件严格分开，别混。</p>
+</blockquote>
+<h2>一、4 个测试场景（3 分钟）</h2>
+<table>
+<thead>
+<tr>
+<th>场景</th>
+<th>数据结构</th>
+<th>复杂度</th>
+<th>期望</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>访问第 N 个</td>
+<td>数组</td>
+<td>O(1)</td>
+<td>极快</td>
+</tr>
+<tr>
+<td>访问第 N 个</td>
+<td>链表</td>
+<td>O(n)</td>
+<td>慢</td>
+</tr>
+<tr>
+<td>末尾追加</td>
+<td>数组</td>
+<td>O(1)</td>
+<td>快</td>
+</tr>
+<tr>
+<td>末尾追加</td>
+<td>链表</td>
+<td>O(1)</td>
+<td>快</td>
+</tr>
+<tr>
+<td>头部插入</td>
+<td>数组</td>
+<td>O(n)</td>
+<td>慢</td>
+</tr>
+<tr>
+<td>头部插入</td>
+<td>链表</td>
+<td>O(1)</td>
+<td>极快</td>
+</tr>
+</tbody></table>
+<h2>二、Python 代码（5 分钟）</h2>
+<pre><code class="language-python">import time
+from collections import deque
+
+N = 10000
+
+# Test data
+arr = list(range(N))
+link = deque(range(N))
+
+# 1. Access last element
+start = time.time(); arr[-1]; arr_time = time.time() - start
+start = time.time(); link[-1]; link_time = time.time() - start
+print(f&#39;Access last:  array={arr_time:.6f}s  linked={link_time:.6f}s&#39;)
+
+# 2. Append to end
+start = time.time(); arr.append(N); arr_t = time.time() - start
+start = time.time(); link.append(N); link_t = time.time() - start
+print(f&#39;Append end:    array={arr_t:.6f}s  linked={link_t:.6f}s&#39;)
+
+# 3. Insert at beginning
+start = time.time(); arr.insert(0, -1); arr_t = time.time() - start
+start = time.time(); link.appendleft(-1); link_t = time.time() - start
+print(f&#39;Insert front:  array={arr_t:.6f}s  linked={link_t:.6f}s&#39;)
+</code></pre>
+<h2>三、示例演算：N=10000（3 分钟）</h2>
+<p>实际跑出来（理论值）：</p>
+<table>
+<thead>
+<tr>
+<th>操作</th>
+<th>数组</th>
+<th>链表</th>
+<th>比值</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Access last</td>
+<td>~0.000001s</td>
+<td>~0.000001s</td>
+<td>1x</td>
+</tr>
+<tr>
+<td>Append end</td>
+<td>~0.000001s</td>
+<td>~0.000001s</td>
+<td>1x</td>
+</tr>
+<tr>
+<td>Insert front</td>
+<td>~0.005s</td>
+<td>~0.000001s</td>
+<td>5000x</td>
+</tr>
+</tbody></table>
+<p><strong>Insert front 链表快 5000 倍</strong>。</p>
+<h2>四、深入了解：为什么差这么多（3 分钟）</h2>
+<p><strong>数组 insert(0)</strong>：</p>
+<ul>
+<li>把所有元素后挪 1 格 = N 步</li>
+<li>N=10000 = 10000 步</li>
+</ul>
+<p><strong>链表 appendleft</strong>：</p>
+<ul>
+<li>改 1 个指针 = 1 步</li>
+<li>N=10000 = 1 步</li>
+</ul>
+<p><strong>差距 = N / 1 = 10000 倍</strong>（实测 ~5000x 因为常数因子）。</p>
+<h2>五、何时用：4 个决策（3 分钟）</h2>
+<table>
+<thead>
+<tr>
+<th>场景</th>
+<th>选</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>频繁随机访问</td>
+<td>数组（O(1)）</td>
+</tr>
+<tr>
+<td>频繁头部增删</td>
+<td>链表（O(1)）</td>
+</tr>
+<tr>
+<td>频繁末尾增删</td>
+<td>都行（O(1)）</td>
+</tr>
+<tr>
+<td>频繁中间增删</td>
+<td>看位置（链表一般快）</td>
+</tr>
+</tbody></table>
+<p><strong>AI 工程师原则</strong>：看&quot;操作频次&quot;选数据结构。</p>
+<h2>六、动手练习</h2>
+<ol>
+<li>跑上面代码，看实际差距</li>
+<li>改 N=100000，再跑（差距更明显）</li>
+<li>写一个 <code>benchmark(n)</code> 函数，封装 3 个测试</li>
+</ol>
+<h2>七、答案</h2>
+<pre><code class="language-python">def benchmark(n):
+    arr = list(range(n))
+    link = deque(range(n))
+    # 3 tests
+    # ...
+
+# Test
+for n in [1000, 10000, 100000]:
+    print(f&#39;N={n}:&#39;)
+    benchmark(n)
+    print()
+</code></pre>
+<h2>八、今日口诀 + 下一节预告</h2>
+<p><strong>今日口诀</strong>：<strong>亲量 = 真知</strong>。理论对，实测也对，才稳。</p>
+<p><strong>下节预告</strong>：数据结构选型小工具——选什么结构自己说。</p>
+<hr>
+<h2>✅ 自查</h2>
+<ul>
+<li><input disabled="" type="checkbox"> 我能跑 benchmark</li>
+<li><input disabled="" type="checkbox"> 我能解释为什么 insert 差 1000 倍</li>
+<li><input disabled="" type="checkbox"> 我能根据场景选对数据结构</li>
+</ul>
+<hr>
+<blockquote>
+<p><strong>📁 作业保存规则</strong>：本课课后练习写进一个文件 <code>W12-S4-homework.py</code>（存 <code>~/sand-hollow/&lt;你的学员ID&gt;/homework/</code>），每道题开头用刚学的备注分隔：<code># --- 题 1 ---</code>、<code># --- 题 2 ---</code>……<strong>交完作业要跟你的智能体说一声</strong>才会批改，评语出现在 <code>reviews/*.review.md</code>。<strong>回报触发词：交完作业或修完坑，都回一句「修完了」</strong>——不回这句 mentor 不知道，坑会一直挂着等。</p>
+</blockquote>
+<h2>📝 今日作业</h2>
+<p>新建 <code>W12-S4-homework.py</code>，3 道题：</p>
+<ol>
+<li><strong>benchmark 跑 N=100000</strong></li>
+<li><strong>写 benchmark(n) 函数</strong>封装 3 测试</li>
+<li><strong>决策表</strong>：每个场景写选数组还是链表</li>
+</ol>
+<hr>
+</div>
+</section>
+<section class="lesson" data-lid="W12-S5">
+<div class="lesson-head"><span class="lt">数组 ④：数据结构选型小工具</span></div>
+<div class="md" data-lid="W12-S5"><!-- slug: data-structure-picker, type: addon -->
+<h1>W12-S5 · 数组 ④：数据结构选型小工具</h1>
+<blockquote>
+<p><strong>一句话核心</strong>：<strong>选对数据结构 = 性能翻 10 倍</strong>。建一个小工具，输入&quot;操作 + N&quot;，输出&quot;用什么结构&quot;。</p>
+</blockquote>
+<blockquote>
+<p><strong>每日节奏（v1.9）：</strong> 阅读 ≈8 分钟，作业 ≈17 分钟
+<strong>需要 Thonny</strong>
+难度：⭐⭐⭐ · W16 加餐③ 第 4 课（前置：W16-S1 ~ S4）</p>
+</blockquote>
+<hr>
+<blockquote>
+<p><strong>📂 课前准备</strong>：先在 Thonny <code>文件 → 新建</code>，立刻 <code>文件 → 另存为...</code> 存为 <code>~/sand-hollow/&lt;你的学员ID&gt;/homework/W12-S5-practice.py</code>（ID 就是你注册沙坑用的 8 位数字）。本课所有亲手敲的代码都写进这个文件；课后作业写进同目录的 <code>W12-S5-homework.py</code>，两个文件严格分开，别混。</p>
+</blockquote>
+<h2>一、选型决策树（3 分钟）</h2>
+<pre><code>need to store batch data?
+|-- frequent random access (arr[i])? -&gt; array (list)
+|-- frequent head insert/delete? -&gt; double-ended queue (deque)
+|-- frequent middle insert/delete? -&gt; doubly linked list (deque)
+|-- key-value pair? -&gt; dict
+|-- no duplicates? -&gt; set
+|-- immutable seq? -&gt; tuple
+|-- heavy numeric? -&gt; numpy array
+</code></pre>
+<h2>二、Python 代码（5 分钟）</h2>
+<pre><code class="language-python">def pick_data_structure(operation, n):
+    &#39;&#39;&#39;Pick best data structure based on operation.&#39;&#39;&#39;
+    if operation == &#39;random_access&#39;:
+        if n &lt; 1000:
+            return &#39;list (O(1) access)&#39;
+        return &#39;list (still O(1), cache friendly)&#39;
+    elif operation == &#39;head_insert&#39;:
+        if n &lt; 100:
+            return &#39;list (small N)&#39;
+        return &#39;deque (O(1) head insert)&#39;
+    elif operation == &#39;search_by_key&#39;:
+        return &#39;dict (O(1) lookup)&#39;
+    elif operation == &#39;unique&#39;:
+        return &#39;set (O(1) membership)&#39;
+    elif operation == &#39;immutable&#39;:
+        return &#39;tuple (immutable, hashable)&#39;
+    elif operation == &#39;numeric&#39;:
+        return &#39;numpy array (vectorized)&#39;
+    else:
+        return &#39;list (default)&#39;
+
+# Test
+ops = [&#39;random_access&#39;, &#39;head_insert&#39;, &#39;search_by_key&#39;,
+       &#39;unique&#39;, &#39;immutable&#39;, &#39;numeric&#39;]
+for op in ops:
+    print(f&#39;{op:20s} -&gt; {pick_data_structure(op, 10000)}&#39;)
+</code></pre>
+<h2>三、示例演算：3 个真实场景（3 分钟）</h2>
+<p><strong>场景 1：学生成绩单</strong></p>
+<ul>
+<li>操作：按学号查分</li>
+<li>选 <code>dict</code>（学号 → 分数）</li>
+</ul>
+<p><strong>场景 2：消息队列</strong></p>
+<ul>
+<li>操作：频繁头部插入</li>
+<li>选 <code>deque</code>（O(1) 头插）</li>
+</ul>
+<p><strong>场景 3：图像像素</strong></p>
+<ul>
+<li>操作：高频访问</li>
+<li>选 <code>list</code>（Python list = 数组）</li>
+</ul>
+<h2>四、深入了解：选型 3 步法（3 分钟）</h2>
+<pre><code>1. list main operations (by frequency)
+2. check complexity of each structure
+3. pick the best match
+</code></pre>
+<p><strong>AI 工程师原则</strong>：<strong>先看操作频次，不是先看数据</strong>。</p>
+<h2>五、何时用：选型升级路径（3 分钟）</h2>
+<pre><code>needs -&gt; simple (list/dict) -&gt; bottleneck -&gt; advanced
+                                       |-- deque (head insert)
+                                       |-- set (unique)
+                                       |-- numpy (numeric)
+                                       |-- pandas (data science)
+</code></pre>
+<p><strong>99% 用 list/dict</strong>——升级是后期优化。</p>
+<h2>六、动手练习</h2>
+<ol>
+<li>跑上面的 <code>pick_data_structure</code> 函数</li>
+<li>加更多操作（sort / search / dedup）</li>
+<li>用工具分析你最近 1 个项目，看选得对吗</li>
+</ol>
+<h2>七、答案</h2>
+<pre><code class="language-python">def pick_data_structure_v2(operation, n):
+    &#39;&#39;&#39;Extended version.&#39;&#39;&#39;
+    rules = {
+        &#39;random_access&#39;: &#39;list&#39;,
+        &#39;head_insert&#39;: &#39;deque&#39; if n &gt; 100 else &#39;list&#39;,
+        &#39;tail_insert&#39;: &#39;list&#39;,
+        &#39;search_key&#39;: &#39;dict&#39;,
+        &#39;unique&#39;: &#39;set&#39;,
+        &#39;immutable&#39;: &#39;tuple&#39;,
+        &#39;sort&#39;: &#39;list (built-in sort)&#39;,
+        &#39;numeric&#39;: &#39;numpy array&#39;,
+        &#39;matrix&#39;: &#39;numpy 2D array&#39;,
+        &#39;graph&#39;: &#39;dict + list (adjacency list)&#39;,
+    }
+    return rules.get(operation, &#39;list (default)&#39;)
+
+# Test all
+for op in rules:  # wait, rules is a dict
+    pass
+
+# Fix
+for op in rules.keys():
+    print(f&#39;{op:20s} -&gt; {pick_data_structure_v2(op, 1000)}&#39;)
+</code></pre>
+<h2>八、今日口诀 + 周末预告</h2>
+<p><strong>今日口诀</strong>：<strong>选型 = 操作 + 频次 + 复杂度</strong>。3 步搞定。</p>
+<p><strong>周末预告</strong>：排序比赛——选择 vs Python 内置 sort。</p>
+<hr>
+<h2>✅ 自查</h2>
+<ul>
+<li><input disabled="" type="checkbox"> 我能写 <code>pick_data_structure</code> 函数</li>
+<li><input disabled="" type="checkbox"> 我能用选型 3 步法</li>
+<li><input disabled="" type="checkbox"> 我能分析最近项目的选型</li>
+</ul>
+<hr>
+<blockquote>
+<p><strong>📁 作业保存规则</strong>：本课课后练习写进一个文件 <code>W12-S5-homework.py</code>（存 <code>~/sand-hollow/&lt;你的学员ID&gt;/homework/</code>），每道题开头用刚学的备注分隔：<code># --- 题 1 ---</code>、<code># --- 题 2 ---</code>……<strong>交完作业要跟你的智能体说一声</strong>才会批改，评语出现在 <code>reviews/*.review.md</code>。<strong>回报触发词：交完作业或修完坑，都回一句「修完了」</strong>——不回这句 mentor 不知道，坑会一直挂着等。</p>
+</blockquote>
+<h2>📝 今日作业</h2>
+<p>新建 <code>W12-S5-homework.py</code>，3 道题：</p>
+<ol>
+<li><strong>写选型函数</strong>：输入操作，输出结构</li>
+<li><strong>扩展规则</strong>：加 sort / dedup / search 操作</li>
+<li><strong>真实场景</strong>：用工具分析 3 个你熟悉的场景</li>
+</ol>
+<hr>
+</div>
+</section>
+<section class="lesson" data-lid="W12-weekend">
+<div class="lesson-head"><span class="lt">排序比赛：选择 vs Python 内置</span></div>
+<div class="md" data-lid="W12-weekend"><!-- slug: sort-race, type: addon -->
+<h1>W12-weekend · 排序比赛：选择 vs Python 内置</h1>
+<blockquote>
+<p><strong>一句话核心</strong>：<strong>学算法是理解原理；生产用标准库</strong>。Python <code>sort()</code> 用 Timsort，N=5000 时比选择排序快 1000 倍。</p>
+</blockquote>
+<blockquote>
+<p><strong>每日节奏（v1.9）：</strong> 周末项目 ≈60 分钟
+<strong>写代码时间</strong>
+难度：⭐⭐⭐ · W16 加餐③ 周末</p>
+</blockquote>
+<hr>
+<blockquote>
+<p><strong>📂 课前准备</strong>：存为 <code>~/sand-hollow/&lt;你的学员ID&gt;/homework/W16-weekend-practice.py</code>。</p>
+</blockquote>
+<h2>⓪ 🤖 课前 AI 一分钟 · 第 36 颗：自己造轮子 vs 用标准库（3 分钟）</h2>
+<p><strong>AI 工程师的金科玉律</strong>：<strong>永远先试标准库</strong>。</p>
+<p><strong>今日口诀</strong>：<strong>学算法 = 理解原理；生产 = 用标准库</strong>。</p>
+<p><strong>⚔️ 判一判</strong>：</p>
+<blockquote>
+<ol>
+<li>自己写算法永远比标准库快</li>
+<li>Python list.sort() 用 C 实现</li>
+</ol>
+</blockquote>
+<details><summary>答案</summary>
+
+<p><strong>1.</strong> ✗ 标准库经过千锤百炼；<strong>2.</strong> ✓ Python 调用 C 实现的 Timsort。</p>
+</details>
+
+<hr>
+<h2>一、项目：排序比赛（60 分钟）</h2>
+<p>写两个排序函数：</p>
+<ol>
+<li><code>selection_sort(arr)</code> —— 上节学的</li>
+<li><code>builtin_sort(arr)</code> —— 用 <code>arr.sort()</code> 或 <code>sorted(arr)</code></li>
+</ol>
+<p>跑 5 组输入，比较哪个快多少倍。</p>
+<h2>二、选择排序（10 分钟）</h2>
+<pre><code class="language-python">def selection_sort(arr):
+    &#39;&#39;&#39;In-place selection sort.&#39;&#39;&#39;
+    arr = list(arr)   # don&#39;t modify original
+    n = len(arr)
+    for i in range(n - 1):
+        min_idx = i
+        for j in range(i + 1, n):
+            if arr[j] &lt; arr[min_idx]:
+                min_idx = j
+        if min_idx != i:
+            arr[i], arr[min_idx] = arr[min_idx], arr[i]
+    return arr
+</code></pre>
+<h2>三、内置排序（5 分钟）</h2>
+<pre><code class="language-python">def builtin_sort(arr):
+    &#39;&#39;&#39;Use Python built-in sort (Timsort).&#39;&#39;&#39;
+    return sorted(arr)
+</code></pre>
+<h2>四、跑比赛（15 分钟）</h2>
+<pre><code class="language-python">import time
+import random
+
+def time_sort(fn, arr):
+    start = time.time()
+    fn(arr)
+    return time.time() - start
+
+print(f&#39;{&quot;N&quot;:&gt;6s} {&quot;selection&quot;:&gt;12s} {&quot;builtin&quot;:&gt;12s} {&quot;ratio&quot;:&gt;8s}&#39;)
+for n in [100, 500, 1000, 2000, 5000]:
+    data = [random.randint(0, 1000000) for _ in range(n)]
+    s = time_sort(selection_sort, data)
+    b = time_sort(builtin_sort, data)
+    print(f&#39;{n:6d} {s:12.4f}s {b:12.4f}s {s/b:8.0f}x&#39;)
+</code></pre>
+<h2>五、深入了解：Timsort 为什么快（3 分钟）</h2>
+<p><strong>Timsort = 归并排序 + 插入排序混合</strong>（2002 年 Tim Peters 为 Python 发明）。</p>
+<p><strong>优势</strong>：</p>
+<ol>
+<li><strong>自适应</strong>：检测&quot;已排好序&quot;段（run）</li>
+<li><strong>稳定</strong>：相等元素保持原顺序</li>
+<li><strong>C 实现 + 高度优化</strong></li>
+<li><strong>最坏 O(N log N)</strong></li>
+</ol>
+<h2>六、何时用（3 分钟）</h2>
+<table>
+<thead>
+<tr>
+<th>场景</th>
+<th>用什么</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>生产代码</td>
+<td>标准库</td>
+</tr>
+<tr>
+<td>学习算法</td>
+<td>自己写</td>
+</tr>
+<tr>
+<td>性能关键 + 标准库不够</td>
+<td>自己写</td>
+</tr>
+<tr>
+<td>嵌入式 / 硬件</td>
+<td>自己写</td>
+</tr>
+</tbody></table>
+<p><strong>默认答案</strong>：<strong>用标准库</strong>。90% 情况标准库足够。</p>
+<h2>七、读代码挑战（10 分钟）</h2>
+<p>找出 2 个 bug：</p>
+<pre><code class="language-python">def selection_sort_buggy(arr):
+    n = len(arr)
+    for i in range(n):           # bug 1?
+        min_idx = 0
+        for j in range(1, n):    # bug 2?
+            if arr[j] &lt; arr[min_idx]:
+                min_idx = j
+        arr[i], arr[min_idx] = arr[min_idx], arr[i]
+    return arr
+</code></pre>
+<details><summary>提示</summary>
+
+<ol>
+<li><code>for i in range(n)</code>——应该是 <code>range(n - 1)</code></li>
+<li><code>for j in range(1, n)</code>——应该是 <code>range(i + 1, n)</code></li>
+</ol>
+</details>
+
+<h2>八、提交（5 分钟）</h2>
+<p>存到 <code>W16-weekend-practice.py</code>。跟 mentor 说&quot;<strong>修完了</strong>&quot;。</p>
+<h2>九、反思（5 分钟）</h2>
+<ul>
+<li>选择排序：O(N²)，简单，自己写</li>
+<li>Python sort：O(N log N)，Timsort，标准库</li>
+<li>差距：N=5000 时约 1000 倍</li>
+</ul>
+<hr>
+<h2>✅ 周末自查</h2>
+<ul>
+<li><input disabled="" type="checkbox"> 写好两个排序函数</li>
+<li><input disabled="" type="checkbox"> 跑过 5 组测试</li>
+<li><input disabled="" type="checkbox"> 找到并修了 2 个 bug</li>
+<li><input disabled="" type="checkbox"> 存到 <code>W16-weekend-practice.py</code></li>
+</ul>
+<hr>
+<h2>👀 C++ 认脸时刻</h2>
+<pre><code class="language-cpp">#include &lt;algorithm&gt;
+#include &lt;vector&gt;
+int main() {
+    std::vector&lt;int&gt; arr = {3, 1, 4, 1, 5, 9, 2, 6};
+    std::sort(arr.begin(), arr.end());   // O(N log N)
+    return 0;
+}
+</code></pre>
+<p>三个认脸：</p>
+<ul>
+<li><code>std::sort(begin, end)</code> 排序</li>
+<li><code>arr.begin() / .end()</code> = 迭代器</li>
+<li>Python <code>arr.sort()</code> 等价</li>
+</ul>
+</div>
+</section>
+</div>
+</div>
+</body>
+</html>

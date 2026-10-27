@@ -1,0 +1,809 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>课程总大纲</title>
+<style>
+:root{--bg:#0f1420;--card:#171e2e;--card2:#1e2740;--border:#2a3550;--text:#e8ecf4;--text2:#8b96ad;--accent:#5b9dff;--ok:#3ecf8e}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+.wrap{max-width:900px;margin:0 auto;padding:28px 20px 60px}
+h1{font-size:1.5rem}
+.wk-meta{color:var(--text2);font-size:.85rem;margin:4px 0 20px}
+.lesson{border:1px solid var(--border);border-radius:12px;padding:16px 18px;margin-bottom:14px;background:var(--card2)}
+.lesson-head{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.lesson-head .lt{font-weight:700;font-size:1rem;flex:1}
+.md{font-size:.92rem;line-height:1.8;color:var(--text);overflow-wrap:break-word}
+.md h1,.md h2,.md h3{margin:14px 0 8px;font-size:1.05rem}
+.md p{margin:8px 0}
+.md code{background:rgba(91,157,255,.12);border-radius:5px;padding:2px 6px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.85em;color:#a8c8ff}
+.md pre{background:#0b0f18;border:1px solid var(--border);border-radius:10px;padding:12px 14px;overflow-x:auto;margin:10px 0}
+.md pre code{background:none;padding:0;color:#c9d7f0}
+.md ul,.md ol{margin:8px 0 8px 22px}
+.md blockquote{border-left:3px solid var(--accent);padding:4px 12px;color:var(--text2);margin:10px 0}
+.md a{color:var(--accent)}
+.md table{border-collapse:collapse;margin:10px 0;font-size:.85rem}
+.md td,.md th{border:1px solid var(--border);padding:6px 10px}
+.md input[type=checkbox]{width:15px;height:15px;accent-color:var(--ok);cursor:pointer;margin-right:6px;vertical-align:-2px}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+<h1 class="wk-title">课程总大纲</h1>
+<div class="wk-meta">17 周 · 总纲</div>
+</header>
+<div class="week-body" data-week="SYLLABUS">
+<div class="md"><h1>家庭编程课 · 完整大纲（13 周基础 + 4 周算法加餐，前置穿插）</h1>
+<blockquote>
+<p>一套材料，两位学员。每课 30-45 分钟。🏆 = 项目周</p>
+<p>🎵 「英语音标」体验课先休息一下，调整后会回来。想继续学，随时说一声就能重新排课。</p>
+</blockquote>
+<hr>
+<h2>第一阶段：语言基础（W01-W05，5 节制 + 周末）</h2>
+<h3>W01 · 起步：让程序开口说话</h3>
+<table>
+<thead>
+<tr>
+<th>课</th>
+<th>主题</th>
+<th>你将能做到</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>L01</td>
+<td>认识终端 + 装 Thonny + 第一行 print</td>
+<td>写出并运行第一个程序</td>
+</tr>
+<tr>
+<td>L02</td>
+<td>变量：给东西起名字</td>
+<td>用盒子装数据、改数据</td>
+</tr>
+<tr>
+<td>L03</td>
+<td>input 让程序提问 + 第一个计算器</td>
+<td>程序跟你对话并算数</td>
+</tr>
+<tr>
+<td>🏠 周末项目</td>
+<td>自我介绍机器人</td>
+<td>问 4 个问题，总结成一段话</td>
+</tr>
+</tbody></table>
+<h3>W02 · 数字与文字魔法</h3>
+<table>
+<thead>
+<tr>
+<th>课</th>
+<th>主题</th>
+<th>你将能做到</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>S1</td>
+<td>数字与类型 · 上：三兄弟登场</td>
+<td>分清文字和数字，会转换</td>
+</tr>
+<tr>
+<td>S2</td>
+<td>数字与类型 · 下：运算符全家福 + 翻车现场</td>
+<td>会算、会用运算符，会认常见报错</td>
+</tr>
+<tr>
+<td>S3</td>
+<td>字符串功夫 · 上：四招基本功 + replace</td>
+<td>大小写/长度/替换四招上手</td>
+</tr>
+<tr>
+<td>S4</td>
+<td>字符串功夫 · 下：索引、切片与侦探 in</td>
+<td>会切片、会用 in 找字符</td>
+</tr>
+<tr>
+<td>S5</td>
+<td>f-string：漂亮地说话</td>
+<td>一行搞定复杂输出</td>
+</tr>
+<tr>
+<td>🏠 周末项目</td>
+<td>名字实验室 + 单价订单计算器</td>
+<td>综合运用</td>
+</tr>
+</tbody></table>
+<h3>W03 · 让程序做决定</h3>
+<table>
+<thead>
+<tr>
+<th>课</th>
+<th>主题</th>
+<th>你将能做到</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>S1</td>
+<td>if 初登场：程序会看情况</td>
+<td>程序会看情况办事</td>
+</tr>
+<tr>
+<td>S2</td>
+<td>比较六兄弟与缩进魔法</td>
+<td>会用各种比较，会写缩进</td>
+</tr>
+<tr>
+<td>S3</td>
+<td>新手坑专场：三大坑各踩一遍</td>
+<td>认得三个新手坑并避开</td>
+</tr>
+<tr>
+<td>S4</td>
+<td>else 与 elif：B 计划和多岔路口</td>
+<td>多分支判断</td>
+</tr>
+<tr>
+<td>S5</td>
+<td>and / or / not 组合条件</td>
+<td>复杂逻辑（成绩等级评定器）</td>
+</tr>
+<tr>
+<td>🏠 周末项目</td>
+<td>猜大小游戏 v1</td>
+<td>一次猜数，程序告诉你高低</td>
+</tr>
+</tbody></table>
+<h3>W04 · 让程序重复干活</h3>
+<table>
+<thead>
+<tr>
+<th>课</th>
+<th>主题</th>
+<th>你将能做到</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>S1</td>
+<td>for 初登场：程序学会重复</td>
+<td>让程序重复 100 次也不累</td>
+</tr>
+<tr>
+<td>S2</td>
+<td>range 的三种玩法</td>
+<td>会用 range 的三种写法</td>
+</tr>
+<tr>
+<td>S3</td>
+<td>累加器·求和与计数</td>
+<td>求和、计数</td>
+</tr>
+<tr>
+<td>S4</td>
+<td>累加器·找最大与三坑</td>
+<td>找最大 + 避开三个坑</td>
+</tr>
+<tr>
+<td>S5</td>
+<td>嵌套循环：图案魔法</td>
+<td>嵌套循环画楼梯、金字塔</td>
+</tr>
+<tr>
+<td>🏠 周末项目</td>
+<td>图案集：楼梯 + 金字塔 + 九九乘法表</td>
+<td>—</td>
+</tr>
+</tbody></table>
+<h3>W05 · 直到……才停</h3>
+<table>
+<thead>
+<tr>
+<th>课</th>
+<th>主题</th>
+<th>你将能做到</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>S1</td>
+<td>while 初见：活循环与死循环</td>
+<td>认得活循环与死循环</td>
+</tr>
+<tr>
+<td>S2</td>
+<td>条件更新：最常见的坑</td>
+<td>会写条件更新，避开最常见的坑</td>
+</tr>
+<tr>
+<td>S3</td>
+<td>break：喊停的艺术</td>
+<td>退出条件设计</td>
+</tr>
+<tr>
+<td>S4</td>
+<td>猜数字组装：循环 + 判断合体</td>
+<td>本阶段集大成</td>
+</tr>
+<tr>
+<td>S5</td>
+<td>打磨：限 5 次 + 再来一局</td>
+<td>限次与计分</td>
+</tr>
+<tr>
+<td>🏠 周末项目</td>
+<td>打磨猜数字：限 5 次 + 计分 + 再来一局</td>
+<td>—</td>
+</tr>
+</tbody></table>
+<h2>第二阶段：更强大的工具（W06-W08，5 节制 + weekend）</h2>
+<blockquote>
+<p>v1.9 5 节制（冰爪 10/19 落地）：每节 S1=核心 / S2=实践 / S3=变种 / S4=综合 / S5=项目 + 🏠 weekend
+风格：Grokking Algorithms 中文版（中文叙述 + 代码英文 + 一句话核心 + 判一判 + C++ 认脸）</p>
+</blockquote>
+<h3>W06 · 加餐①：二分查找 + Big O（前置 W05 猜数字 + W08 函数）</h3>
+<table>
+<thead>
+<tr>
+<th>节</th>
+<th>主题</th>
+<th>slug</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>S1</td>
+<td>二分查找：每次砍一半（雪地寻宝）</td>
+<td><code>binary-search</code></td>
+</tr>
+<tr>
+<td>S2</td>
+<td>Big O：度量速度，数据翻倍</td>
+<td><code>big-o</code></td>
+</tr>
+<tr>
+<td>S3</td>
+<td>二分查找写代码：把本能变 Python</td>
+<td><code>binary-search-code</code></td>
+</tr>
+<tr>
+<td>S4</td>
+<td>二分查找实战：查一本真的词典</td>
+<td><code>binary-search-practice</code></td>
+</tr>
+<tr>
+<td>S5</td>
+<td>选对算法：复杂度在真实场景</td>
+<td><code>algorithm-compare</code></td>
+</tr>
+<tr>
+<td>🏠 周末</td>
+<td>词典寻宝赛 + 读代码挑战</td>
+<td><code>treasure</code></td>
+</tr>
+</tbody></table>
+<h3>W07 · 列表：一串数据（前置 W06 加餐①）</h3>
+<table>
+<thead>
+<tr>
+<th>节</th>
+<th>主题</th>
+<th>slug</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>S1</td>
+<td>列表是什么：一个变量装一批</td>
+<td><code>list-intro</code></td>
+</tr>
+<tr>
+<td>S2</td>
+<td>增删改查四大操作</td>
+<td><code>list-ops</code></td>
+</tr>
+<tr>
+<td>S3</td>
+<td>遍历 + 统计（max/min/sum/平均）</td>
+<td><code>list-iterate</code></td>
+</tr>
+<tr>
+<td>S4</td>
+<td>嵌套：字典里的列表 + 实战宠物图鉴</td>
+<td><code>list-slice</code></td>
+</tr>
+<tr>
+<td>S5</td>
+<td>列表综合 + 数据结构选型</td>
+<td><code>list-summary</code></td>
+</tr>
+<tr>
+<td>🏠 周末</td>
+<td>购物清单完整版（add / remove / save）</td>
+<td><code>list-shopping-cart</code></td>
+</tr>
+</tbody></table>
+<h3>W08 · 🏆 项目周：画地图（前置 W07 列表）</h3>
+<table>
+<thead>
+<tr>
+<th>节</th>
+<th>主题</th>
+<th>slug</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>S1</td>
+<td>画地图：先想后写</td>
+<td><code>cat-adv-map</code></td>
+</tr>
+<tr>
+<td>S2</td>
+<td>设计图：功能 + 数据 + 函数 + 界面</td>
+<td><code>cat-adv-design</code></td>
+</tr>
+<tr>
+<td>S3</td>
+<td>最小骨架：让空房子通电</td>
+<td><code>cat-adv-skeleton</code></td>
+</tr>
+<tr>
+<td>S4</td>
+<td>逐块实现：每天搬两块</td>
+<td><code>cat-adv-block</code></td>
+</tr>
+<tr>
+<td>S5</td>
+<td>save/load：让作品活下去</td>
+<td><code>cat-adv-save</code></td>
+</tr>
+<tr>
+<td>🏠 周末</td>
+<td>打磨 + 家人对战赛</td>
+<td><code>cat-adventure</code></td>
+</tr>
+</tbody></table>
+<h2>第三阶段：算法加餐 + 视觉 + 创作 + 毕业（W09-W13，5 节制 + 周末）</h2>
+<h3>W09 · 加餐②：贪心算法（前置 W04 循环 + W06/W07 列表 + W08 函数）</h3>
+<table>
+<thead>
+<tr>
+<th>节</th>
+<th>主题</th>
+<th>slug</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>S1</td>
+<td>贪心 ①：永远挑最大的硬币</td>
+<td><code>greedy-coin</code></td>
+</tr>
+<tr>
+<td>S2</td>
+<td>贪心 ②：贪心实战 + 改进（贪心 vs 暴力）</td>
+<td><code>greedy-coin-practice</code></td>
+</tr>
+<tr>
+<td>S3</td>
+<td>贪心 ③：贪心失败的场景</td>
+<td><code>greedy-coin-fail</code></td>
+</tr>
+<tr>
+<td>S4</td>
+<td>贪心 ④：活动选择问题</td>
+<td><code>greedy-activity</code></td>
+</tr>
+<tr>
+<td>S5</td>
+<td>贪心 ⑤：项目（巡逻排班游戏）</td>
+<td><code>greedy-patrol-game</code></td>
+</tr>
+<tr>
+<td>🏠 周末</td>
+<td>找零比赛：贪心 vs 暴力</td>
+<td><code>greedy-coin-game</code></td>
+</tr>
+</tbody></table>
+<h3>W10 · 函数 def：打包一段代码（前置 W07/W08 列表/画地图 + W09 加餐②）</h3>
+<table>
+<thead>
+<tr>
+<th>节</th>
+<th>主题</th>
+<th>slug</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>S1</td>
+<td>def 初见：为什么要打包</td>
+<td><code>function-def</code></td>
+</tr>
+<tr>
+<td>S2</td>
+<td>参数：凹槽 + 默认值 + 关键字</td>
+<td><code>function-params</code></td>
+</tr>
+<tr>
+<td>S3</td>
+<td>返回值：return + 作用域</td>
+<td><code>function-return</code></td>
+</tr>
+<tr>
+<td>S4</td>
+<td>高阶函数：map / filter / sorted</td>
+<td><code>function-higher-order</code></td>
+</tr>
+<tr>
+<td>S5</td>
+<td>递归入门：函数调自己</td>
+<td><code>function-recursion-intro</code></td>
+</tr>
+<tr>
+<td>🏠 周末</td>
+<td>改造冒险游戏：用函数重构</td>
+<td><code>function-adventure-refactor</code></td>
+</tr>
+</tbody></table>
+<h3>W11 · turtle 海龟登场：编程画画（前置 W10 函数）</h3>
+<table>
+<thead>
+<tr>
+<th>节</th>
+<th>主题</th>
+<th>slug</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>S1</td>
+<td>前进 + 转弯：画正方形</td>
+<td><code>turtle-basics</code></td>
+</tr>
+<tr>
+<td>S2</td>
+<td>颜色 + 速度 + 粗细 + 填充</td>
+<td><code>turtle-style</code></td>
+</tr>
+<tr>
+<td>S3</td>
+<td>循环画图：正多边形 → 雪花 → 螺旋</td>
+<td><code>turtle-loops</code></td>
+</tr>
+<tr>
+<td>S4</td>
+<td>实战：签名 + 装饰画</td>
+<td><code>turtle-projects</code></td>
+</tr>
+<tr>
+<td>S5</td>
+<td>turtle + 函数：画分形（snowflake）</td>
+<td><code>turtle-fractal</code></td>
+</tr>
+<tr>
+<td>🏠 周末</td>
+<td>用 turtle 画一幅完整的画（签名！）</td>
+<td><code>turtle-gallery</code></td>
+</tr>
+</tbody></table>
+<h3>W12 · 加餐③：数组 vs 链表 + 选择排序（前置 W06 列表）</h3>
+<table>
+<thead>
+<tr>
+<th>节</th>
+<th>主题</th>
+<th>slug</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>S1</td>
+<td>数组 vs 链表：两种&quot;排队&quot;方式</td>
+<td><code>array-vs-list</code></td>
+</tr>
+<tr>
+<td>S2</td>
+<td>Python list 内部实现（动态数组）</td>
+<td><code>list-internals</code></td>
+</tr>
+<tr>
+<td>S3</td>
+<td>数组 vs 链表 ③：选择排序</td>
+<td><code>selection-sort</code></td>
+</tr>
+<tr>
+<td>S4</td>
+<td>数组 vs 链表 ④：性能实测</td>
+<td><code>array-vs-list-benchmark</code></td>
+</tr>
+<tr>
+<td>S5</td>
+<td>数组 vs 链表 ⑤：数据结构选型小工具</td>
+<td><code>data-structure-picker</code></td>
+</tr>
+<tr>
+<td>🏠 周末</td>
+<td>排序比赛：选择 vs Python 内置</td>
+<td><code>sort-race</code></td>
+</tr>
+</tbody></table>
+<h3>W13 · 字典：用名字找东西（前置 W12 加餐③）</h3>
+<table>
+<thead>
+<tr>
+<th>节</th>
+<th>主题</th>
+<th>slug</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>S1</td>
+<td>字典基础：键值对</td>
+<td><code>dict-intro</code></td>
+</tr>
+<tr>
+<td>S2</td>
+<td>嵌套：字典里的列表</td>
+<td><code>dict-nested</code></td>
+</tr>
+<tr>
+<td>S3</td>
+<td>遍历：把字典抖出来</td>
+<td><code>dict-codex</code></td>
+</tr>
+<tr>
+<td>S4</td>
+<td>嵌套：字典里的字典</td>
+<td><code>dict-vs-list</code></td>
+</tr>
+<tr>
+<td>S5</td>
+<td>宠物图鉴：函数 + 字典合体</td>
+<td><code>dict-config</code></td>
+</tr>
+<tr>
+<td>🏠 周末</td>
+<td>宠物图鉴完整版</td>
+<td><code>dict-codex-final</code></td>
+</tr>
+</tbody></table>
+<p><strong>通过标准：100+ 行自己写的代码，能讲清每一部分，报错自己修。</strong></p>
+<h2>第四阶段：算法加餐 ④ + 基础 + 毕业（W14-W17）</h2>
+<blockquote>
+<p>W14 加餐④ 递归 + W15 random + W16 毕业选题 + W17 毕业项目
+加餐 ①/②/③ 已前插到 W06/W09/W12（详 §二 §三）
+风格：Grokking Algorithms 中文版（参考 Aditya Bhargava 2016《Grokking Algorithms》/ 中文版《算法图解》）</p>
+</blockquote>
+<h3>📚 加餐课知识依赖表（2026-10-19 猴哥要求梳理）</h3>
+<blockquote>
+<p><strong>目标</strong>：确认每个加餐课用到的 Python 知识已经在前面课程学完。</p>
+</blockquote>
+<table>
+<thead>
+<tr>
+<th>加餐课</th>
+<th>位置</th>
+<th>用到的 Python 模块</th>
+<th>前置周</th>
+<th>状态</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>加餐① 二分</strong></td>
+<td>W06</td>
+<td><code>if</code> 条件 / <code>while</code> 循环 / 列表下标 / 变量 / 函数 <code>def</code></td>
+<td>W03 + W05 + W07 列表 + W10 def</td>
+<td>✓ 全部前置覆盖</td>
+</tr>
+<tr>
+<td><strong>加餐② 贪心</strong></td>
+<td>W09</td>
+<td><code>if</code> 比较 / <code>for</code> 循环 / 列表遍历 / 函数 <code>def</code></td>
+<td>W03 + W04 + W07 + W10</td>
+<td>✓ 全部前置覆盖</td>
+</tr>
+<tr>
+<td><strong>加餐③ 数组 + 排序</strong></td>
+<td>W12</td>
+<td>列表索引 + 插入/删除 + 比较 + 交换 + for</td>
+<td>W04 + W07</td>
+<td>✓ 全部前置覆盖</td>
+</tr>
+<tr>
+<td><strong>加餐④ 递归</strong></td>
+<td>W14</td>
+<td><code>def</code> + <code>if</code> 出口 + <code>return</code></td>
+<td>W03 + W10 def</td>
+<td>✓ 全部前置覆盖</td>
+</tr>
+<tr>
+<td><strong>加餐④ <code>@lru_cache</code></strong></td>
+<td>W14</td>
+<td>装饰器 / 函数作为值</td>
+<td>W10 高阶函数</td>
+<td>✓ 前置覆盖</td>
+</tr>
+</tbody></table>
+<p><strong>结论</strong>：W01-W13 已学完的 Python 基础知识，<strong>完整覆盖</strong> 4 个加餐课全部内容。</p>
+<h3>W14 · 加餐④：递归 + 记忆化（前置 W10 def + W13 字典）</h3>
+<table>
+<thead>
+<tr>
+<th>节</th>
+<th>主题</th>
+<th>slug</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>S1</td>
+<td>递归 ①：函数调用自己</td>
+<td><code>recursion-mirror</code></td>
+</tr>
+<tr>
+<td>S2</td>
+<td>递归 ②：调用栈可视化</td>
+<td><code>recursion-visualize</code></td>
+</tr>
+<tr>
+<td>S3</td>
+<td>递归 ③：递归树与记忆化</td>
+<td><code>recursion-tree</code></td>
+</tr>
+<tr>
+<td>S4</td>
+<td>递归 ④：lru_cache 实战</td>
+<td><code>recursion-optimize</code></td>
+</tr>
+<tr>
+<td>S5</td>
+<td>递归 ⑤：项目（递归解迷宫）</td>
+<td><code>recursion-maze</code></td>
+</tr>
+<tr>
+<td>🏠 周末</td>
+<td>递归 vs 迭代：何时用哪个</td>
+<td><code>recursion-vs-iteration</code></td>
+</tr>
+</tbody></table>
+<h3>W15 · random 三招：让电脑扔骰子（前置 W10/W11 函数/海龟 + W14 加餐④）</h3>
+<table>
+<thead>
+<tr>
+<th>节</th>
+<th>主题</th>
+<th>slug</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>S1</td>
+<td>random.choice / randint</td>
+<td><code>random-basic</code></td>
+</tr>
+<tr>
+<td>S2</td>
+<td>random + 字典：随机抽题</td>
+<td><code>random-quiz</code></td>
+</tr>
+<tr>
+<td>S3</td>
+<td>random + 函数：石头剪刀布</td>
+<td><code>random-game</code></td>
+</tr>
+<tr>
+<td>S4</td>
+<td>实战：文字 RPG 战斗</td>
+<td><code>random-rpg</code></td>
+</tr>
+<tr>
+<td>S5</td>
+<td>random.seed：可复现的&quot;随机&quot;</td>
+<td><code>random-seed</code></td>
+</tr>
+<tr>
+<td>🏠 周末</td>
+<td>文字 RPG 完整版 + 战斗系统</td>
+<td><code>random-rpg-final</code></td>
+</tr>
+</tbody></table>
+<h3>W16 · 🏆 毕业选题：四选一（前置 W13 字典 + W15 random）</h3>
+<table>
+<thead>
+<tr>
+<th>节</th>
+<th>主题</th>
+<th>slug</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>S1</td>
+<td>毕业选题：四选一（游戏 / turtle / 工具 / 数据）</td>
+<td><code>grad-topic</code></td>
+</tr>
+<tr>
+<td>S2</td>
+<td>设计图：先想后写</td>
+<td><code>grad-design</code></td>
+</tr>
+<tr>
+<td>S3</td>
+<td>最小骨架 + 第一块</td>
+<td><code>grad-skeleton</code></td>
+</tr>
+<tr>
+<td>S4</td>
+<td>逐块实现：每天搬两块</td>
+<td><code>grad-block</code></td>
+</tr>
+<tr>
+<td>S5</td>
+<td>save/load：让作品活下去</td>
+<td><code>grad-save</code></td>
+</tr>
+<tr>
+<td>🏠 周末</td>
+<td>打磨 + 家人对战赛</td>
+<td><code>grad-final</code></td>
+</tr>
+</tbody></table>
+<h3>W17 · 🏆 毕业项目 L1-L3（3 节制，前置 W16 毕业选题）</h3>
+<table>
+<thead>
+<tr>
+<th>课</th>
+<th>主题</th>
+<th>slug</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>L01</td>
+<td>选题 + 设计图</td>
+<td><code>grad-topic-final</code></td>
+</tr>
+<tr>
+<td>L02</td>
+<td>实现 + 调试</td>
+<td><code>grad-implement</code></td>
+</tr>
+<tr>
+<td>L03</td>
+<td>演示 + 讲给家人听（费曼输出）</td>
+<td><code>grad-demo</code></td>
+</tr>
+<tr>
+<td>🏠 周末</td>
+<td>家族展示会</td>
+<td><code>grad-showcase</code></td>
+</tr>
+</tbody></table>
+<p><strong>通过标准：100+ 行自己写的代码，能讲清每一部分，报错自己修。</strong></p>
+<h2>进度表（两位学员各一份，学完一格勾一格）</h2>
+<blockquote>
+<p>周次按<strong>实际排布</strong>（W01-W17，其中 W06/W09/W12/W14 是算法加餐周）。
+加餐周也照学，不跳过 —— 它们是后面 W07/W10/W13/W15 的前置。
+一行 = 一周（正课 + 🏠 周末项目都完成后勾）。</p>
+</blockquote>
+<p><strong>第一阶段 · 基础语法（W01-W05，5 节制 + 周末）</strong></p>
+<ul>
+<li><input disabled="" type="checkbox"> W01 三课 + 自我介绍机器人</li>
+<li><input disabled="" type="checkbox"> W02 五课 + 名字实验室</li>
+<li><input disabled="" type="checkbox"> W03 五课 + 猜大小</li>
+<li><input disabled="" type="checkbox"> W04 五课 + 图案集</li>
+<li><input disabled="" type="checkbox"> W05 五课 + 猜数字完整版</li>
+</ul>
+<p><strong>第二阶段 · 工具与第一个项目（W06-W08，5 节制 + 周末）</strong></p>
+<ul>
+<li><input disabled="" type="checkbox"> W06 加餐①：二分查找 + Big O（5 节 + 词典寻宝赛）</li>
+<li><input disabled="" type="checkbox"> W07 列表：购物清单完整版（5 节）</li>
+<li><input disabled="" type="checkbox"> W08 🏆 项目周：画地图（5 节 + 家人对战赛）</li>
+</ul>
+<p><strong>第三阶段 · 算法加餐② + 函数 + 视觉（W09-W13，5 节制 + 周末）</strong></p>
+<ul>
+<li><input disabled="" type="checkbox"> W09 加餐②：贪心算法（5 节 + 找零比赛）</li>
+<li><input disabled="" type="checkbox"> W10 函数 def（5 节 + 改造冒险游戏）</li>
+<li><input disabled="" type="checkbox"> W11 turtle 海龟登场（5 节 + 画一幅完整的画）</li>
+<li><input disabled="" type="checkbox"> W12 加餐③：数组 vs 链表 + 选择排序（5 节 + 排序比赛）</li>
+<li><input disabled="" type="checkbox"> W13 字典：宠物图鉴完整版（5 节）</li>
+</ul>
+<p><strong>第四阶段 · 加餐④ + 毕业（W14-W17）</strong></p>
+<ul>
+<li><input disabled="" type="checkbox"> W14 加餐④：递归 + 记忆化（5 节 + 递归 vs 迭代）</li>
+<li><input disabled="" type="checkbox"> W15 random 三招：文字 RPG 完整版（5 节）</li>
+<li><input disabled="" type="checkbox"> W16 🏆 毕业选题：四选一（5 节 + 打磨 + 家人对战赛）</li>
+<li><input disabled="" type="checkbox"> W17 🏆 毕业项目 L1-L3 + 家族展示会 🎓</li>
+</ul>
+</div>
+</div>
+</div>
+</body>
+</html>

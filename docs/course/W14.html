@@ -1,0 +1,1260 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>W14 · 加餐④：递归 + 记忆化（前置 W10 def + W13 字典）</title>
+<style>
+:root{--bg:#0f1420;--card:#171e2e;--card2:#1e2740;--border:#2a3550;--text:#e8ecf4;--text2:#8b96ad;--accent:#5b9dff;--ok:#3ecf8e}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+.wrap{max-width:900px;margin:0 auto;padding:28px 20px 60px}
+h1{font-size:1.5rem}
+.wk-meta{color:var(--text2);font-size:.85rem;margin:4px 0 20px}
+.lesson{border:1px solid var(--border);border-radius:12px;padding:16px 18px;margin-bottom:14px;background:var(--card2)}
+.lesson-head{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.lesson-head .lt{font-weight:700;font-size:1rem;flex:1}
+.md{font-size:.92rem;line-height:1.8;color:var(--text);overflow-wrap:break-word}
+.md h1,.md h2,.md h3{margin:14px 0 8px;font-size:1.05rem}
+.md p{margin:8px 0}
+.md code{background:rgba(91,157,255,.12);border-radius:5px;padding:2px 6px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.85em;color:#a8c8ff}
+.md pre{background:#0b0f18;border:1px solid var(--border);border-radius:10px;padding:12px 14px;overflow-x:auto;margin:10px 0}
+.md pre code{background:none;padding:0;color:#c9d7f0}
+.md ul,.md ol{margin:8px 0 8px 22px}
+.md blockquote{border-left:3px solid var(--accent);padding:4px 12px;color:var(--text2);margin:10px 0}
+.md a{color:var(--accent)}
+.md table{border-collapse:collapse;margin:10px 0;font-size:.85rem}
+.md td,.md th{border:1px solid var(--border);padding:6px 10px}
+.md input[type=checkbox]{width:15px;height:15px;accent-color:var(--ok);cursor:pointer;margin-right:6px;vertical-align:-2px}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+<h1 class="wk-title">加餐④：递归 + 记忆化（前置 W10 def + W13 字典）</h1>
+<div class="wk-meta">W14 · 6 课</div>
+</header>
+<div class="week-body" data-week="W14">
+<section class="lesson" data-lid="W14-S1">
+<div class="lesson-head"><span class="lt">递归 ①：函数调用自己</span></div>
+<div class="md" data-lid="W14-S1"><!-- slug: recursion-mirror, type: addon -->
+<h1>W14-S1 · 递归 ①：函数调用自己</h1>
+<blockquote>
+<p><strong>一句话核心</strong>：<strong>递归 = 出口条件 + 自调 + 缩小</strong>。函数调自己，n 每次变小，碰到出口就停。fib(40) 朴素要 1 亿次，加缓存只要 40 次。</p>
+</blockquote>
+<blockquote>
+<p><strong>每日节奏（v1.9）：</strong> 阅读 ≈10 分钟，作业 ≈15 分钟，总共 ≤25 分钟
+<strong>需要 Thonny</strong> —— 跑代码、动手改
+难度：⭐⭐⭐ · 本篇是加餐④ 递归的第 1 课（前置：W08 函数）</p>
+</blockquote>
+<hr>
+<blockquote>
+<p><strong>📂 课前准备</strong>：先在 Thonny <code>文件 → 新建</code>，立刻 <code>文件 → 另存为...</code> 存为 <code>~/sand-hollow/&lt;你的学员ID&gt;/homework/W14-S1-practice.py</code>（ID 就是你注册沙坑用的 8 位数字）。本课所有亲手敲的代码都写进这个文件；课后作业写进同目录的 <code>W14-S1-homework.py</code>，两个文件严格分开，别混。</p>
+</blockquote>
+<h2>一、核心想法（3 分钟）</h2>
+<p>镜子里有镜子——镜子里还有镜子，<strong>无穷无尽</strong>。</p>
+<p>递归 = 程序版的&quot;镜子里有镜子&quot;。函数调用自己，再调用自己，<strong>直到某个出口</strong>。</p>
+<pre><code class="language-python">def count_down(n):
+    &#39;&#39;&#39;Print n, n-1, n-2, ..., 0, then &#39;Go!&#39;.&#39;&#39;&#39;
+    if n &lt; 0:                  # exit condition (base case)
+        return
+    print(n)
+    count_down(n - 1)          # call self with smaller n
+</code></pre>
+<p><strong>两个关键</strong>：</p>
+<ol>
+<li><strong>出口条件</strong>：<code>n &lt; 0</code> 时停止</li>
+<li><strong>自调 + 缩小</strong>：<code>count_down(n - 1)</code> 调自己，n 每次减 1</li>
+</ol>
+<h2>二、示例演算：count_down(3)（3 分钟）</h2>
+<table>
+<thead>
+<tr>
+<th>步骤</th>
+<th>n</th>
+<th>动作</th>
+<th>输出</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>1</td>
+<td>3</td>
+<td>打印 3，调 count_down(2)</td>
+<td>3</td>
+</tr>
+<tr>
+<td>2</td>
+<td>2</td>
+<td>打印 2，调 count_down(1)</td>
+<td>2</td>
+</tr>
+<tr>
+<td>3</td>
+<td>1</td>
+<td>打印 1，调 count_down(0)</td>
+<td>1</td>
+</tr>
+<tr>
+<td>4</td>
+<td>0</td>
+<td>打印 0，调 count_down(-1)</td>
+<td>0</td>
+</tr>
+<tr>
+<td>5</td>
+<td>-1</td>
+<td>触发出口条件 return</td>
+<td>—</td>
+</tr>
+</tbody></table>
+<p>输出 <code>3 2 1 0</code>，然后停。</p>
+<blockquote>
+<p><strong>📖 图 1.1</strong>：调用栈像一摞盘子——count_down(3) 放最下，count_down(2) 放上面... 出口时从最上往下&quot;撤&quot;。</p>
+</blockquote>
+<h2>三、阶乘：经典例子（5 分钟）</h2>
+<p><code>5! = 5 × 4 × 3 × 2 × 1 = 120</code></p>
+<p><strong>递归定义</strong>：</p>
+<ul>
+<li><code>0! = 1</code>（出口）</li>
+<li><code>n! = n × (n-1)!</code></li>
+</ul>
+<pre><code class="language-python">def factorial(n):
+    &#39;&#39;&#39;Return n! using recursion.&#39;&#39;&#39;
+    if n == 0:                 # base case
+        return 1
+    return n * factorial(n - 1)   # recursive case
+</code></pre>
+<p><strong>调用栈</strong>（自顶向下展开，从底向上收）：</p>
+<pre><code>factorial(5)
+  = 5 * factorial(4)
+       = 4 * factorial(3)
+            = 3 * factorial(2)
+                 = 2 * factorial(1)
+                      = 1 * factorial(0)
+                           = 1
+                      = 1 * 1 = 1
+                 = 2 * 1 = 2
+            = 3 * 2 = 6
+       = 4 * 6 = 24
+  = 5 * 24 = 120
+</code></pre>
+<h2>四、斐波那契（5 分钟）</h2>
+<p><code>fib(0) = 0, fib(1) = 1, fib(n) = fib(n-1) + fib(n-2)</code></p>
+<pre><code class="language-python">def fib(n):
+    &#39;&#39;&#39;Return the nth Fibonacci number.&#39;&#39;&#39;
+    if n == 0 or n == 1:   # base case
+        return n
+    return fib(n - 1) + fib(n - 2)
+
+for i in range(10):
+    print(fib(i), end=&#39; &#39;)
+# 0 1 1 2 3 5 8 13 21 34
+</code></pre>
+<p><strong>简单但慢</strong>：<code>fib(40)</code> 要算 1 亿次（指数级）。W16-S3 会学优化。</p>
+<h2>五、深入了解：递归的历史八卦（3 分钟）</h2>
+<p><strong>递归 1958 年由 John McCarthy 在 LISP 里提出</strong>——他也是 AI 概念的发明人（&quot;人工智能&quot;这个词就是他 1956 年达特茅斯会议造的）。</p>
+<p><strong>LISP = List Processing</strong>——列表处理语言，递归是核心。Python 的 list 操作深受 LISP 影响。</p>
+<p><strong>AI 工程师为什么爱递归</strong>：</p>
+<ul>
+<li><strong>树结构</strong>：决策树、搜索树、语法树——天然分形</li>
+<li><strong>图算法</strong>：DFS（深度优先搜索）就是递归</li>
+<li><strong>分治</strong>：大问题拆同款小问题（快排、归并）</li>
+</ul>
+<p><strong>没学递归的 AI 工程师 = 内功缺一半</strong>。</p>
+<h2>六、何时用：递归 vs 迭代（3 分钟）</h2>
+<table>
+<thead>
+<tr>
+<th>场景</th>
+<th>选递归</th>
+<th>选迭代</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>树/图（天然分形）</td>
+<td>✓</td>
+<td>✗</td>
+</tr>
+<tr>
+<td>大数据 + 性能</td>
+<td>✗（除非加缓存）</td>
+<td>✓</td>
+</tr>
+<tr>
+<td>教学/代码清晰</td>
+<td>✓</td>
+<td>✗</td>
+</tr>
+<tr>
+<td>栈深度有限</td>
+<td>✗（栈溢出风险）</td>
+<td>✓</td>
+</tr>
+</tbody></table>
+<p><strong>经验法则</strong>：</p>
+<ul>
+<li>树/图问题 = 递归（清晰胜过性能）</li>
+<li>大数据 = 迭代（性能胜过清晰）</li>
+<li>加缓存 = 递归也能很快（fib memo 40 步 vs 1 亿步）</li>
+</ul>
+<h2>七、动手练习（先做完，再看第八节答案）</h2>
+<ol>
+<li>跑上面的 <code>count_down(3)</code> 代码，看输出</li>
+<li>跑 <code>factorial(5)</code> 和 <code>factorial(10)</code> —— 后者要 3628800</li>
+<li>写个 <code>sum_to_n(n)</code> 递归版（sum_to_n(5) = 5+4+3+2+1 = 15）</li>
+<li>故意写错：删掉 <code>if n == 0</code> 出口条件——看 Python 报什么错</li>
+</ol>
+<h2>八、答案</h2>
+<p><strong>1.</strong> ✓ 输出 <code>3 2 1 0</code></p>
+<p><strong>2.</strong> ✓ 120 和 3628800</p>
+<p><strong>3.</strong> <code>def sum_to_n(n): if n == 1: return 1; return n + sum_to_n(n - 1)</code></p>
+<p><strong>4.</strong> <code>RecursionError: maximum recursion depth exceeded</code>（Python 默认上限 ~1000 层）</p>
+<h2>九、今日口诀 + 下一节预告</h2>
+<p><strong>今日口诀</strong>：<strong>递归 = 出口 + 自调 + 缩小</strong>。三件齐全才正确。</p>
+<p><strong>下节预告</strong>：递归可视化——画递归树看 fib(5) 为什么慢，怎么用记忆化加速。</p>
+<hr>
+<h2>✅ 今天的阅读完成自查</h2>
+<ul>
+<li><input disabled="" type="checkbox"> 我能解释&quot;镜子里有镜子&quot;和递归的关系</li>
+<li><input disabled="" type="checkbox"> 我能写带出口条件的递归函数</li>
+<li><input disabled="" type="checkbox"> 我能跑 factorial(5) 和 fib(10)</li>
+<li><input disabled="" type="checkbox"> 我能说出递归和 AI 的关系（LISP 1958）</li>
+</ul>
+<hr>
+<blockquote>
+<p><strong>📁 作业保存规则</strong>：本课课后练习写进一个文件 <code>W14-S1-homework.py</code>（存 <code>~/sand-hollow/&lt;你的学员ID&gt;/homework/</code>），每道题开头用刚学的备注分隔：<code># --- 题 1 ---</code>、<code># --- 题 2 ---</code>……<strong>交完作业要跟你的智能体说一声</strong>才会批改，评语出现在 <code>reviews/*.review.md</code>。<strong>回报触发词：交完作业或修完坑，都回一句「修完了」</strong>——不回这句 mentor 不知道，坑会一直挂着等。</p>
+</blockquote>
+<h2>📝 今日作业（≈15 分钟，今天的 30 分钟额度还剩这些）</h2>
+<p>新建文件 <code>W14-S1-homework.py</code>（存 <code>~/sand-hollow/&lt;你的学员ID&gt;/homework/</code>），3 道题：</p>
+<ol>
+<li><strong>倒数</strong>：写 <code>count_down(10)</code> 递归</li>
+<li><strong>阶乘</strong>：写 <code>factorial(20)</code> 递归</li>
+<li><strong>求和</strong>：写 <code>sum_list([1, 2, 3, 4, 5])</code> 递归（提示：第一个 + 剩下）</li>
+</ol>
+<blockquote>
+<p>交完作业跟你的智能体说一声（回报触发词「修完了」），评语出现在 <code>reviews/*.review.md</code>。</p>
+</blockquote>
+<hr>
+</div>
+</section>
+<section class="lesson" data-lid="W14-S2">
+<div class="lesson-head"><span class="lt">递归 ②：调用栈可视化</span></div>
+<div class="md" data-lid="W14-S2"><!-- slug: recursion-visualize, type: addon -->
+<h1>W14-S2 · 递归 ②：调用栈可视化</h1>
+<blockquote>
+<p><strong>一句话核心</strong>：<strong>递归调用 = 一摞盘子堆上去，弹完才返回</strong>。可视化看到调用栈 = 理解递归。</p>
+</blockquote>
+<blockquote>
+<p><strong>每日节奏（v1.9）：</strong> 阅读 ≈10 分钟，作业 ≈15 分钟
+<strong>需要 Thonny</strong>
+难度：⭐⭐⭐ · W17 加餐④ 第 2 课（前置：W17-S1）</p>
+</blockquote>
+<hr>
+<blockquote>
+<p><strong>📂 课前准备</strong>：先在 Thonny <code>文件 → 新建</code>，立刻 <code>文件 → 另存为...</code> 存为 <code>~/sand-hollow/&lt;你的学员ID&gt;/homework/W14-S2-practice.py</code>（ID 就是你注册沙坑用的 8 位数字）。本课所有亲手敲的代码都写进这个文件；课后作业写进同目录的 <code>W14-S2-homework.py</code>，两个文件严格分开，别混。</p>
+</blockquote>
+<h2>一、调用栈是什么（3 分钟）</h2>
+<pre><code class="language-python">def a():
+    print(&#39;a start&#39;)
+    b()
+    print(&#39;a end&#39;)
+
+def b():
+    print(&#39;b start&#39;)
+    c()
+    print(&#39;b end&#39;)
+
+def c():
+    print(&#39;c start&#39;)
+    print(&#39;c end&#39;)
+
+a()
+# Output:
+# a start
+# b start
+# c start
+# c end
+# b end
+# a end
+</code></pre>
+<p><strong>调用顺序</strong>：<code>a → b → c → (c 完) → b → (b 完) → a</code></p>
+<p><strong>栈变化</strong>（可视化）：</p>
+<pre><code>Call c:  [a, b, c]   &lt;- top
+c done:  [a, b]
+b done:  [a]
+a done:  []
+</code></pre>
+<h2>二、调用栈可视化函数（5 分钟）</h2>
+<pre><code class="language-python">import sys
+
+def visualize_call(func, *args):
+    &#39;&#39;&#39;Run func and show call stack at each step.&#39;&#39;&#39;
+    old_trace = sys.settrace(lambda *a, **k: None)  # disable default
+    print(f&#39;&gt;&gt;&gt; Calling {func.__name__}{args}&#39;)
+    result = func(*args)
+    print(f&#39;&lt;&lt;&lt; Returned {result}&#39;)
+    return result
+
+# Test
+def factorial(n, depth=0):
+    indent = &#39;  &#39; * depth
+    print(f&#39;{indent}factorial({n})&#39;)
+    if n == 0:
+        print(f&#39;{indent}  -&gt; base case, return 1&#39;)
+        return 1
+    result = n * factorial(n - 1, depth + 1)
+    print(f&#39;{indent}  -&gt; return {result}&#39;)
+    return result
+
+factorial(3)
+# factorial(3)
+#   factorial(2)
+#     factorial(1)
+#       factorial(0)
+#         -&gt; base case, return 1
+#       -&gt; return 1
+#     -&gt; return 2
+#   -&gt; return 6
+</code></pre>
+<h2>三、示例演算：factorial(3)（3 分钟）</h2>
+<table>
+<thead>
+<tr>
+<th>步</th>
+<th>调用栈（从底到顶）</th>
+<th>输出</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>1</td>
+<td>[factorial(3)]</td>
+<td>&quot;factorial(3)&quot;</td>
+</tr>
+<tr>
+<td>2</td>
+<td>[factorial(3), factorial(2)]</td>
+<td>&quot;  factorial(2)&quot;</td>
+</tr>
+<tr>
+<td>3</td>
+<td>[factorial(3), factorial(2), factorial(1)]</td>
+<td>&quot;    factorial(1)&quot;</td>
+</tr>
+<tr>
+<td>4</td>
+<td>[factorial(3), factorial(2), factorial(1), factorial(0)]</td>
+<td>&quot;      factorial(0)&quot;</td>
+</tr>
+<tr>
+<td>5</td>
+<td>[factorial(3), factorial(2), factorial(1), factorial(0)]</td>
+<td>&quot;        -&gt; base case, return 1&quot;</td>
+</tr>
+<tr>
+<td>6</td>
+<td>[factorial(3), factorial(2), factorial(1)]</td>
+<td>&quot;      -&gt; return 1&quot;</td>
+</tr>
+<tr>
+<td>7</td>
+<td>[factorial(3), factorial(2)]</td>
+<td>&quot;    -&gt; return 2&quot;</td>
+</tr>
+<tr>
+<td>8</td>
+<td>[factorial(3)]</td>
+<td>&quot;  -&gt; return 6&quot;</td>
+</tr>
+<tr>
+<td>9</td>
+<td>[]</td>
+<td>done</td>
+</tr>
+</tbody></table>
+<h2>四、深入了解：栈帧（3 分钟）</h2>
+<p>每次函数调用 = 创建一个<strong>栈帧（stack frame）</strong>：</p>
+<ul>
+<li>参数值</li>
+<li>局部变量</li>
+<li>返回地址</li>
+</ul>
+<p><strong>栈空间有限</strong>：Python 默认 1000 层。深度递归会爆栈。</p>
+<pre><code class="language-python">import sys
+print(sys.getrecursionlimit())   # 1000
+sys.setrecursionlimit(2000)      # raise limit (not recommended)
+</code></pre>
+<h2>五、何时用：调用栈在 AI 框架（3 分钟）</h2>
+<p><strong>PyTorch</strong> 每层 forward = 一次函数调用 = 一次栈帧。</p>
+<pre><code>forward(x)        # stack: [forward]
+  layer1(x)       # stack: [forward, layer1]
+    relu(...)      # stack: [forward, layer1, relu]
+  layer2(x)       # pop: [forward, layer2]
+backward()        # backprop (recursive backward call)
+</code></pre>
+<p><strong>栈追踪 = 调试 AI 模型</strong>。<code>pdb.set_trace()</code> 配合栈。</p>
+<h2>六、动手练习</h2>
+<ol>
+<li>跑上面的 <code>factorial(3)</code> 看可视化</li>
+<li>改 <code>factorial(5)</code> 看更深栈</li>
+<li>故意递归到 1500 层，看 <code>RecursionError</code></li>
+</ol>
+<h2>七、答案</h2>
+<pre><code class="language-python">import sys
+# 3
+sys.setrecursionlimit(1500)
+def deep(n):
+    if n == 0:
+        return
+    deep(n - 1)
+
+try:
+    deep(1500)
+except RecursionError as e:
+    print(f&#39;RecursionError: {e}&#39;)
+# RecursionError: maximum recursion depth exceeded
+</code></pre>
+<h2>八、今日口诀 + 下一节预告</h2>
+<p><strong>今日口诀</strong>：<strong>调用栈 = LIFO 盘子</strong>。可视化 = 理解递归的关键。</p>
+<p><strong>下节预告</strong>：递归优化——lru_cache 实战 + 替代方案。</p>
+<hr>
+<h2>✅ 自查</h2>
+<ul>
+<li><input disabled="" type="checkbox"> 我能解释调用栈的 LIFO</li>
+<li><input disabled="" type="checkbox"> 我能用 visualize 函数看栈</li>
+<li><input disabled="" type="checkbox"> 我能预测 RecursionError 何时发生</li>
+</ul>
+<hr>
+<blockquote>
+<p><strong>📁 作业保存规则</strong>：本课课后练习写进一个文件 <code>W14-S2-homework.py</code>（存 <code>~/sand-hollow/&lt;你的学员ID&gt;/homework/</code>），每道题开头用刚学的备注分隔：<code># --- 题 1 ---</code>、<code># --- 题 2 ---</code>……<strong>交完作业要跟你的智能体说一声</strong>才会批改，评语出现在 <code>reviews/*.review.md</code>。<strong>回报触发词：交完作业或修完坑，都回一句「修完了」</strong>——不回这句 mentor 不知道，坑会一直挂着等。</p>
+</blockquote>
+<h2>📝 今日作业</h2>
+<p>新建 <code>W14-S2-homework.py</code>，3 道题：</p>
+<ol>
+<li><strong>可视化 factorial(5)</strong></li>
+<li><strong>故意爆栈</strong>：递归 1500 层看 RecursionError</li>
+<li><strong>理解 AI 框架</strong>：画 PyTorch forward 的栈变化</li>
+</ol>
+<hr>
+</div>
+</section>
+<section class="lesson" data-lid="W14-S3">
+<div class="lesson-head"><span class="lt">递归 ③：递归树与记忆化</span></div>
+<div class="md" data-lid="W14-S3"><!-- slug: recursion-tree, type: addon -->
+<h1>W14-S3 · 递归 ③：递归树与记忆化</h1>
+<blockquote>
+<p><strong>一句话核心</strong>：<strong>fib(40) 慢是因为重复算</strong>。加缓存（memoization）从 1 亿次降到 40 次——<strong>O(2ⁿ) → O(n)</strong>。</p>
+</blockquote>
+<blockquote>
+<p><strong>每日节奏（v1.9）：</strong> 阅读 ≈8 分钟，作业 ≈17 分钟，总共 ≤25 分钟
+<strong>需要 Thonny</strong> —— 看 + 写代码
+难度：⭐⭐⭐ · 本篇是加餐④ 递归的第 2 课（前置：W16-S1）</p>
+</blockquote>
+<hr>
+<blockquote>
+<p><strong>📂 课前准备</strong>：先在 Thonny <code>文件 → 新建</code>，立刻 <code>文件 → 另存为...</code> 存为 <code>~/sand-hollow/&lt;你的学员ID&gt;/homework/W14-S3-practice.py</code>（ID 就是你注册沙坑用的 8 位数字）。本课所有亲手敲的代码都写进这个文件；课后作业写进同目录的 <code>W14-S3-homework.py</code>，两个文件严格分开，别混。</p>
+</blockquote>
+<h2>一、核心想法（3 分钟）</h2>
+<p>fib(5) 调用栈展开：</p>
+<pre><code>fib(5)
+├── fib(4)
+│   ├── fib(3)
+│   │   ├── fib(2)
+│   │   │   ├── fib(1) = 1
+│   │   │   └── fib(0) = 0
+│   │   └── fib(1) = 1
+│   └── fib(2)
+│       ├── fib(1) = 1
+│       └── fib(0) = 0
+└── fib(3)
+    ├── fib(2)
+    │   ├── fib(1) = 1
+    │   └── fib(0) = 0
+    └── fib(1) = 1
+</code></pre>
+<p>数一下：fib(5) 调用 <strong>15 次</strong>。fib(10) 调用 <strong>177 次</strong>。fib(40) 调用 <strong>1.65 亿次</strong>。</p>
+<p><strong>为什么这么多？</strong> fib(3) 算了 2 次，fib(2) 算了 3 次——<strong>重复</strong>。</p>
+<h2>二、示例演算：fib(5) 调用次数（3 分钟）</h2>
+<table>
+<thead>
+<tr>
+<th>节点</th>
+<th>次数</th>
+<th>节点</th>
+<th>次数</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>fib(5)</td>
+<td>1</td>
+<td>fib(1)</td>
+<td>8</td>
+</tr>
+<tr>
+<td>fib(4)</td>
+<td>1</td>
+<td>fib(0)</td>
+<td>5</td>
+</tr>
+<tr>
+<td>fib(3)</td>
+<td>2</td>
+<td><strong>总计</strong></td>
+<td><strong>15</strong></td>
+</tr>
+<tr>
+<td>fib(2)</td>
+<td>3</td>
+<td></td>
+<td></td>
+</tr>
+</tbody></table>
+<p>加缓存后：每个 fib(k) 只算 1 次 → 6 次（fib(0) 到 fib(5)）。</p>
+<h2>三、记忆化：算一次存起来（5 分钟）</h2>
+<pre><code class="language-python">def fib_memo(n, memo=None):
+    &#39;&#39;&#39;Fibonacci with memoization.&#39;&#39;&#39;
+    if memo is None:
+        memo = {}
+    if n in memo:                 # cache hit
+        return memo[n]
+    if n == 0 or n == 1:          # base case
+        memo[n] = n
+        return memo[n]
+    memo[n] = fib_memo(n - 1, memo) + fib_memo(n - 2, memo)
+    return memo[n]
+</code></pre>
+<p><strong>关键</strong>：算过的存 <code>memo[n]</code>，下次直接拿。</p>
+<h2>四、对比：朴素 vs 记忆化（5 分钟）</h2>
+<pre><code class="language-python">import time
+
+def fib_naive(n):
+    if n == 0 or n == 1: return n
+    return fib_naive(n - 1) + fib_naive(n - 2)
+
+def fib_memo(n, memo=None):
+    if memo is None: memo = {}
+    if n in memo: return memo[n]
+    if n == 0 or n == 1:
+        memo[n] = n
+        return n
+    memo[n] = fib_memo(n - 1, memo) + fib_memo(n - 2, memo)
+    return memo[n]
+
+# Test: fib(35)
+n = 35
+start = time.time(); fib_naive(n); t1 = time.time() - start
+start = time.time(); fib_memo(n); t2 = time.time() - start
+print(f&#39;fib_naive({n}): {t1:.2f}s&#39;)
+print(f&#39;fib_memo({n}): {t2:.4f}s&#39;)
+print(f&#39;Memo is {t1/t2:.0f}x faster&#39;)
+</code></pre>
+<p>跑一下。<code>fib(35)</code> 朴素要 ~5 秒，记忆化要 0.0001 秒。<strong>几万倍</strong>。</p>
+<h2>五、深入了解：缓存改变 AI 工业（3 分钟）</h2>
+<p><strong>缓存 = 空间换时间</strong>——这是 AI 工程师的核心优化哲学。</p>
+<p><strong>真实案例</strong>：</p>
+<ul>
+<li><strong>Redis/Memcached</strong>：互联网公司用缓存扛流量，<strong>省 90% 数据库查询</strong></li>
+<li><strong>向量缓存</strong>：ChatGPT 把热门问题答案缓存，<strong>响应快 100 倍</strong></li>
+<li><strong>GPU 缓存</strong>：训练 AI 时缓存中间结果，<strong>省 50% 显存</strong></li>
+<li><strong>CDN 缓存</strong>：把图片/视频缓存到离用户近的服务器，<strong>加载快 10 倍</strong></li>
+</ul>
+<p><strong>没学缓存的 AI 工程师 = 不会省钱的会计</strong>。</p>
+<h2>六、何时用：加缓存 vs 不加（3 分钟）</h2>
+<table>
+<thead>
+<tr>
+<th>场景</th>
+<th>加缓存</th>
+<th>不加</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>重复子问题（递归树）</td>
+<td>✓ 必加</td>
+<td>太慢</td>
+</tr>
+<tr>
+<td>一次性计算</td>
+<td>✗ 浪费内存</td>
+<td>✓</td>
+</tr>
+<tr>
+<td>输入空间大</td>
+<td>✓（dict 索引 O(1)）</td>
+<td>✗ 重新算</td>
+</tr>
+<tr>
+<td>内存紧张</td>
+<td>✗（占空间）</td>
+<td>✓</td>
+</tr>
+</tbody></table>
+<p><strong>Python 内置</strong>：<code>functools.lru_cache</code> —— 一行加缓存：</p>
+<pre><code class="language-python">from functools import lru_cache
+
+@lru_cache(maxsize=None)
+def fib(n):
+    if n == 0 or n == 1: return n
+    return fib(n - 1) + fib(n - 2)
+</code></pre>
+<p>比手动 <code>memo</code> dict 更简洁。</p>
+<h2>七、动手练习（先做完，再看第八节答案）</h2>
+<ol>
+<li>跑 fib_naive(35) 和 fib_memo(35) —— 数比值</li>
+<li>跑 fib_naive(40) —— 要 ~30 秒</li>
+<li>跑 fib_memo(1000) —— 瞬间</li>
+<li>用 <code>@lru_cache</code> 改写 fib 函数——比手动 memo 简洁吗？</li>
+</ol>
+<h2>八、答案</h2>
+<ol>
+<li>朴素 ~5s，记忆化 ~0.0001s，比值 ~5 万倍</li>
+<li>✓ 朴素 ~30s</li>
+<li>✓ 记忆化瞬间（O(n) = 1000 步）</li>
+<li>✓ <code>@lru_cache(maxsize=None)</code> 比手动 memo dict 简洁 5 倍</li>
+</ol>
+<h2>九、今日口诀 + 下一节预告</h2>
+<p><strong>今日口诀</strong>：<strong>递归 = 出口 + 自调 + 缩小 + 缓存</strong>。四件齐全 = AI 工程师级。</p>
+<p><strong>下节预告</strong>：周末项目——递归 vs 迭代比赛（性能 + 可读性）。</p>
+<hr>
+<h2>✅ 今天的阅读完成自查</h2>
+<ul>
+<li><input disabled="" type="checkbox"> 我能画 fib(5) 的递归树</li>
+<li><input disabled="" type="checkbox"> 我能用 memo 缓存算过的值</li>
+<li><input disabled="" type="checkbox"> 我能用 <code>@lru_cache</code> 改写递归</li>
+<li><input disabled="" type="checkbox"> 我能讲缓存改变 AI 工业的 4 个案例</li>
+</ul>
+<hr>
+<blockquote>
+<p><strong>📁 作业保存规则</strong>：本课课后练习写进一个文件 <code>W14-S3-homework.py</code>（存 <code>~/sand-hollow/&lt;你的学员ID&gt;/homework/</code>），每道题开头用刚学的备注分隔：<code># --- 题 1 ---</code>、<code># --- 题 2 ---</code>……<strong>交完作业要跟你的智能体说一声</strong>才会批改，评语出现在 <code>reviews/*.review.md</code>。<strong>回报触发词：交完作业或修完坑，都回一句「修完了」</strong>——不回这句 mentor 不知道，坑会一直挂着等。</p>
+</blockquote>
+<h2>📝 今日作业（≈17 分钟，今天的 30 分钟额度还剩这些）</h2>
+<p>新建文件 <code>W14-S3-homework.py</code>（存 <code>~/sand-hollow/&lt;你的学员ID&gt;/homework/</code>），3 道题：</p>
+<ol>
+<li><strong>fib(50) 朴素版</strong>：观察要多久</li>
+<li><strong>fib(50) 记忆化版</strong>：观察要多久</li>
+<li><strong>爬楼梯</strong>：n 阶楼梯，每次 1 或 2 步，多少种走法？写递归 + 记忆化（提示：<code>stairs(n) = stairs(n-1) + stairs(n-2)</code>，跟 fib 同款）</li>
+</ol>
+<blockquote>
+<p>交完作业跟你的智能体说一声（回报触发词「修完了」），评语出现在 <code>reviews/*.review.md</code>。</p>
+</blockquote>
+<hr>
+</div>
+</section>
+<section class="lesson" data-lid="W14-S4">
+<div class="lesson-head"><span class="lt">递归 ③：lru_cache 实战</span></div>
+<div class="md" data-lid="W14-S4"><!-- slug: recursion-lru-cache, type: addon -->
+<h1>W14-S4 · 递归 ③：lru_cache 实战</h1>
+<blockquote>
+<p><strong>一句话核心</strong>：<strong>@lru_cache = 一行加缓存</strong>。fib(50) 朴素 10¹⁵ 次，加缓存 50 次。Python 标准库就行。</p>
+</blockquote>
+<blockquote>
+<p><strong>每日节奏（v1.9）：</strong> 阅读 ≈8 分钟，作业 ≈17 分钟
+<strong>需要 Thonny</strong>
+难度：⭐⭐⭐ · W17 加餐④ 第 3 课（前置：W17-S1 + S2 + S3）</p>
+</blockquote>
+<hr>
+<blockquote>
+<p><strong>📂 课前准备</strong>：先在 Thonny <code>文件 → 新建</code>，立刻 <code>文件 → 另存为...</code> 存为 <code>~/sand-hollow/&lt;你的学员ID&gt;/homework/W14-S4-practice.py</code>（ID 就是你注册沙坑用的 8 位数字）。本课所有亲手敲的代码都写进这个文件；课后作业写进同目录的 <code>W14-S4-homework.py</code>，两个文件严格分开，别混。</p>
+</blockquote>
+<h2>一、3 种 fib 实现（5 分钟）</h2>
+<pre><code class="language-python">import time
+from functools import lru_cache
+
+# 1. Naive (O(2^n))
+def fib_naive(n):
+    if n &lt; 2:
+        return n
+    return fib_naive(n - 1) + fib_naive(n - 2)
+
+# 2. Manual memo (O(n))
+def fib_memo(n, memo={}):
+    if n in memo:
+        return memo[n]
+    if n &lt; 2:
+        return n
+    memo[n] = fib_memo(n - 1, memo) + fib_memo(n - 2, memo)
+    return memo[n]
+
+# 3. @lru_cache (O(n), 1-line)
+@lru_cache(maxsize=None)
+def fib_cache(n):
+    if n &lt; 2:
+        return n
+    return fib_cache(n - 1) + fib_cache(n - 2)
+</code></pre>
+<h2>二、对比：跑 fib(35)（3 分钟）</h2>
+<pre><code class="language-python">for name, fn in [(&#39;naive&#39;, fib_naive), (&#39;memo&#39;, fib_memo), (&#39;cache&#39;, fib_cache)]:
+    if name == &#39;cache&#39;:
+        fib_cache.cache_clear()   # reset
+    start = time.time()
+    result = fn(35)
+    print(f&#39;{name:6s}: {time.time()-start:.4f}s  result={result}&#39;)
+</code></pre>
+<p><strong>结果</strong>：</p>
+<ul>
+<li>naive: ~5.0s</li>
+<li>memo: ~0.0001s</li>
+<li>cache: ~0.0001s</li>
+</ul>
+<p><strong>5 万倍加速</strong>。</p>
+<h2>三、示例演算：fib(35) 调用次数（3 分钟）</h2>
+<table>
+<thead>
+<tr>
+<th>实现</th>
+<th>调用次数</th>
+<th>时间</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>naive</td>
+<td>29 亿次</td>
+<td>5s</td>
+</tr>
+<tr>
+<td>memo</td>
+<td>36 次</td>
+<td>0.0001s</td>
+</tr>
+<tr>
+<td>cache</td>
+<td>36 次</td>
+<td>0.0001s</td>
+</tr>
+</tbody></table>
+<p><strong>重复计算 = 99.99% 的浪费</strong>。</p>
+<h2>四、深入了解：@lru_cache 怎么工作（3 分钟）</h2>
+<pre><code class="language-python"># equivalent
+def fib_cache(n):
+    if n in cache:    # check dict
+        return cache[n]
+    if n &lt; 2:
+        return n
+    result = fib_cache(n - 1) + fib_cache(n - 2)
+    cache[n] = result
+    return result
+cache = {}
+</code></pre>
+<p><strong>cache = dict</strong>。<code>maxsize</code> 是 LRU 缓存大小（<code>None</code> = 无限）。</p>
+<h2>五、何时用：3 个 lru_cache 场景（3 分钟）</h2>
+<table>
+<thead>
+<tr>
+<th>场景</th>
+<th>用 lru_cache</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>递归 fib</td>
+<td>✓ 必备</td>
+</tr>
+<tr>
+<td>递归阶乘</td>
+<td>✗ 单次调用无重复</td>
+</tr>
+<tr>
+<td>递归爬楼梯</td>
+<td>✓ 必备</td>
+</tr>
+<tr>
+<td>Web 缓存 API</td>
+<td>✓ 不同</td>
+</tr>
+<tr>
+<td>缓存大对象</td>
+<td>✗ 内存紧张</td>
+</tr>
+</tbody></table>
+<p><strong>AI 工程师原则</strong>：递归 + 重叠子问题 = 加 cache。</p>
+<h2>六、动手练习</h2>
+<ol>
+<li>跑 fib(35) 对比</li>
+<li>跑 fib(50) —— naive 跑不动</li>
+<li>用 <code>@lru_cache</code> 重写 W17-S1 的 factorial</li>
+</ol>
+<h2>七、答案</h2>
+<pre><code class="language-python">import time
+from functools import lru_cache
+
+@lru_cache(maxsize=None)
+def fib(n):
+    if n &lt; 2: return n
+    return fib(n - 1) + fib(n - 2)
+
+# 1
+start = time.time(); print(fib(35)); print(f&#39;fib(35): {time.time()-start:.4f}s&#39;)
+
+# 2
+start = time.time(); print(fib(50)); print(f&#39;fib(50): {time.time()-start:.4f}s&#39;)
+# 12586269025
+# fib(50): 0.0001s
+
+# 3
+@lru_cache(maxsize=None)
+def factorial(n):
+    if n == 0: return 1
+    return n * factorial(n - 1)
+</code></pre>
+<h2>八、今日口诀 + 下一节预告</h2>
+<p><strong>今日口诀</strong>：<strong>@lru_cache = 5 行变 1 行</strong>。递归 + 重叠 = 必加 cache。</p>
+<p><strong>下节预告</strong>：递归项目——递归解迷宫。</p>
+<hr>
+<h2>✅ 自查</h2>
+<ul>
+<li><input disabled="" type="checkbox"> 我能写 3 种 fib 实现</li>
+<li><input disabled="" type="checkbox"> 我能用 <code>@lru_cache</code></li>
+<li><input disabled="" type="checkbox"> 我能解释 cache 怎么工作</li>
+</ul>
+<hr>
+<blockquote>
+<p><strong>📁 作业保存规则</strong>：本课课后练习写进一个文件 <code>W14-S4-homework.py</code>（存 <code>~/sand-hollow/&lt;你的学员ID&gt;/homework/</code>），每道题开头用刚学的备注分隔：<code># --- 题 1 ---</code>、<code># --- 题 2 ---</code>……<strong>交完作业要跟你的智能体说一声</strong>才会批改，评语出现在 <code>reviews/*.review.md</code>。<strong>回报触发词：交完作业或修完坑，都回一句「修完了」</strong>——不回这句 mentor 不知道，坑会一直挂着等。</p>
+</blockquote>
+<h2>📝 今日作业</h2>
+<p>新建 <code>W14-S4-homework.py</code>，3 道题：</p>
+<ol>
+<li><strong>fib(50)</strong> 跑朴素 vs cache</li>
+<li><strong>爬楼梯</strong>：<code>stairs(n) = stairs(n-1) + stairs(n-2)</code> 加 cache</li>
+<li><strong>解释</strong>：为什么 cache 5 万倍加速</li>
+</ol>
+<hr>
+</div>
+</section>
+<section class="lesson" data-lid="W14-S5">
+<div class="lesson-head"><span class="lt">递归项目：递归解迷宫</span></div>
+<div class="md" data-lid="W14-S5"><!-- slug: recursion-maze, type: addon -->
+<h1>W14-S5 · 递归项目：递归解迷宫</h1>
+<blockquote>
+<p><strong>一句话核心</strong>：<strong>递归 = 试错 + 回溯</strong>。迷宫每步试 4 个方向，撞墙就回退。</p>
+</blockquote>
+<blockquote>
+<p><strong>每日节奏（v1.9）：</strong> 阅读 ≈8 分钟，作业 ≈17 分钟
+<strong>需要 Thonny</strong>
+难度：⭐⭐⭐ · W17 加餐④ 第 4 课（前置：W17-S1 ~ S4）</p>
+</blockquote>
+<hr>
+<blockquote>
+<p><strong>📂 课前准备</strong>：先在 Thonny <code>文件 → 新建</code>，立刻 <code>文件 → 另存为...</code> 存为 <code>~/sand-hollow/&lt;你的学员ID&gt;/homework/W14-S5-practice.py</code>（ID 就是你注册沙坑用的 8 位数字）。本课所有亲手敲的代码都写进这个文件；课后作业写进同目录的 <code>W14-S5-homework.py</code>，两个文件严格分开，别混。</p>
+</blockquote>
+<h2>一、迷宫表示（3 分钟）</h2>
+<pre><code class="language-python"># 0 = path, 1 = wall
+maze = [
+    [0, 1, 0, 0, 0],
+    [0, 1, 0, 1, 0],
+    [0, 0, 0, 0, 0],
+    [1, 1, 1, 1, 0],
+    [0, 0, 0, 0, 0]
+]
+# entry (0, 0) -&gt; exit (4, 4)
+</code></pre>
+<h2>二、递归解迷宫（5 分钟）</h2>
+<pre><code class="language-python">def solve_maze(maze, x, y, end_x, end_y, path=None):
+    &#39;&#39;&#39;Recursive DFS. Returns path or None.&#39;&#39;&#39;
+    if path is None:
+        path = []
+
+    # boundary check
+    rows, cols = len(maze), len(maze[0])
+    if not (0 &lt;= x &lt; rows and 0 &lt;= y &lt; cols):
+        return None
+    # hit wall or visited
+    if maze[x][y] == 1 or (x, y) in path:
+        return None
+    # reach exit
+    if x == end_x and y == end_y:
+        return path + [(x, y)]
+
+    # mark visited
+    path.append((x, y))
+
+    # try 4 directions: up, right, down, left
+    for dx, dy in [(-1, 0), (0, 1), (1, 0), (0, -1)]:
+        result = solve_maze(maze, x + dx, y + dy, end_x, end_y, path)
+        if result:
+            return result
+
+    # backtrack on dead end
+    path.pop()
+    return None
+</code></pre>
+<h2>三、示例演算：5x5 迷宫（3 分钟）</h2>
+<pre><code>entry 0,0 -&gt; exit 4,4
+0 1 0 0 0
+0 1 0 1 0
+0 0 0 0 0
+1 1 1 1 0
+0 0 0 0 0
+</code></pre>
+<p><strong>路径</strong>：(0,0) → (1,0) → (2,0) → (2,1) → (2,2) → (2,3) → (2,4) → (3,4) → (4,4) ✓</p>
+<p><strong>8 步到终点</strong>。</p>
+<h2>四、深入了解：DFS vs BFS（3 分钟）</h2>
+<table>
+<thead>
+<tr>
+<th>算法</th>
+<th>找路径</th>
+<th>找最短</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>DFS</strong> (递归)</td>
+<td>✓</td>
+<td>✗ 找到一条就行</td>
+</tr>
+<tr>
+<td><strong>BFS</strong> (队列)</td>
+<td>✓</td>
+<td>✓ 最短路径</td>
+</tr>
+<tr>
+<td><strong>A</strong>* (启发式)</td>
+<td>✓</td>
+<td>✓ 最优路径</td>
+</tr>
+</tbody></table>
+<p><strong>AI 工程师原则</strong>：</p>
+<ul>
+<li>简单解 → DFS（递归）</li>
+<li>最短解 → BFS</li>
+<li>大规模 + 启发式 → A*</li>
+</ul>
+<h2>五、何时用：递归在 AI 搜索（3 分钟）</h2>
+<table>
+<thead>
+<tr>
+<th>AI 场景</th>
+<th>用递归？</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>迷宫 / 游戏</td>
+<td>✓ DFS</td>
+</tr>
+<tr>
+<td>决策树（minimax）</td>
+<td>✓ alpha-beta 剪枝</td>
+</tr>
+<tr>
+<td>图搜索</td>
+<td>✓ DFS / BFS</td>
+</tr>
+<tr>
+<td>知识图谱查询</td>
+<td>✓ BFS</td>
+</tr>
+<tr>
+<td>神经网络 forward</td>
+<td>✗ 用循环</td>
+</tr>
+<tr>
+<td>训练优化（梯度下降）</td>
+<td>✗ 用循环</td>
+</tr>
+</tbody></table>
+<p><strong>99% 搜索算法是递归</strong>。</p>
+<h2>六、动手练习</h2>
+<ol>
+<li>跑上面的 <code>solve_maze</code> 找路径</li>
+<li>改入口到 (0, 1) —— 应该没解</li>
+<li>画路径：用 <code>*</code> 标记迷宫里的解</li>
+</ol>
+<h2>七、答案</h2>
+<pre><code class="language-python"># 1
+result = solve_maze(maze, 0, 0, 4, 4)
+print(result)   # [(0,0), (1,0), ..., (4,4)]
+
+# 2
+result = solve_maze(maze, 0, 1, 4, 4)
+print(result)   # None (hit wall)
+
+# 3
+def print_maze_with_path(maze, path):
+    for i in range(len(maze)):
+        row = &#39;&#39;
+        for j in range(len(maze[0])):
+            if (i, j) in path:
+                row += &#39;* &#39;
+            elif maze[i][j] == 1:
+                row += &#39;# &#39;
+            else:
+                row += &#39;. &#39;
+        print(row)
+
+result = solve_maze(maze, 0, 0, 4, 4)
+print_maze_with_path(maze, result)
+# * . # . .
+# * . # . .
+# * * * * *
+# # # # * .
+# . . . * .
+</code></pre>
+<h2>八、今日口诀 + 周末预告</h2>
+<p><strong>今日口诀</strong>：<strong>递归 = DFS = 试 4 步 + 回退</strong>。</p>
+<p><strong>周末预告</strong>：递归 vs 迭代比赛——性能 + 可读性。</p>
+<hr>
+<h2>✅ 自查</h2>
+<ul>
+<li><input disabled="" type="checkbox"> 我能写 <code>solve_maze</code> 函数</li>
+<li><input disabled="" type="checkbox"> 我能区分 DFS vs BFS</li>
+<li><input disabled="" type="checkbox"> 我能解释 AI 搜索为什么用递归</li>
+</ul>
+<hr>
+<blockquote>
+<p><strong>📁 作业保存规则</strong>：本课课后练习写进一个文件 <code>W14-S5-homework.py</code>（存 <code>~/sand-hollow/&lt;你的学员ID&gt;/homework/</code>），每道题开头用刚学的备注分隔：<code># --- 题 1 ---</code>、<code># --- 题 2 ---</code>……<strong>交完作业要跟你的智能体说一声</strong>才会批改，评语出现在 <code>reviews/*.review.md</code>。<strong>回报触发词：交完作业或修完坑，都回一句「修完了」</strong>——不回这句 mentor 不知道，坑会一直挂着等。</p>
+</blockquote>
+<h2>📝 今日作业</h2>
+<p>新建 <code>W14-S5-homework.py</code>，3 道题：</p>
+<ol>
+<li><strong>跑 solve_maze</strong> 找路径</li>
+<li><strong>画迷宫</strong>：用 * 标记解</li>
+<li><strong>加 BFS</strong>：找最短路径（队列实现）</li>
+</ol>
+<hr>
+</div>
+</section>
+<section class="lesson" data-lid="W14-weekend">
+<div class="lesson-head"><span class="lt">递归 vs 迭代: 何时用哪个</span></div>
+<div class="md" data-lid="W14-weekend"><!-- slug: recursion-vs-iteration, type: addon -->
+<h1>W14-weekend · 递归 vs 迭代: 何时用哪个</h1>
+<blockquote>
+<p><strong>一句话核心</strong>: <strong>写时用递归(清晰), 生产用迭代(快)</strong>.AI 工程师&quot;看菜吃饭&quot;——树/图递归, 循环迭代.</p>
+</blockquote>
+<blockquote>
+<p>**每日节奏(v1.9): ** 周末项目 ≈60 分钟(纯动手, 没阅读)
+<strong>写代码时间</strong> —— 设计、写、调试
+难度: ⭐⭐⭐ · 前置: W16-S1 + W16-S3</p>
+</blockquote>
+<hr>
+<blockquote>
+<p><strong>📂 课前准备 · 随堂练习文件</strong>: 先在 Thonny <code>文件 → 新建</code>, 立刻 <code>文件 → 另存为...</code> 存为 <code>~/sand-hollow/&lt;你的学员ID&gt;/homework/W16-weekend-practice.py</code>.周末代码都写在这里.</p>
+</blockquote>
+<h2>⓪ 🤖 课前 AI 一分钟 · 第 39 颗: 递归 = 清晰, 迭代 = 性能(3 分钟)</h2>
+<p>今天的周末: 递归(清晰)和迭代(快)PK.</p>
+<p><strong>AI 工程师的&quot;看菜吃饭&quot;</strong>: </p>
+<ul>
+<li><strong>递归</strong>: 问题天然&quot;分形&quot;(树、图、分治)—— 清晰胜过性能</li>
+<li><strong>迭代</strong>: 性能压倒一切(训练 AI 跑亿次)—— 速度胜过清晰</li>
+</ul>
+<p><strong>今日口诀</strong>: <strong>写时用递归(清晰), 生产用迭代(快)</strong>.</p>
+<p><strong>⚔️ 判一判</strong>: </p>
+<blockquote>
+<ol>
+<li>递归比迭代总是慢</li>
+<li>递归对树/图问题特别合适</li>
+</ol>
+</blockquote>
+<details><summary>答案</summary>
+
+<p><strong>1.</strong> ✗ 编译器优化(如尾递归)后差距小; <strong>2.</strong> ✓ 树/图天然分形.</p>
+</details>
+
+<hr>
+<h2>一、项目: 递归 vs 迭代(60 分钟)</h2>
+<p>写 4 个函数(每个问题两个版本): </p>
+<ol>
+<li><code>factorial_recursive(n)</code> / <code>factorial_iterative(n)</code></li>
+<li><code>fib_recursive(n, memo)</code> / <code>fib_iterative(n)</code></li>
+<li><code>sum_list_recursive(arr)</code> / <code>sum_list_iterative(arr)</code></li>
+<li><code>reverse_string_recursive(s)</code> / <code>reverse_string_iterative(s)</code></li>
+</ol>
+<p>跑 5 组输入, 比较时间和正确性.</p>
+<h2>二、阶乘(5 分钟)</h2>
+<pre><code class="language-python">def factorial_recursive(n):
+    if n == 0: return 1
+    return n * factorial_recursive(n - 1)
+
+def factorial_iterative(n):
+    result = 1
+    for i in range(1, n + 1):
+        result = result * i
+    return result
+
+print(factorial_recursive(10))   # 3628800
+print(factorial_iterative(10))   # 3628800
+</code></pre>
+<h2>三、斐波那契(10 分钟)</h2>
+<pre><code class="language-python">def fib_recursive(n, memo={}):
+    if n in memo: return memo[n]
+    if n == 0 or n == 1: return n
+    memo[n] = fib_recursive(n - 1, memo) + fib_recursive(n - 2, memo)
+    return memo[n]
+
+def fib_iterative(n):
+    if n == 0 or n == 1: return n
+    a, b = 0, 1
+    for _ in range(n - 1):
+        a, b = b, a + b
+    return b
+
+print(fib_recursive(20))   # 6765
+print(fib_iterative(20))   # 6765
+</code></pre>
+<p><strong>关键</strong>: 迭代版用两个变量滚动, O(N) 时间 O(1) 空间.</p>
+<h2>四、示例演算: factorial(5)(3 分钟)</h2>
+<table>
+<thead>
+<tr>
+<th>步骤</th>
+<th>递归</th>
+<th>迭代</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>1</td>
+<td>factorial(5) → 5 × factorial(4)</td>
+<td>result=1, i=1, result=1</td>
+</tr>
+<tr>
+<td>2</td>
+<td>factorial(4) → 4 × factorial(3)</td>
+<td>result=1, i=2, result=2</td>
+</tr>
+<tr>
+<td>3</td>
+<td>factorial(3) → 3 × factorial(2)</td>
+<td>result=2, i=3, result=6</td>
+</tr>
+<tr>
+<td>4</td>
+<td>factorial(2) → 2 × factorial(1)</td>
+<td>result=6, i=4, result=24</td>
+</tr>
+<tr>
+<td>5</td>
+<td>factorial(1) → 1 × factorial(0)</td>
+<td>result=24, i=5, result=120</td>
+</tr>
+<tr>
+<td>6</td>
+<td>factorial(0) → 1</td>
+<td>—</td>
+</tr>
+<tr>
+<td><strong>结果</strong></td>
+<td>120</td>
+<td>120</td>
+</tr>
+</tbody></table>
+<p>两种都正确.迭代版<strong>不展开调用栈</strong>, 省内存.</p>
+<h2>五、深入了解: 尾递归优化(3 分钟)</h2>
+<p><strong>尾递归</strong>: 递归调用是函数的<strong>最后一个操作</strong>.</p>
+<pre><code class="language-python"># Normal recursion (factorial(5) = 5 * factorial(4), last op is multiply)
+def factorial(n):
+    if n == 0: return 1
+    return n * factorial(n - 1)
+
+# Tail recursion (recursive call is the last op)
+def factorial_tail(n, acc=1):
+    if n == 0: return acc
+    return factorial_tail(n - 1, n * acc)
+</code></pre>
+<p><strong>优势</strong>: 编译器可以把尾递归<strong>转成循环</strong>(不爆栈).</p>
+<p><strong>Python 不支持</strong>: CPython 没做尾递归优化, 所以尾递归还是会爆栈.</p>
+<p><strong>Scala/Haskell/Erlang</strong> 等函数式语言都支持——这是为什么它们爱递归.</p>
+<h2>六、何时用: 选递归 vs 迭代(3 分钟)</h2>
+<table>
+<thead>
+<tr>
+<th>场景</th>
+<th>选</th>
+<th>原因</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>树/图遍历</td>
+<td>递归</td>
+<td>代码清晰 3-5 倍</td>
+</tr>
+<tr>
+<td>阶乘/斐波那契/求和</td>
+<td>迭代</td>
+<td>性能 + 不爆栈</td>
+</tr>
+<tr>
+<td>大数据(10⁶+ 元素)</td>
+<td>迭代</td>
+<td>递归爆栈</td>
+</tr>
+<tr>
+<td>教学/作业</td>
+<td>递归</td>
+<td>体现算法思想</td>
+</tr>
+<tr>
+<td>生产 AI 系统</td>
+<td>迭代 + 缓存</td>
+<td>性能压倒一切</td>
+</tr>
+</tbody></table>
+<p><strong>AI 工程师的金科玉律</strong>: <strong>树/图递归, 循环迭代.</strong></p>
+<h2>七、跑比赛(10 分钟)</h2>
+<pre><code class="language-python">import time
+
+def time_it(fn, *args):
+    start = time.time()
+    result = fn(*args)
+    return time.time() - start, result
+
+# Test cases
+for n in [10, 50, 100, 500, 1000]:
+    t1, r1 = time_it(fib_recursive, n)
+    t2, r2 = time_it(fib_iterative, n)
+    print(f&#39;fib({n:4d}): rec={t1:.6f}s iter={t2:.6f}s&#39;)
+</code></pre>
+<p>跑一下.看差距.</p>
+<h2>八、读代码挑战(10 分钟)</h2>
+<p>找出下面代码里的 2 个 bug: </p>
+<pre><code class="language-python">def fib_iterative_buggy(n):
+    a, b = 0, 1
+    for i in range(n):       # bug 1?
+        a, b = b, a + b
+    return a                  # bug 2?
+</code></pre>
+<details><summary>提示</summary>
+
+<ol>
+<li><code>range(n)</code> 多算一次——应该是 <code>range(n - 1)</code>(或者从 i=1 开始)</li>
+<li><code>return a</code>——应该是 <code>return b</code>(最后一次 b 才是 fib(n))</li>
+</ol>
+</details>
+
+<h2>九、提交(5 分钟)</h2>
+<p>存到 <code>W16-weekend-practice.py</code>.跟 mentor 说&quot;<strong>修完了</strong>&quot;.</p>
+<h2>十、反思(5 分钟)</h2>
+<ul>
+<li>递归: 清晰, 但慢(除非缓存)</li>
+<li>迭代: 快, O(N) 时间 O(1) 空间</li>
+<li>AI 工程师: 树/图用递归, 循环用迭代</li>
+</ul>
+<hr>
+<h2>✅ 周末自查</h2>
+<ul>
+<li><input disabled="" type="checkbox"> 写好 4 对函数(递归/迭代各 4)</li>
+<li><input disabled="" type="checkbox"> 跑过 5 组测试, 看到差距</li>
+<li><input disabled="" type="checkbox"> 找到并修了 2 个 bug</li>
+<li><input disabled="" type="checkbox"> 存到 <code>W16-weekend-practice.py</code></li>
+</ul>
+<p>四格全勾 → 周末完成.W16 加餐④ 收官!</p>
+<hr>
+<h2>👀 C++ 认脸时刻(1 分钟 · 只看不敲)</h2>
+<pre><code class="language-cpp">int fib_iterative(int n) {
+    if (n == 0 || n == 1) return n;
+    int a = 0, b = 1;
+    for (int i = 2; i &lt;= n; i++) {
+        int c = a + b;
+        a = b;
+        b = c;
+    }
+    return b;
+}
+</code></pre>
+<p>三个认脸: </p>
+<ul>
+<li>C++ 变量要 <code>int</code> 声明</li>
+<li><code>int c = a + b; a = b; b = c;</code> 三个变量滚动(Python 用 <code>a, b = b, a + b</code> 一行)</li>
+<li><code>for (int i = 2; i &lt;= n; i++)</code> = <code>for i in range(2, n + 1)</code></li>
+</ul>
+</div>
+</section>
+</div>
+</div>
+</body>
+</html>

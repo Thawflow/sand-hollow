@@ -1,0 +1,106 @@
+{
+  "weeks": [
+    {
+      "id": "W01",
+      "title": "起步：让程序开口说话",
+      "current": true,
+      "lesson_count": 3
+    },
+    {
+      "id": "W02",
+      "title": "数字与文字魔法",
+      "current": false,
+      "lesson_count": 6
+    },
+    {
+      "id": "W03",
+      "title": "让程序做决定",
+      "current": false,
+      "lesson_count": 6
+    },
+    {
+      "id": "W04",
+      "title": "让程序重复干活",
+      "current": false,
+      "lesson_count": 6
+    },
+    {
+      "id": "W05",
+      "title": "直到……才停",
+      "current": false,
+      "lesson_count": 6
+    },
+    {
+      "id": "W06",
+      "title": "加餐①：二分查找 + Big O（前置 W05 猜数字 + W08 函数）",
+      "current": false,
+      "lesson_count": 6
+    },
+    {
+      "id": "W07",
+      "title": "列表：一串数据（前置 W06 加餐①）",
+      "current": false,
+      "lesson_count": 6
+    },
+    {
+      "id": "W08",
+      "title": "🏆 项目周：画地图（前置 W07 列表）",
+      "current": false,
+      "lesson_count": 6
+    },
+    {
+      "id": "W09",
+      "title": "加餐②：贪心算法（前置 W04 循环 + W06/W07 列表 + W08 函数）",
+      "current": false,
+      "lesson_count": 6
+    },
+    {
+      "id": "W10",
+      "title": "函数 def：打包一段代码（前置 W07/W08 列表/画地图 + W09 加餐②）",
+      "current": false,
+      "lesson_count": 6
+    },
+    {
+      "id": "W11",
+      "title": "turtle 海龟登场：编程画画（前置 W10 函数）",
+      "current": false,
+      "lesson_count": 6
+    },
+    {
+      "id": "W12",
+      "title": "加餐③：数组 vs 链表 + 选择排序（前置 W06 列表）",
+      "current": false,
+      "lesson_count": 6
+    },
+    {
+      "id": "W13",
+      "title": "字典：用名字找东西（前置 W12 加餐③）",
+      "current": false,
+      "lesson_count": 6
+    },
+    {
+      "id": "W14",
+      "title": "加餐④：递归 + 记忆化（前置 W10 def + W13 字典）",
+      "current": false,
+      "lesson_count": 6
+    },
+    {
+      "id": "W15",
+      "title": "random 三招：让电脑扔骰子（前置 W10/W11 函数/海龟 + W14 加餐④）",
+      "current": false,
+      "lesson_count": 6
+    },
+    {
+      "id": "W16",
+      "title": "🏆 毕业选题：四选一（前置 W13 字典 + W15 random）",
+      "current": false,
+      "lesson_count": 6
+    },
+    {
+      "id": "W17",
+      "title": "🏆 毕业项目 L1-L3（3 节制，前置 W16 毕业选题）",
+      "current": false,
+      "lesson_count": 4
+    }
+  ]
+}

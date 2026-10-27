@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>W02 · 数字与文字魔法</title>
+<style>
+:root{--bg:#0f1420;--card:#171e2e;--card2:#1e2740;--border:#2a3550;--text:#e8ecf4;--text2:#8b96ad;--accent:#5b9dff;--ok:#3ecf8e}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+.wrap{max-width:900px;margin:0 auto;padding:28px 20px 60px}
+h1{font-size:1.5rem}
+.wk-meta{color:var(--text2);font-size:.85rem;margin:4px 0 20px}
+.lesson{border:1px solid var(--border);border-radius:12px;padding:16px 18px;margin-bottom:14px;background:var(--card2)}
+.lesson-head{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.lesson-head .lt{font-weight:700;font-size:1rem;flex:1}
+.md{font-size:.92rem;line-height:1.8;color:var(--text);overflow-wrap:break-word}
+.md h1,.md h2,.md h3{margin:14px 0 8px;font-size:1.05rem}
+.md p{margin:8px 0}
+.md code{background:rgba(91,157,255,.12);border-radius:5px;padding:2px 6px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.85em;color:#a8c8ff}
+.md pre{background:#0b0f18;border:1px solid var(--border);border-radius:10px;padding:12px 14px;overflow-x:auto;margin:10px 0}
+.md pre code{background:none;padding:0;color:#c9d7f0}
+.md ul,.md ol{margin:8px 0 8px 22px}
+.md blockquote{border-left:3px solid var(--accent);padding:4px 12px;color:var(--text2);margin:10px 0}
+.md a{color:var(--accent)}
+.md table{border-collapse:collapse;margin:10px 0;font-size:.85rem}
+.md td,.md th{border:1px solid var(--border);padding:6px 10px}
+.md input[type=checkbox]{width:15px;height:15px;accent-color:var(--ok);cursor:pointer;margin-right:6px;vertical-align:-2px}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+<h1 class="wk-title">数字与文字魔法</h1>
+<div class="wk-meta">W02 · 6 课</div>
+</header>
+<div class="week-body" data-week="W02">
+<section class="lesson" data-lid="W02-S1">
+<div class="lesson-head"><span class="lt">数字与类型 · 上：三兄弟登场</span></div>
+<div class="md" data-lid="W02-S1"><!-- slug: number-type, type: base -->
+<h1>W02-S1 · 数字与类型 · 上：三兄弟登场</h1>
+<blockquote>
+<p><strong>每日节奏（v1.9）：</strong> 本篇纯阅读 ≈12 分钟，读完做当天作业 ≈10 分钟，总共 ≤25 分钟（留 5 分钟余量给喝水发呆 🐾）
+<strong>不需要 Thonny</strong>——今天一个字代码都不用敲，看完就行
+难度：⭐⭐ · 本篇是原 W02-L01 的前半（概念 + 透视镜 + 转换三兄弟）</p>
+</blockquote>
+<hr>
+<h2>一、概念：数据也有&quot;种族&quot;（3 分钟）</h2>
+<p>世界上的东西分种族：猫是猫、狗是狗。Python 世界的数据也分<strong>类型（type）</strong>，最常用的三兄弟：</p>
+<table>
+<thead>
+<tr>
+<th>名字</th>
+<th>装什么</th>
+<th>例子</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>int</strong></td>
+<td>整数</td>
+<td><code>42</code>、<code>2026</code>、<code>-3</code></td>
+</tr>
+<tr>
+<td><strong>float</strong></td>
+<td>小数</td>
+<td><code>3.14</code>、<code>0.5</code>、<code>-1.0</code></td>
+</tr>
+<tr>
+<td><strong>str</strong></td>
+<td>文字（字符串）</td>
+<td><code>&quot;ThawPaw&quot;</code>、<code>&quot;2026&quot;</code>（注意带引号！）</td>
+</tr>
+</tbody></table>
+<p><strong>大坑预告：</strong> <code>&quot;2026&quot;</code> 和 <code>2026</code> 长得像双胞胎，其实是两个种族——一个 str 一个 int。这一周我们会反复跟这个坑作斗争。</p>
+<h2>二、type()：类型透视镜（4 分钟）</h2>
+<p>想知道一个数据是什么种族？用 <code>type()</code> 照一照：</p>
+<pre><code class="language-python">type(2026)      # &lt;class &#39;int&#39;&gt;    整数
+type(&quot;2026&quot;)    # &lt;class &#39;str&#39;&gt;    字符串（有引号）
+type(3.14)      # &lt;class &#39;float&#39;&gt;  小数
+type(&quot;ThawPaw&quot;) # &lt;class &#39;str&#39;&gt;
+</code></pre>
+<p><strong>透视镜三大发现（先记住，作业会用到）：</strong></p>
+<ol>
+<li>引号是种族标志——有引号 = str，没引号 = 数字（int 或 float）</li>
+<li>有没有小数点是 int 和 float 的分界线</li>
+<li><code>input()</code> 收到的东西<strong>永远是 str</strong>——哪怕你输入的是数字！</li>
+</ol>
+<pre><code class="language-python">age = input(&quot;你几岁？&quot;)
+# 你输入 11，但 age 里装的是 &quot;11&quot;（字符串！）
+</code></pre>
+<p>这就是为什么 W01 的计算器要用 <code>int(input(...))</code>——先拿文字，再转成数字。</p>
+<h2>三、转换三兄弟：int() / float() / str()（5 分钟）</h2>
+<p>三兄弟可以互相转换（变身术）：</p>
+<pre><code class="language-python">int(&quot;2026&quot;) + 1     # 2027 —— str 变 int，能做数学了
+float(&quot;3.5&quot;) * 2    # 7.0 —— str 变 float
+str(11) + &quot; years&quot;  # &quot;11 years&quot; —— int 变 str，能拼接了
+</code></pre>
+<p><strong>转换翻车现场（读一遍就懂，不用跑）：</strong></p>
+<ul>
+<li><code>int(&quot;3.5&quot;)</code> → ❌ ValueError：int 不收带小数点的字符串（要找 float）</li>
+<li><code>int(&quot;你好&quot;)</code> → ❌ ValueError：变不成数字</li>
+<li><code>&quot;10&quot; * 3</code> → <code>101010</code>（不是 30！）：字符串乘法是<strong>复读机</strong></li>
+</ul>
+<p><strong>今日口诀：</strong> 要变数字找 int/float，要拼文字先 str，input 进来全是 str。</p>
+<hr>
+<h2>✅ 今天的阅读完成自查</h2>
+<ul>
+<li><input disabled="" type="checkbox"> 我知道 int / float / str 各装什么</li>
+<li><input disabled="" type="checkbox"> 我知道 <code>&quot;2026&quot;</code> 和 <code>2026</code> 是两个种族</li>
+<li><input disabled="" type="checkbox"> 我知道 input() 收到的永远是 str</li>
+</ul>
+<p>三格全勾 → 打开作业 <code>W02-S1-homework.py</code>（见下方作业说明）</p>
+<hr>
+<blockquote>
+<p><strong>📁 作业保存规则</strong>：本课课后练习写进一个文件 <code>W02-S1-homework.py</code>（存 <code>~/sand-hollow/&lt;你的学员ID&gt;/homework/</code>），每道题开头用刚学的备注分隔：<code># --- 题 1 ---</code>、<code># --- 题 2 ---</code>……<strong>交完作业要跟你的智能体说一声</strong>才会批改，评语出现在 <code>reviews/*.review.md</code>。<strong>回报触发词：交完作业或修完坑，都回一句「修完了」</strong>——不回这句 mentor 不知道，坑会一直挂着等。</p>
+</blockquote>
+<h2>📝 今日作业（≈10 分钟，今天的 30 分钟额度还剩这些）</h2>
+<p>新建文件 <code>W02-S1-homework.py</code>（存 <code>~/sand-hollow/&lt;你的学员ID&gt;/homework/</code>），3 道题：</p>
+<ol>
+<li><strong>透视镜</strong>：用 <code>print(type(...))</code> 查四样东西——<code>14</code>、<code>&quot;14&quot;</code>、<code>1.4</code>、<code>&quot;1.4&quot;</code>。先在注释里笔猜每行输出，再运行对答案</li>
+<li><strong>复读机验证</strong>：先笔猜再跑——<code>&quot;52&quot; * 6</code> 和 <code>52 * 6</code> 各输出什么？</li>
+<li><strong>修 bug</strong>：<code>cats = input(&quot;How many cats? &quot;)</code> 然后 <code>print(cats + 1)</code> 翻车了。把报错最后一行抄进注释，再修复到能跑</li>
+</ol>
+<blockquote>
+<p>交完作业跟你的智能体说一声（回报触发词「修完了」），评语出现在 <code>reviews/*.review.md</code>。
+<strong>今天的额度用完就收工</strong>——明天见，S2 讲数字运算符 + 翻车现场 🐾</p>
+</blockquote>
+</div>
+</section>
+<section class="lesson" data-lid="W02-S2">
+<div class="lesson-head"><span class="lt">数字与类型 · 下：运算符全家福 + 翻车现场</span></div>
+<div class="md" data-lid="W02-S2"><!-- slug: operator, type: base -->
+<h1>W02-S2 · 数字与类型 · 下：运算符全家福 + 翻车现场</h1>
+<blockquote>
+<p><strong>每日节奏（v1.9）：</strong> 本篇纯阅读 ≈12 分钟 + 作业 ≈10 分钟，总 ≤25 分钟
+难度：⭐⭐ · 本篇是原 W02-L01 的后半 · 前置：S1
+<strong>依然不需要开 Thonny</strong>——读完做作业才开</p>
+</blockquote>
+<hr>
+<blockquote>
+<p><strong>📂 课前准备</strong>：先在 Thonny <code>文件 → 新建</code>，立刻 <code>文件 → 另存为...</code> 存为 <code>~/sand-hollow/&lt;你的学员ID&gt;/homework/W02-S2-practice.py</code>（ID 就是你注册沙坑用的 8 位数字）。本课所有亲手敲的代码都写进这个文件；课后作业写进同目录的 <code>W02-S2-homework.py</code>，两个文件严格分开，别混。</p>
+</blockquote>
+<h2>一、数字运算符全家福（5 分钟）</h2>
+<p>数学课的老朋友们（注意最后两位是新面孔）：</p>
+<table>
+<thead>
+<tr>
+<th>运算符</th>
+<th>作用</th>
+<th>例子</th>
+<th>结果</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>+</code> <code>-</code> <code>*</code></td>
+<td>加减乘</td>
+<td><code>10 * 3</code></td>
+<td><code>30</code></td>
+</tr>
+<tr>
+<td><code>/</code></td>
+<td>除（永远得 float！）</td>
+<td><code>10 / 3</code></td>
+<td><code>3.3333...</code></td>
+</tr>
+<tr>
+<td><code>//</code></td>
+<td>整除（砍掉小数）</td>
+<td><code>10 // 3</code></td>
+<td><code>3</code></td>
+</tr>
+<tr>
+<td><code>%</code></td>
+<td>取余数（剩下的）</td>
+<td><code>10 % 3</code></td>
+<td><code>1</code></td>
+</tr>
+</tbody></table>
+<p><strong><code>//</code> 和 <code>%</code> 是一对好搭档</strong>——一个数可以拆成「几整份 + 零头」：</p>
+<pre><code class="language-python">3661 // 3600  # 1      —— 3661 秒里有 1 个完整小时
+3661 % 3600   # 61     —— 去掉整小时，剩 61 秒
+</code></pre>
+<p>S5 的加速挑战（秒数换算）全靠这两位。<strong>记住：一小时是 3600 秒</strong>，不是 360（某位学徒在这里栽过 😼）。</p>
+<h2>二、⚠️ 转换翻车现场合集（5 分钟）</h2>
+<p>新手三大翻车，全读一遍（今天的作业就是绕开它们）：</p>
+<p><strong>翻车 1：str + int 拼接</strong></p>
+<pre><code class="language-python">age = 11
+print(&quot;我&quot; + age + &quot;岁&quot;)   # ❌ TypeError
+# 修法：print(f&quot;我{age}岁&quot;)  或  print(&quot;我&quot; + str(age) + &quot;岁&quot;)
+</code></pre>
+<p><strong>翻车 2：input 直接做数学</strong></p>
+<pre><code class="language-python">price = input(&quot;多少钱？&quot;)   # 收到 &quot;5&quot;（str！）
+print(price * 3)           # &quot;555&quot; —— 复读机，不是 15！
+</code></pre>
+<p><strong>翻车 3：该用 float 的地方用了 int</strong></p>
+<pre><code class="language-python">price = int(input(&quot;单价？&quot;))  # 输入 12.5 → 当场 ValueError
+</code></pre>
+<p><strong>规则一句话：</strong> 答案可能带小数的问题用 <code>float()</code> 收，纯整数（个数、次数）用 <code>int()</code> 收。</p>
+<h2>三、🪜 高阶偷跑区（已会 f-string 的学员看，2 分钟）</h2>
+<p>如果你已经会 f-string（比如在 W01-L03 提前用过 <code>f&quot;{a} + {b} = {a+b}&quot;</code>），那么翻车 1 对你不存在——W02-L03（现 S5）会正式教。没学过也完全不影响今天的作业。</p>
+<hr>
+<h2>✅ 今天的阅读完成自查</h2>
+<ul>
+<li><input disabled="" type="checkbox"> 我知道 <code>//</code> 整除和 <code>%</code> 取余怎么用</li>
+<li><input disabled="" type="checkbox"> 我知道一小时是 3600 秒</li>
+<li><input disabled="" type="checkbox"> 我能说出三大翻车各自的修法</li>
+</ul>
+<blockquote>
+<p><strong>📁 作业保存规则</strong>：本课课后练习写进一个文件 <code>W02-S2-homework.py</code>（存 <code>~/sand-hollow/&lt;你的学员ID&gt;/homework/</code>），每道题开头用刚学的备注分隔：<code># --- 题 1 ---</code>、<code># --- 题 2 ---</code>……<strong>交完作业要跟你的智能体说一声</strong>才会批改，评语出现在 <code>reviews/*.review.md</code>。<strong>回报触发词：交完作业或修完坑，都回一句「修完了」</strong>——不回这句 mentor 不知道，坑会一直挂着等。</p>
+</blockquote>
+<h2>📝 今日作业（≈10 分钟）</h2>
+<p>新建 <code>W02-S2-homework.py</code>，2 道题：</p>
+<ol>
+<li><strong>猫粮小账本</strong>：问单价（float）、买几袋（int）、付了多少钱（float），打印总价和找零。打印时注意 str/float 拼接坑（三步自查：读报错 → 找撞点 → f-string/str()/逗号选一）</li>
+<li><strong>🚀 加速挑战</strong>：输入总秒数（比如 3661），用 <code>//</code> 和 <code>%</code> 拆成 X 小时 Y 分 Z 秒。自查：3661 → 1小时1分1秒；<strong>再拿 4000 跑一遍</strong> → 应该是 1小时6分40秒（一个数测不出 360 的坑，两个才保险 😼）</li>
+</ol>
+<blockquote>
+<p>交完喊「修完了」。额度用完就收工——明天 S3 见 🐾</p>
+</blockquote>
+</div>
+</section>
+<section class="lesson" data-lid="W02-S3">
+<div class="lesson-head"><span class="lt">字符串功夫 · 上：四招基本功 + replace</span></div>
+<div class="md" data-lid="W02-S3"><!-- slug: string, type: base -->
+<h1>W02-S3 · 字符串功夫 · 上：四招基本功 + replace</h1>
+<blockquote>
+<p><strong>每日节奏（v1.9）：</strong> 纯阅读 ≈13 分钟 + 作业 ≈10 分钟，总 ≤25 分钟
+难度：⭐⭐ · 本篇是原 W02-L02 的前半 · 前置：S2</p>
+</blockquote>
+<hr>
+<blockquote>
+<p><strong>📂 课前准备</strong>：先在 Thonny <code>文件 → 新建</code>，立刻 <code>文件 → 另存为...</code> 存为 <code>~/sand-hollow/&lt;你的学员ID&gt;/homework/W02-S3-practice.py</code>（ID 就是你注册沙坑用的 8 位数字）。本课所有亲手敲的代码都写进这个文件；课后作业写进同目录的 <code>W02-S3-homework.py</code>，两个文件严格分开，别混。</p>
+</blockquote>
+<h2>一、概念：字符串是字符项链（3 分钟）</h2>
+<p><code>&quot;ThawPaw&quot;</code> 想象成一条项链，每个字符是一颗珠子：</p>
+<pre><code>T-h-a-w-P-a-w   （7 颗珠子，从 0 开始编号！）
+0-1-2-3-4-5-6
+</code></pre>
+<p><strong>编号从 0 开始</strong>是编程世界的铁律——第一颗珠子是 0 号，不是 1 号。</p>
+<h2>二、四招基本功（6 分钟）</h2>
+<pre><code class="language-python">name = &quot;ThawPaw&quot;
+
+len(name)          # 7      —— 数珠子（长度）
+name.upper()       # THAWPAW —— 全变大写
+name.lower()       # thawpaw —— 全变小写
+name.count(&quot;a&quot;)    # 2      —— 数某个字符出现几次
+</code></pre>
+<p>四招都是<strong>项链自带技能</strong>（专业说法叫「方法 method」）：<code>数据.技能()</code> 的句式——<code>name.upper()</code> 读作「name，变大声！」😼</p>
+<h2>三、replace：偷天换日（4 分钟）</h2>
+<pre><code class="language-python">msg = &quot;I like dogs&quot;
+msg.replace(&quot;dogs&quot;, &quot;cats&quot;)   # &quot;I like cats&quot;
+</code></pre>
+<p>把项链里所有的 <code>dogs</code> 珠子串换成 <code>cats</code>。一次换所有出现的位置：</p>
+<pre><code class="language-python">&quot;aabbcc&quot;.replace(&quot;b&quot;, &quot;x&quot;)   # &quot;aaxxcc&quot; —— 两个 b 都换了
+</code></pre>
+<p><strong>注意：</strong> replace 不改原项链，是返回一条新的。想留住结果要装进盒子：</p>
+<pre><code class="language-python">new_msg = msg.replace(&quot;dogs&quot;, &quot;cats&quot;)   # ✅ 结果存进 new_msg
+</code></pre>
+<h2>四、今天不学但预告（in / 切片 / 索引）</h2>
+<p>S4 会学「索引与切片」（从项链上精准取珠子）和 <code>in</code>（一秒侦探）。今天先把四招基本功 + replace 练熟。</p>
+<hr>
+<h2>✅ 今天的阅读完成自查</h2>
+<ul>
+<li><input disabled="" type="checkbox"> 我知道 len / upper / lower / count 各干什么</li>
+<li><input disabled="" type="checkbox"> 我知道 <code>数据.技能()</code> 这个句式</li>
+<li><input disabled="" type="checkbox"> 我知道 replace 要接住返回值才留得住</li>
+</ul>
+<blockquote>
+<p><strong>📁 作业保存规则</strong>：本课课后练习写进一个文件 <code>W02-S3-homework.py</code>（存 <code>~/sand-hollow/&lt;你的学员ID&gt;/homework/</code>），每道题开头用刚学的备注分隔：<code># --- 题 1 ---</code>、<code># --- 题 2 ---</code>……<strong>交完作业要跟你的智能体说一声</strong>才会批改，评语出现在 <code>reviews/*.review.md</code>。<strong>回报触发词：交完作业或修完坑，都回一句「修完了」</strong>——不回这句 mentor 不知道，坑会一直挂着等。</p>
+</blockquote>
+<h2>📝 今日作业（≈10 分钟）</h2>
+<p>新建 <code>W02-S3-homework.py</code>，3 道题：</p>
+<ol>
+<li><strong>自我名片</strong>：把你的名字存进变量，用 <code>len()</code> 和 <code>.upper()</code> 打印两行：<code>名字有 X 个字母</code> + 名字全大写版</li>
+<li><strong>复读机改造</strong>：<code>&quot;meow meow meow&quot;</code> 里有几个 &quot;meow&quot;？用 <code>.count()</code> 数出来</li>
+<li><strong>偷天换日</strong>：把 <code>&quot;I like homework&quot;</code> 里的 <code>homework</code> 换成 <code>games</code>，打印换前换后两行对比</li>
+</ol>
+<blockquote>
+<p>交完喊「修完了」。明天 S4：项链上取珠子（索引与切片）🐾</p>
+</blockquote>
+</div>
+</section>
+<section class="lesson" data-lid="W02-S4">
+<div class="lesson-head"><span class="lt">字符串功夫 · 下：索引、切片与侦探 in</span></div>
+<div class="md" data-lid="W02-S4"><!-- slug: string-index, type: base -->
+<h1>W02-S4 · 字符串功夫 · 下：索引、切片与侦探 in</h1>
+<blockquote>
+<p><strong>每日节奏（v1.9）：</strong> 纯阅读 ≈13 分钟 + 作业 ≈10 分钟，总 ≤25 分钟
+难度：⭐⭐⭐（切片是本周最难，读慢点） · 本篇是原 W02-L02 的后半 · 前置：S3</p>
+</blockquote>
+<hr>
+<blockquote>
+<p><strong>📂 课前准备</strong>：先在 Thonny <code>文件 → 新建</code>，立刻 <code>文件 → 另存为...</code> 存为 <code>~/sand-hollow/&lt;你的学员ID&gt;/homework/W02-S4-practice.py</code>（ID 就是你注册沙坑用的 8 位数字）。本课所有亲手敲的代码都写进这个文件；课后作业写进同目录的 <code>W02-S4-homework.py</code>，两个文件严格分开，别混。</p>
+</blockquote>
+<h2>一、索引：取单颗珠子（4 分钟）</h2>
+<pre><code class="language-python">name = &quot;ThawPaw&quot;
+
+name[0]    # &quot;T&quot; —— 0 号珠子（第一颗！）
+name[1]    # &quot;h&quot;
+name[6]    # &quot;w&quot; —— 最后一颗
+</code></pre>
+<p><strong>负数索引 = 从右往倒数</strong>：</p>
+<pre><code class="language-python">name[-1]   # &quot;w&quot; —— 最后一颗
+name[-2]   # &quot;a&quot; —— 倒数第二
+</code></pre>
+<p><code>[-1]</code> 取最后一个，超常用，记住它。</p>
+<h2>二、切片：剪一段珠子（6 分钟）</h2>
+<pre><code class="language-python">name = &quot;ThawPaw&quot;
+
+name[0:4]    # &quot;Thaw&quot; —— 取 0 到 3 号（4 号不算！）
+name[4:]     # &quot;Paw&quot;  —— 从 4 号取到结尾
+name[:3]     # &quot;Tha&quot;  —— 从头取到 2 号
+name[-3:]    # &quot;Paw&quot;  —— 最后三颗
+</code></pre>
+<p><strong>规则一句话：</strong> <code>起点:终点</code>，<strong>含头不含尾</strong>（终点那颗不算）。这个规则全世界程序员都背过——今天你也是了。</p>
+<p><strong>为什么编号从 0 开始？</strong> 因为 <code>name[0:4]</code> 的长度正好是 4-0=4 颗。从 0 开始，减法就是长度——这是设计者的私心 😼</p>
+<h2>三、in：一秒侦探（3 分钟）</h2>
+<pre><code class="language-python">&quot;cat&quot; in &quot;concatenate&quot;     # True  —— 找得到
+&quot;cat&quot; in &quot;dog park&quot;        # False —— 找不到
+&quot;PAW&quot; in &quot;ThawPaw&quot;         # False —— 大小写敏感！侦探很严格
+</code></pre>
+<p>返回 True / False（布尔值，W03 的主角之一，先混个脸熟）。</p>
+<h2>四、新手三大坑速查（2 分钟）</h2>
+<ol>
+<li><code>name[7]</code>（超界）→ IndexError——项链只有 7 颗，最大编号 6</li>
+<li><code>name.upper()</code> 忘了 <code>()</code> → 没报错但也没变身（那是技能说明书，不是技能本身）</li>
+<li>切片 <code>name[1:3]</code> 只有 2 颗珠子，不是 3 颗——含头不含尾</li>
+</ol>
+<hr>
+<h2>✅ 今天的阅读完成自查</h2>
+<ul>
+<li><input disabled="" type="checkbox"> 我知道 <code>[0]</code> 是第一颗、<code>[-1]</code> 是最后一颗</li>
+<li><input disabled="" type="checkbox"> 我知道切片「含头不含尾」</li>
+<li><input disabled="" type="checkbox"> 我知道 in 返回 True/False 且大小写敏感</li>
+</ul>
+<blockquote>
+<p><strong>📁 作业保存规则</strong>：本课课后练习写进一个文件 <code>W02-S4-homework.py</code>（存 <code>~/sand-hollow/&lt;你的学员ID&gt;/homework/</code>），每道题开头用刚学的备注分隔：<code># --- 题 1 ---</code>、<code># --- 题 2 ---</code>……<strong>交完作业要跟你的智能体说一声</strong>才会批改，评语出现在 <code>reviews/*.review.md</code>。<strong>回报触发词：交完作业或修完坑，都回一句「修完了」</strong>——不回这句 mentor 不知道，坑会一直挂着等。</p>
+</blockquote>
+<h2>📝 今日作业（≈10 分钟）</h2>
+<p>新建 <code>W02-S4-homework.py</code>，3 道题：</p>
+<ol>
+<li><strong>首尾侦探</strong>：存一个至少 5 字母的单词，用 <code>[0]</code> 和 <code>[-1]</code> 分别取出首尾字母打印</li>
+<li><strong>切片三连</strong>：用 <code>[:3]</code>、<code>[-3:]</code>、<code>[1:4]</code> 各切一刀，先笔猜结果写进注释，再运行验证</li>
+<li><strong>侦探查案</strong>：<code>&quot;paw&quot; in &quot;ThawPaw&quot;</code> 是 True 还是 False？为什么？笔猜 → 验证 → 把原因写进注释（提示：大小写）</li>
+</ol>
+<blockquote>
+<p>交完喊「修完了」。明天 S5 是本周大招：f-string 🐾</p>
+</blockquote>
+</div>
+</section>
+<section class="lesson" data-lid="W02-S5">
+<div class="lesson-head"><span class="lt">f-string：漂亮地说话</span></div>
+<div class="md" data-lid="W02-S5"><!-- slug: f-string, type: base -->
+<h1>W02-S5 · f-string：漂亮地说话</h1>
+<blockquote>
+<p><strong>每日节奏（v1.9）：</strong> 纯阅读 ≈15 分钟 + 作业 ≈10 分钟，总 ≈25 分钟（周内最后一篇！）
+难度：⭐⭐ · 本篇 = 原 W02-L03 全部 · 前置：S1-S4
+如果你提前偷学过 f-string（很多学员会），把它当复习 + 补盲区</p>
+</blockquote>
+<hr>
+<blockquote>
+<p><strong>📂 课前准备</strong>：先在 Thonny <code>文件 → 新建</code>，立刻 <code>文件 → 另存为...</code> 存为 <code>~/sand-hollow/&lt;你的学员ID&gt;/homework/W02-S5-practice.py</code>（ID 就是你注册沙坑用的 8 位数字）。本课所有亲手敲的代码都写进这个文件；课后作业写进同目录的 <code>W02-S5-homework.py</code>，两个文件严格分开，别混。</p>
+</blockquote>
+<h2>一、拼接到底哪里痛（3 分钟）</h2>
+<p>W01 你用过 <code>+</code> 拼字符串：</p>
+<pre><code class="language-python">print(&quot;认识你太开心了，&quot; + name + &quot;！&quot;)
+print(name + &quot; 喜欢 &quot; + food + &quot;，还爱玩 &quot; + game + &quot;。&quot;)
+</code></pre>
+<p>痛在三点：引号多到眼花、数字必须 <code>str()</code> 转一圈、忘了转就 TypeError（翻车现场见 S2）。</p>
+<h2>二、f-string 三步上手法（5 分钟）</h2>
+<p>引号前加个 <code>f</code>，花括号里直接放变量：</p>
+<pre><code class="language-python">print(f&quot;认识你太开心了，{name}！&quot;)
+print(f&quot;{name} 喜欢 {food}，还爱玩 {game}。&quot;)
+</code></pre>
+<p>三步：① 引号前写 <code>f</code> ② 要填空的地方写 <code>{}</code> ③ 花括号里放变量名。完事。</p>
+<h2>三、花括号 = 小型计算器（5 分钟）</h2>
+<p>花括号里不止能放变量，还能<strong>直接写算式</strong>：</p>
+<pre><code class="language-python">a = 10
+b = 3
+print(f&quot;{a} + {b} = {a + b}&quot;)       # 10 + 3 = 13
+print(f&quot;{a} 除以 {b} 约等于 {a / b:.2f}&quot;)   # 10 除以 3 约等于 3.33
+</code></pre>
+<p><code>{a + b}</code> 会先算好再填进去。<code>: .2f</code> 是「保留两位小数」——账单神器。</p>
+<p><strong>这正是它的杀手锏</strong>：以前的写法要 <code>str(a) + &quot; + &quot; + str(b) + &quot; = &quot; + str(a+b)</code>，现在一行全包。</p>
+<h2>四、格式化魔法速览（2 分钟）</h2>
+<pre><code class="language-python">f&quot;{3.14159:.1f}&quot;    # &quot;3.1&quot;     —— 一位小数
+f&quot;{0.25:.0%}&quot;       # &quot;25%&quot;     —— 百分比
+f&quot;{1234567:,}&quot;      # &quot;1,234,567&quot; —— 千分位
+</code></pre>
+<p>今天作业用不到，但知道它们存在——将来做成绩单/账单时回来抄。</p>
+<h2>五、什么时候不用 f-string</h2>
+<ul>
+<li>打印一个单独的变量：<code>print(name)</code> 就行，不必 <code>print(f&quot;{name}&quot;)</code></li>
+<li>拼接超长的纯文字（没变量）：普通字符串即可</li>
+</ul>
+<p><strong>口诀：</strong> 有变量/算式要填 → f-string；没有 → 普通引号。</p>
+<hr>
+<h2>✅ 今天的阅读完成自查</h2>
+<ul>
+<li><input disabled="" type="checkbox"> 我会三步上手：f + {} + 变量</li>
+<li><input disabled="" type="checkbox"> 我知道花括号里能写算式</li>
+<li><input disabled="" type="checkbox"> 我知道 <code>:.2f</code> 是两位小数</li>
+</ul>
+<blockquote>
+<p><strong>📁 作业保存规则</strong>：本课课后练习写进一个文件 <code>W02-S5-homework.py</code>（存 <code>~/sand-hollow/&lt;你的学员ID&gt;/homework/</code>），每道题开头用刚学的备注分隔：<code># --- 题 1 ---</code>、<code># --- 题 2 ---</code>……<strong>交完作业要跟你的智能体说一声</strong>才会批改，评语出现在 <code>reviews/*.review.md</code>。<strong>回报触发词：交完作业或修完坑，都回一句「修完了」</strong>——不回这句 mentor 不知道，坑会一直挂着等。</p>
+</blockquote>
+<h2>📝 今日作业（≈10 分钟，含两道挑战）</h2>
+<p>新建 <code>W02-S5-homework.py</code>，4 道题：</p>
+<ol>
+<li><strong>改写旧程序</strong>：把 W01-L03 问答机器人（或宠物三问）的拼接 print 全部改写 f-string 版，跑通</li>
+<li><strong>计算器升级</strong>：问两个数，用一行 f-string 打印加减乘除四个结果</li>
+<li><strong>🚀 加速挑战 A</strong>：账单打印——问单价和数量，输出 <code>共 X 件，合计 Y 元</code>（合计保留 2 位小数，用 <code>:.2f</code>）</li>
+<li><strong>🚀 加速挑战 B</strong>：把你 W02-S2 的秒数换算（题 2）改成 f-string 输出：<code>3661 秒 = 1 小时 1 分 1 秒</code></li>
+</ol>
+<blockquote>
+<p>交完喊「修完了」——<strong>本周 S1-S5 全清的话，weekend 大挑战（名字实验室 + 单价订单计算器）就解锁了</strong> 🏆 按老规矩不拆，周末慢慢打 🐾</p>
+</blockquote>
+</div>
+</section>
+<section class="lesson" data-lid="W02-weekend">
+<div class="lesson-head"><span class="lt">名字实验室 + 单价订单计算器</span></div>
+<div class="md" data-lid="W02-weekend"><!-- slug: name-lab, type: project -->
+<h1>W02-weekend · 名字实验室 + 单价订单计算器</h1>
+<blockquote>
+<p>用时：40-60 分钟 · 难度：⭐⭐⭐ · 前置：W02 三课</p>
+</blockquote>
+<hr>
+<h2>一、本周武功盘点（3 分钟）</h2>
+<ul>
+<li>类型与转换：int / float / str / type()，&quot;2026&quot; ≠ 2026</li>
+<li>字符串功夫：len / upper / lower / strip / replace / 切片 / in</li>
+<li>f-string：花括号填空 + :.2f / :, / 对齐</li>
+</ul>
+<p>周末两个项目把它们全部用上。规矩不变：<strong>全部手敲，不复制粘贴。</strong></p>
+<h2>二、项目 A：名字实验室（25 分钟）</h2>
+<blockquote>
+<p>📁 项目存 <code>~/sand-hollow/&lt;你的学员ID&gt;/homework/</code>（与平日练习同目录，平铺不建周子目录）。</p>
+</blockquote>
+<p>新建 <code>name_lab.py</code>。目标：用户输入姓和名，实验室把这个名字玩出花。</p>
+<p><strong>要求打印 6 行报告：</strong></p>
+<ol>
+<li>完整姓名（姓 + 名 拼接）</li>
+<li>大写喊名（英文变大写；中文原样——没大小写）</li>
+<li>名字长度（len）</li>
+<li>名字首字（索引 [0]）</li>
+<li>姓氏打星：完整姓名里把姓氏替换成 *（replace）</li>
+<li>侦探判断：名字里是否含字母 a（in，输出 True / False）</li>
+</ol>
+<p>最后再用 f-string 打一行居中的汇报卡（:^20）。</p>
+<p><strong>提示三条：</strong></p>
+<ul>
+<li>先把 姓、名 装进两个变量，完整姓名 = 两个变量拼接，存第三个变量</li>
+<li>判断含 a 前，先 lower() 统一大小写（不然大写 A 会漏网）</li>
+<li>中文姓名照样能玩：长度、首字、替换、侦探全有效</li>
+</ul>
+<p>参考代码（先自己写，卡住 10 分钟以上再看）：</p>
+<pre><code class="language-python">family = input(&quot;Your family name? &quot;)
+given = input(&quot;Your given name? &quot;)
+
+full = family + given
+
+print(&quot;Full name:&quot;, full)
+print(&quot;SHOUT it out:&quot;, full.upper())
+print(&quot;Name length:&quot;, len(full))
+print(&quot;First letter:&quot;, full[0])
+print(&quot;Family name starred:&quot;, full.replace(family, &quot;*&quot;))
+print(&quot;Contains letter a:&quot;, &quot;a&quot; in full.lower())
+
+title = &quot;Name Lab Report Complete&quot;
+print(f&quot;{title:^20}&quot;)
+</code></pre>
+<p><strong>常见翻车点：</strong></p>
+<ul>
+<li>replace(family, &quot;*&quot;) 换的是<strong>所有</strong>匹配到的姓氏——如果名字里恰好也有同字，会一起变星，正常现象</li>
+<li>中文字符也按 1 个字符计，汇报卡嫌窄就把 :^20 调成 :^30</li>
+</ul>
+<p><strong>玩性彩蛋（选玩）：</strong> 切片还能倒着切——<code>full[::-1]</code> 得到倒着念的名字，超纲招式，照抄体验一下就行，原理 W06 讲列表时回头见。</p>
+<h2>三、项目 B：单价订单计算器（20 分钟）</h2>
+<p>新建 <code>order.py</code>。这是 W01 计算器的进化版：一张像样的<strong>小票</strong>。</p>
+<p><strong>要求：</strong></p>
+<ol>
+<li>问两样商品：各问商品名、单价（float）、数量（int），共 6 个 input</li>
+<li>每样一行明细：f-string + :.2f</li>
+<li>合计一行：两样小计相加，用 :, 和 :.2f</li>
+<li>问实付金额，最后打印找零一行</li>
+</ol>
+<p><strong>目标小票长相（数值自定）：</strong></p>
+<pre><code class="language-text">=== Family Corner Store ===
+Cat food x 3 = 118.50 yuan
+Cat treats x 10 = 45.00 yuan
+Total: 163.50 yuan
+Paid 200 yuan, change: 36.50 yuan
+</code></pre>
+<p><strong>提示三条：</strong></p>
+<ul>
+<li>明细行参考：<code>print(f&quot;{n1} x {c1} = {p1 * c1:.2f} yuan&quot;)</code></li>
+<li>合计 = 两个「单价 × 数量」相加，再进 f-string</li>
+<li>想看千位分隔出场，就把某样单价输大点（比如猫抓板 199 元，买 100 个）——数字越大，<code>,</code> 越好看</li>
+<li>实付不够时会打出负数找零——现在先不管，W03 学了 if 就能拦住它（好伏笔）</li>
+</ul>
+<h2>四、验收标准（自助验收）</h2>
+<ul>
+<li>找一位家人当用户完整跑一遍，输入真实数据</li>
+<li>名字实验室 7 行输出（6 行报告 + 汇报卡）无报错；中文名、英文名各试一次</li>
+<li>小票四舍五入到分，格式工整，找零算得对</li>
+<li>输入里故意混一次带空格的商品名，看小票是否还能看（学过 strip 的你懂的）</li>
+<li>两位学员互相演示，给对方的报告卡 / 小票截个图留念 ✅</li>
+</ul>
+<h2>五、W02 全周自查</h2>
+<ul>
+<li><input disabled="" type="checkbox"> L01：分得清 int / float / str，会 type() 和转换三兄弟，踩过 ValueError</li>
+<li><input disabled="" type="checkbox"> L02：五招基本功 + 切片 + in 全用过，能算对 s[1:3]</li>
+<li><input disabled="" type="checkbox"> L03：会 f-string 填空和四种格式化造型</li>
+<li><input disabled="" type="checkbox"> 周末两个项目完成并给家人演示过</li>
+</ul>
+<p>W02 毕业 🎓 → 进入 W03「让程序做决定」。预告：学了三周，程序还只会从头到尾直着走——下周教它<strong>看情况办事</strong>。</p>
+</div>
+</section>
+</div>
+</div>
+</body>
+</html>

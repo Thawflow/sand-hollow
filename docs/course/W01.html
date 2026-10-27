@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>W01 · 起步：让程序开口说话</title>
+<style>
+:root{--bg:#0f1420;--card:#171e2e;--card2:#1e2740;--border:#2a3550;--text:#e8ecf4;--text2:#8b96ad;--accent:#5b9dff;--ok:#3ecf8e}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+.wrap{max-width:900px;margin:0 auto;padding:28px 20px 60px}
+h1{font-size:1.5rem}
+.wk-meta{color:var(--text2);font-size:.85rem;margin:4px 0 20px}
+.lesson{border:1px solid var(--border);border-radius:12px;padding:16px 18px;margin-bottom:14px;background:var(--card2)}
+.lesson-head{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.lesson-head .lt{font-weight:700;font-size:1rem;flex:1}
+.md{font-size:.92rem;line-height:1.8;color:var(--text);overflow-wrap:break-word}
+.md h1,.md h2,.md h3{margin:14px 0 8px;font-size:1.05rem}
+.md p{margin:8px 0}
+.md code{background:rgba(91,157,255,.12);border-radius:5px;padding:2px 6px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.85em;color:#a8c8ff}
+.md pre{background:#0b0f18;border:1px solid var(--border);border-radius:10px;padding:12px 14px;overflow-x:auto;margin:10px 0}
+.md pre code{background:none;padding:0;color:#c9d7f0}
+.md ul,.md ol{margin:8px 0 8px 22px}
+.md blockquote{border-left:3px solid var(--accent);padding:4px 12px;color:var(--text2);margin:10px 0}
+.md a{color:var(--accent)}
+.md table{border-collapse:collapse;margin:10px 0;font-size:.85rem}
+.md td,.md th{border:1px solid var(--border);padding:6px 10px}
+.md input[type=checkbox]{width:15px;height:15px;accent-color:var(--ok);cursor:pointer;margin-right:6px;vertical-align:-2px}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+<h1 class="wk-title">起步：让程序开口说话</h1>
+<div class="wk-meta">W01 · 3 课</div>
+</header>
+<div class="week-body" data-week="W01">
+<section class="lesson" data-lid="W01-L01">
+<div class="lesson-head"><span class="lt">认识终端 + 装 Thonny + 第一行代码</span></div>
+<div class="md" data-lid="W01-L01"><!-- slug: thonny-hello, type: base -->
+<h1>W01-L01 · 认识终端 + 装 Thonny + 第一行代码</h1>
+<blockquote>
+<p>用时：35-45 分钟 · 难度：⭐ · 无需任何基础</p>
+</blockquote>
+<hr>
+<blockquote>
+<p><strong>📂 课前准备</strong>：先在 Thonny <code>文件 → 新建</code>，立刻 <code>文件 → 另存为...</code> 存为 <code>~/sand-hollow/&lt;你的学员ID&gt;/homework/W01-L01-practice.py</code>（ID 就是你注册沙坑用的 8 位数字）。本课所有亲手敲的代码都写进这个文件；课后作业写进同目录的 <code>W01-L01-homework.py</code>，两个文件严格分开，别混。</p>
+</blockquote>
+<h2>一、Python 是什么（5 分钟）</h2>
+<p>Python 是全世界最流行的编程语言之一：AI、游戏、科学计算、网站都在用。
+写 Python = 用它能看懂的文字，一步一步告诉电脑做什么。</p>
+<p><strong>给玩过 Scratch 的同学：</strong> Python 就是&quot;文字版 Scratch&quot;，你搭积木做的贪吃蛇，思想完全通用，只是把拖积木变成打字。
+<strong>没玩过 Scratch 也不用管上面这句</strong>，直接开始。</p>
+<p>本课两大任务：① 装好写代码的工具 Thonny；② 写出你的第一行代码。</p>
+<h2>二、先见见终端（5 分钟，认个脸就行）</h2>
+<p>Mac 上按 <code>Command + 空格</code>，输入 <code>终端</code> 或 <code>Terminal</code>，回车。看到一个窗口，里面有一行 <code>xxx %</code> ——这叫<strong>提示符</strong>，意思是&quot;轮到你打字了&quot;。</p>
+<p>逐条试试（每条后回车）：</p>
+<pre><code class="language-bash">pwd           # where am I
+ls            # what files are here
+echo &quot;hello&quot;   # say it back
+</code></pre>
+<h3>命令记忆小表格</h3>
+<p>这些命令都是英文缩写，认了全称就不需要死记：</p>
+<table>
+<thead>
+<tr>
+<th>命令</th>
+<th>英文全称</th>
+<th>一句话记忆</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>pwd</code></td>
+<td><strong>p</strong>rint <strong>w</strong>orking <strong>d</strong>irectory（打印工作目录）</td>
+<td>我在哪个目录</td>
+</tr>
+<tr>
+<td><code>ls</code></td>
+<td><strong>l</strong>i<strong>s</strong>t（列出）</td>
+<td>这里有什么文件</td>
+</tr>
+<tr>
+<td><code>cd</code></td>
+<td><strong>c</strong>hange <strong>d</strong>irectory（切换目录）</td>
+<td>去别的目录</td>
+</tr>
+</tbody></table>
+<blockquote>
+<p><code>cd</code> 今天先混个脸熟，第 7 周 git 课会天天用它。</p>
+</blockquote>
+<p>看完可以关掉它。今天只需要知道：<strong>终端 = 用打字而不是鼠标指挥电脑</strong>。程序员和 AI 智能体（Agent）们天天用它，我们第 7 周（git 课）会正式回来。</p>
+<h2>三、安装 Thonny（5 分钟）</h2>
+<p>Thonny 是专门为初学者设计的 Python 编辑器，界面极简：</p>
+<ol>
+<li>浏览器打开 <a href="https://thonny.org">thonny.org</a></li>
+<li>点右上 <strong>Download</strong> → 选 <strong>Mac</strong> 版</li>
+<li>打开下载的 dmg，把 Thonny 拖进&quot;应用程序&quot;</li>
+<li>打开 Thonny</li>
+</ol>
+<p>界面只有三处重要：</p>
+<ul>
+<li><strong>上方大空白区</strong>：写代码的地方（叫编辑器）</li>
+<li><strong>下方 Shell 区</strong>：立刻试一行代码的地方（问一句答一句）</li>
+<li><strong>绿色圆点 Run 按钮</strong>：运行整个程序（相当于游戏的开局按钮）</li>
+</ul>
+<h2>四、第一行代码（15 分钟）</h2>
+<p>在上方空白区<strong>亲手打字</strong>（不要复制粘贴！从今天起 4 周内全部手敲）：</p>
+<pre><code class="language-python">print(&quot;Hello, Python!&quot;)
+print(&quot;This is my first line of code&quot;)
+</code></pre>
+<p>点 Run，第一次会让你保存——用 <code>文件 → 另存为...</code> 存到 <code>~/sand-hollow/&lt;你的学员ID&gt;/homework/</code>（目录没有就新建），标题栏路径确认 ✅ 后文件名填 <code>first.py</code>。看下方 Shell 区——你的程序说话了！🎉</p>
+<h3>逐字拆解 <code>print(&quot;Hello, Python!&quot;)</code></h3>
+<table>
+<thead>
+<tr>
+<th>部件</th>
+<th>作用</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>print</code></td>
+<td>命令名：把内容打印出来（Python 自带）</td>
+</tr>
+<tr>
+<td><code>(</code> <code>)</code></td>
+<td>内容放括号里，交给命令</td>
+</tr>
+<tr>
+<td><code>&quot;Hello, Python!&quot;</code></td>
+<td>引号包住的一串文字，叫<strong>字符串</strong></td>
+</tr>
+</tbody></table>
+<p>规则：一行一个命令，结尾不用分号。</p>
+<h3>⚠️ 新手三大坑（每个都值得亲手踩一次）</h3>
+<ol>
+<li><strong>引号必须英文</strong>：<code>&quot;...&quot;</code> ✅，中文引号 <code>“...”</code> ❌（输入法切英文！）</li>
+<li><strong>引号要一对</strong>：<code>print(&quot;你好)</code> 少右引号 → 报错</li>
+<li><strong>区分大小写</strong>：<code>Print</code> ≠ <code>print</code></li>
+</ol>
+<p>踩坑方法：故意删掉一个引号，点 Run，读报错。<strong>报错最后一行永远是最重要的信息。</strong> 读完把引号补回来。</p>
+<h2>五、Shell 秒答区（5 分钟）</h2>
+<p>点一下下方 Shell 区域，直接输入（<code>&gt;&gt;&gt;</code> 后面）：</p>
+<pre><code class="language-python">&gt;&gt;&gt; 2 + 2
+&gt;&gt;&gt; 100 * 7
+&gt;&gt;&gt; &quot;meow&quot; * 10
+</code></pre>
+<p>回车即答。<code>&quot;meow&quot; * 10</code> 会发生什么？亲手试。（字符串乘数字 = 重复！）</p>
+<h2>六、动手练习（先做完，再看第七节答案）</h2>
+<ol>
+<li>打印三行自我介绍：昵称（化名，比如 ThawPaw）/ 最喜欢的游戏 / 最想学会的一件事</li>
+<li>用 print 打一只 ASCII 猫：</li>
+</ol>
+<pre><code class="language-python">print(&quot; /\_/\ &quot;)
+print(&quot;( o.o )&quot;)
+print(&quot; &gt; ^ &lt; &quot;)
+</code></pre>
+<ol start="3">
+<li>在 Shell 里算：11 年大约是多少天（11 × 365）？再想想：为什么只能说「大约」？</li>
+<li>故意制造一次报错（删引号或改大写 P），抄下报错最后一行，再修好</li>
+<li>🚀 加速挑战：用 print 打出一个 5 行以上的图案（房子、旗子、爱心都行）</li>
+</ol>
+<h2>七、练习答案（先做再看！）</h2>
+<p><strong>1.</strong> 三行 print，引号包住文字即可。参考：</p>
+<pre><code class="language-python">print(&quot;Hi, I am ThawPaw&quot;)
+print(&quot;My favorite game is Snake&quot;)
+print(&quot;I want to build my own game&quot;)
+</code></pre>
+<p><strong>2.</strong> 照抄运行即可，注意每行引号都要配对。</p>
+<p><strong>3.</strong> Shell 里输入 <code>11 * 365</code> 得 4015（数字不要引号！加了引号会变成重复 365 遍）。追问答案：因为闰年——每四年多一天，一年平均约 365.25 天，所以 ×365 只是粗算。</p>
+<p><strong>4.</strong> 删引号会看到 <code>SyntaxError: unterminated string literal</code>（语法错误：字符串没写完）；<code>Print</code> 大写会看到 <code>NameError: name &#39;Print&#39; is not defined</code>（没有叫 Print 的命令）。<strong>NameError 和 SyntaxError 以后会天天见，混个脸熟。</strong></p>
+<p><strong>5.</strong> 自由发挥，5 行以上 print 就算过。两个都试过的同学：注意 <code>&quot;   *&quot;</code> 里空格也是字符串的一部分，可以用来对齐图案。</p>
+<h2>八、自查清单</h2>
+<ul>
+<li><input disabled="" type="checkbox"> Thonny 装好能打开，运行过 first.py</li>
+<li><input disabled="" type="checkbox"> 我知道 print / 括号 / 引号 / 字符串各是什么</li>
+<li><input disabled="" type="checkbox"> 我故意制造过报错，并读完了最后一行</li>
+<li><input disabled="" type="checkbox"> 练习 5 题全部完成，答案对过</li>
+<li><input disabled="" type="checkbox"> 🚀 加速挑战完成（全员必做，mentor 打分）</li>
+</ul>
+<p>全勾 → 进入 W01-L02「变量：给东西起名字」。</p>
+</div>
+</section>
+<section class="lesson" data-lid="W01-L02">
+<div class="lesson-head"><span class="lt">变量（variable）：给东西起名字</span></div>
+<div class="md" data-lid="W01-L02"><!-- slug: variable, type: base -->
+<h1>W01-L02 · 变量（variable）：给东西起名字</h1>
+<blockquote>
+<p>用时：35-45 分钟 · 难度：⭐⭐ · 核心概念：变量（variable）、赋值（assignment）、新手第一大坑</p>
+</blockquote>
+<hr>
+<blockquote>
+<p><strong>📂 课前准备</strong>：先在 Thonny <code>文件 → 新建</code>，立刻 <code>文件 → 另存为...</code> 存为 <code>~/sand-hollow/&lt;你的学员ID&gt;/homework/W01-L02-practice.py</code>（ID 就是你注册沙坑用的 8 位数字）。本课所有亲手敲的代码都写进这个文件；课后作业写进同目录的 <code>W01-L02-homework.py</code>，两个文件严格分开，别混。</p>
+</blockquote>
+<h2>一、概念：变量 = 贴了标签的盒子（5 分钟）</h2>
+<p><strong>变量</strong>（variable）就是给数据起个名字，以后用名字就能拿到数据。</p>
+<pre><code class="language-python">score = 95
+</code></pre>
+<p>读作：准备一个盒子，贴上 <code>score</code> 标签，里面装 95。</p>
+<ul>
+<li><code>=</code> 读作&quot;<strong>装进去</strong>&quot;，英文叫 <strong>assignment（赋值）</strong>——它不是数学的 equals（等于）！</li>
+<li>标签名（变量名）自己起，要见名知意</li>
+<li>盒子里的东西随时可以换</li>
+</ul>
+<p>为什么需要变量：程序里同一份数据要用很多次（比如游戏里的得分），不可能每次都重写一遍——起个名字，一劳永逸。</p>
+<h2>二、第一批变量（10 分钟）</h2>
+<p>亲手敲：</p>
+<pre><code class="language-python">name = &quot;Alex&quot;
+age = 12
+pet = &quot;cat&quot;
+score = 95
+
+print(name)
+print(age)
+print(pet)
+print(score)
+</code></pre>
+<p>Run 运行，四行数据都出来了。</p>
+<h3>拆解</h3>
+<ul>
+<li><code>name = &quot;Alex&quot;</code> —— 文字要引号（字符串）</li>
+<li><code>age = 12</code> —— 数字<strong>不要</strong>引号</li>
+<li><code>print(name)</code> —— 打印盒子里的<strong>内容</strong>：Alex</li>
+</ul>
+<h3>换盒子里的东西</h3>
+<p>在文件末尾加：</p>
+<pre><code class="language-python">score = 95
+print(score)
+score = 100
+print(score)
+</code></pre>
+<p>第一次打印 95，改完再打印变 100。旧值被扔掉，盒子里永远是最新装的。</p>
+<h3>最烧脑的一行：<code>score = score + 5</code></h3>
+<pre><code class="language-python">score = 90
+score = score + 5
+print(score)      # 95
+</code></pre>
+<p>读三遍：&quot;<strong>新的</strong> score = <strong>旧的</strong> score + 5&quot;。
+执行顺序：① 打开盒子拿出 90 → ② 算 90 + 5 得 95 → ③ 把 95 装回盒子。
+（玩过 Scratch 的同学：这就是「将得分增加 5」积木。）</p>
+<h2>三、新手第一大坑（10 分钟）</h2>
+<p>这两行<strong>各跑一次</strong>，看差别：</p>
+<pre><code class="language-python">print(name)      # prints: Alex (open the box)
+print(&quot;name&quot;)    # prints: name (read the label as-is)
+</code></pre>
+<p>一句话记住：<strong>带引号 = 原样照念，不带引号 = 打开盒子拿内容。</strong></p>
+<p>再用数字验证一遍坑的威力：</p>
+<pre><code class="language-python">age = 12
+print(&quot;age&quot;)     # prints: age
+print(age)       # prints: 12
+</code></pre>
+<p>这个坑至少会陪伴你前两周，每次 print 输出不对，先检查引号。</p>
+<h2>四、变量命名规则（5 分钟）</h2>
+<ul>
+<li>✅ 合法：<code>score</code>、<code>my_name</code>、<code>pet2</code>、<code>love_cats</code></li>
+<li>❌ 不合法：<code>2score</code>（数字开头）、<code>my name</code>（有空格）、<code>print</code>（占用命令名）</li>
+<li>习惯：全小写 + 下划线；名字要有含义——<code>cat_age</code> 比 <code>x</code> 好一万倍</li>
+</ul>
+<h2>五、新装备：备注（comment）——写给看代码的人（3 分钟）</h2>
+<p>程序里常常要留话——给看代码的人看，不让电脑执行。这就是<strong>备注</strong>（comment）：</p>
+<pre><code class="language-python"># this whole line is a comment - the computer skips it
+score = 95   # a comment can also follow the code, like this
+</code></pre>
+<ul>
+<li><code>#</code> 号开头，到行尾为止都是备注，电脑看都不看</li>
+<li>用处一：<strong>给代码写说明</strong>——给读代码的人，包括三个月后的自己</li>
+<li>用处二：<strong>给文件分区</strong>——做练习时每道题前写一行 <code># --- 题 1 ---</code>，导师一眼看清你做到了第几题</li>
+<li>习惯：备注说「为什么」就够，不用复述代码本身</li>
+</ul>
+<h2>六、动手练习（先做完，再看第七节答案）</h2>
+<blockquote>
+<p><strong>📁 作业保存规则</strong>：本课课后练习写进一个文件 <code>W01-L02-homework.py</code>（存 <code>~/sand-hollow/&lt;你的学员ID&gt;/homework/</code>），每道题开头用刚学的备注分隔：<code># --- 题 1 ---</code>、<code># --- 题 2 ---</code>……<strong>交完作业要跟你的智能体说一声</strong>才会批改，评语出现在 <code>reviews/*.review.md</code>。<strong>回报触发词：交完作业或修完坑，都回一句「修完了」</strong>——不回这句 mentor 不知道，坑会一直挂着等。</p>
+</blockquote>
+<ol>
+<li>建 4 个变量：<code>my_name</code>（用化名，别用真名）/ <code>my_hobby</code> / <code>my_dream</code> / <code>my_food</code>，全部打印</li>
+<li>大坑验证：建 <code>food = &quot;ice cream&quot;</code>，分别跑 <code>print(food)</code> 和 <code>print(&quot;food&quot;)</code>，把两个输出各是什么写进注释</li>
+<li>先猜再跑：<code>score = 0</code> → 打印 → <code>score = score + 10</code> → 打印 → <code>score = score * 3</code> → 打印。运行前先在纸上写下三次输出，对了才算真懂</li>
+<li>宠物信息卡：<code>pet_name</code> / <code>pet_type</code> / <code>pet_age</code> 三个变量，打印成三行名片</li>
+<li>🚀 加速挑战：<code>left = &quot;meow&quot;</code>、<code>right = &quot;woof&quot;</code>，只允许用变量名（不许直接写 meow 和 woof），打印出 <code>meow and woof are friends</code>（提示：print 里可以用逗号隔开多个东西）</li>
+</ol>
+<h2>七、练习答案（先做再看！）</h2>
+<p><strong>1.</strong></p>
+<pre><code class="language-python">my_name = &quot;ThawPaw&quot;
+my_hobby = &quot;playing Snake&quot;
+my_dream = &quot;build my own game&quot;
+my_food = &quot;ice cream&quot;
+print(my_name)
+print(my_hobby)
+print(my_dream)
+print(my_food)
+</code></pre>
+<p><strong>2.</strong> <code>print(food)</code> → ice cream；<code>print(&quot;food&quot;)</code> → food。前者开盒子，后者照念。</p>
+<p><strong>3.</strong> 0 → 10 → 30。你若猜 0/10/50，说明把 <code>* 3</code> 当成了 <code>+ 20</code>；猜错不丢人，回看「最烧脑的一行」。</p>
+<p><strong>4.</strong></p>
+<pre><code class="language-python">pet_name = &quot;Snowball&quot;
+pet_type = &quot;cat&quot;
+pet_age = 2
+print(&quot;Name:&quot;, pet_name)
+print(&quot;Type:&quot;, pet_type)
+print(&quot;Age:&quot;, pet_age)
+</code></pre>
+<p><strong>5.</strong></p>
+<pre><code class="language-python">left = &quot;meow&quot;
+right = &quot;woof&quot;
+print(left, &quot;and&quot;, right, &quot;are friends&quot;)
+</code></pre>
+<p>逗号分隔的内容之间会自动加空格。（另一种解法 W02 的 <code>+</code> 拼接和 f-string 都能做，学到再回来看。）</p>
+<h2>八、自查清单</h2>
+<ul>
+<li><input disabled="" type="checkbox"> 我能解释&quot;变量 = 贴标签的盒子&quot;</li>
+<li><input disabled="" type="checkbox"> 我知道 <code>=</code> 是&quot;装进去&quot;不是&quot;等于&quot;</li>
+<li><input disabled="" type="checkbox"> 我能独立推算 <code>score = score + 5</code> 的结果</li>
+<li><input disabled="" type="checkbox"> 我亲手验证过第一大坑，说得出带引号和不带的区别</li>
+<li><input disabled="" type="checkbox"> 练习 5 题完成，答案对过</li>
+</ul>
+<p>全勾 → 进入 W01-L03「input + 第一个计算器」。</p>
+</div>
+</section>
+<section class="lesson" data-lid="W01-L03">
+<div class="lesson-head"><span class="lt">input 让程序提问 + 第一个计算器 + 周末机器人</span></div>
+<div class="md" data-lid="W01-L03"><!-- slug: input, type: base -->
+<h1>W01-L03 · input 让程序提问 + 第一个计算器 + 周末机器人</h1>
+<blockquote>
+<p>用时：40-50 分钟（含周末项目） · 难度：⭐⭐ · W01 毕业课</p>
+</blockquote>
+<hr>
+<blockquote>
+<p><strong>📂 课前准备</strong>：先在 Thonny <code>文件 → 新建</code>，立刻 <code>文件 → 另存为...</code> 存为 <code>~/sand-hollow/&lt;你的学员ID&gt;/homework/W01-L03-practice.py</code>（ID 就是你注册沙坑用的 8 位数字）。本课所有亲手敲的代码都写进这个文件；课后作业写进同目录的 <code>W01-L03-homework.py</code>，两个文件严格分开，别混。</p>
+</blockquote>
+<h2>一、概念：让程序跟你聊天（5 分钟）</h2>
+<p>目前为止都是程序单方面打印。加上 <code>input</code>，程序就能<strong>提问并记住你的回答</strong>：</p>
+<pre><code class="language-python">name = input(&quot;What is your name? &quot;)
+</code></pre>
+<p>拆解：</p>
+<ul>
+<li>先打印括号里的问题</li>
+<li>然后<strong>程序停下，等你打字</strong>，你按回车</li>
+<li>你打的字就变成了结果，被装进 <code>name</code> 盒子</li>
+</ul>
+<h2>二、第一个对话程序（10 分钟）</h2>
+<p>亲手敲：</p>
+<pre><code class="language-python">print(&quot;Hello! I am the quiz bot&quot;)
+
+name = input(&quot;What is your name? &quot;)
+food = input(&quot;What food do you like best? &quot;)
+game = input(&quot;What game do you like best? &quot;)
+
+print(&quot;So happy to meet you, &quot; + name + &quot;!&quot;)
+print(name + &quot; likes &quot; + food + &quot;, and loves &quot; + game + &quot;.&quot;)
+</code></pre>
+<p>运行，认真回答三个问题，看程序的回应。</p>
+<h3>拆解拼接</h3>
+<p><code>&quot;So happy to meet you, &quot; + name + &quot;!&quot;</code> —— <code>+</code> 把字符串首尾粘起来：</p>
+<ul>
+<li>引号里是固定文字，<code>name</code> 是盒子里的内容</li>
+<li>空格标点要自己设计在引号里（<code>&quot; likes &quot;</code> 前后有空格）</li>
+<li><code>+</code> 只能连接字符串，连数字会报错——马上讲</li>
+</ul>
+<h2>三、致命细节：input 收到的永远是文字（10 分钟）</h2>
+<p><code>input</code> 哪怕收到数字，也当作<strong>字符串</strong>处理：</p>
+<pre><code class="language-python">age = input(&quot;How old are you? &quot;)
+print(age + 1)        # error!
+</code></pre>
+<p>报错：字符串不能加数字。你说&quot;11&quot;，程序看做两个字符「1」「1」。</p>
+<p>解法——<strong>转换</strong>：</p>
+<pre><code class="language-python">age = int(input(&quot;How old are you? &quot;))
+print(age + 1)        # works!
+</code></pre>
+<p><code>int(...)</code> 把&quot;11&quot;变成 11（真数字）。int 就是 integer（整数）的缩写——顾名思义，它的工作就是把&quot;文字数字&quot;变回整数。</p>
+<p>口诀：<strong>input 收到的是话，要算数先 int。</strong></p>
+<p>再体验一次两种东西的差别：</p>
+<pre><code class="language-python">print(&quot;2026&quot; + &quot;2026&quot;)    # 20262026 (concatenation)
+print(2026 + 2026)        # 4052 (math)
+</code></pre>
+<h2>四、实战：四则计算器（10 分钟）</h2>
+<p>新建 <code>calculator.py</code>（同目录），亲手敲：</p>
+<pre><code class="language-python">print(&quot;=== Family Calculator ===&quot;)
+
+a = float(input(&quot;First number: &quot;))
+b = float(input(&quot;Second number: &quot;))
+
+print(f&quot;{a} + {b} = {a + b}&quot;)
+print(f&quot;{a} - {b} = {a - b}&quot;)
+print(f&quot;{a} * {b} = {a * b}&quot;)
+print(f&quot;{a} / {b} = {a / b}&quot;)
+</code></pre>
+<p>运行，输入 12 和 3，检查四行结果。</p>
+<h3>新面孔：f-string（W02 详细讲，今天混个脸熟）</h3>
+<p><code>print(f&quot;{a} + {b} = {a + b}&quot;)</code> —— 引号前加 <code>f</code>，花括号 <code>{}</code> 里的变量和算式会<strong>自动算好填进去</strong>。比 <code>+</code> 拼接舒服得多，W02-L03 专门教。</p>
+<h3>⚠️ 留一个Bug当作业</h3>
+<p>试输入第二个数 0？会看到 <code>ZeroDivisionError</code>（除零错误）。
+<strong>别修它</strong>——记住这个名字，第 4 周「异常处理」课我们正式收拾它。好课程会埋伏笔。</p>
+<h2>五、动手练习（先做完，再看第六节答案）</h2>
+<blockquote>
+<p>⚠️ <strong>交作业门禁：5 道题必须全部写完，并实际跑通至少 1 次。只有标题、空函数或半截代码，都算未完成。</strong> 5 题都过再勾“通过”。</p>
+</blockquote>
+<blockquote>
+<p><strong>📁 作业保存规则</strong>：本课课后练习写进一个文件 <code>W01-L03-homework.py</code>（存 <code>~/sand-hollow/&lt;你的学员ID&gt;/homework/</code>），每道题开头用刚学的备注分隔：<code># --- 题 1 ---</code>、<code># --- 题 2 ---</code>……<strong>交完作业要跟你的智能体说一声</strong>才会批改，评语出现在 <code>reviews/*.review.md</code>。<strong>回报触发词：交完作业或修完坑，都回一句「修完了」</strong>——不回这句 mentor 不知道，坑会一直挂着等。</p>
+</blockquote>
+<ol>
+<li>（题 1 · 三问复述）问 3 个问题（最喜欢的游戏 / 最喜欢的动物 / 今天心情），最后用一句话全部复述</li>
+<li>（题 2 · 数猫）问家里有几只猫，int 转换后打印 <code>Next year you will have X + 1 cats</code></li>
+<li>（题 3 · 填词游戏）：问一个形容词、一个动物、一个动作，打印一句搞笑句子（「一只__的__在__」）</li>
+<li>（题 4 · 订单计算器）把第三节的计算器改成<strong>订单计算器</strong>：问单价、问数量，打印一行明细 + 一行合计（合计 = 单价 × 数量）</li>
+<li>🚀 加速挑战（题 5 · 五则运算）：问两个数，打印加减乘除 AND 它们的平均值（5 项输出）</li>
+</ol>
+<h2>六、练习答案（先做再看！）</h2>
+<p><strong>1.</strong></p>
+<pre><code class="language-python">game = input(&quot;What is your favorite game? &quot;)
+animal = input(&quot;What is your favorite animal? &quot;)
+mood = input(&quot;How do you feel today? &quot;)
+print(&quot;Today &quot; + mood + &quot;, thinking about &quot; + game + &quot; and &quot; + animal)
+</code></pre>
+<p><strong>2.</strong></p>
+<pre><code class="language-python">cats = int(input(&quot;How many cats at home? &quot;))
+print(&quot;Next year you will have&quot;, cats + 1, &quot;cats&quot;)
+</code></pre>
+<p><strong>3.</strong> 自由发挥，三个 input + 一个拼接 print 就算过。</p>
+<p><strong>4.</strong></p>
+<pre><code class="language-python">price = float(input(&quot;Unit price: &quot;))
+count = int(input(&quot;Quantity: &quot;))
+print(&quot;Item:&quot;, price, &quot;yuan x&quot;, count)
+print(&quot;Total:&quot;, price * count, &quot;yuan&quot;)
+</code></pre>
+<p>注意：单价可能有小数用 float，数量是整数用 int。</p>
+<p><strong>5.</strong></p>
+<pre><code class="language-python">a = float(input(&quot;First number: &quot;))
+b = float(input(&quot;Second number: &quot;))
+print(f&quot;{a} + {b} = {a + b}&quot;)
+print(f&quot;{a} - {b} = {a - b}&quot;)
+print(f&quot;{a} * {b} = {a * b}&quot;)
+print(f&quot;{a} / {b} = {a / b}&quot;)
+print(f&quot;Average = {(a + b) / 2}&quot;)
+</code></pre>
+<h2>七、🏠 周末项目：自我介绍机器人（20-30 分钟）</h2>
+<p>把本周三课全部用上（print / 变量 / input），做一个 <code>W01-project.py</code>（存 <code>~/sand-hollow/&lt;你的学员ID&gt;/homework/</code>）：</p>
+<p><strong>要求：</strong></p>
+<ol>
+<li>机器人先自我介绍（print 两三行，给它个性：傲娇、话痨、毒舌都行）</li>
+<li>问用户至少 4 个问题（昵称 / 最喜欢的游戏 / 爱好 / 一个自由发挥的）</li>
+<li>最后打印一段包含<strong>所有回答</strong>的总结</li>
+<li>彩蛋：最后再问一句「你还想问我什么？」然后回一个固定彩蛋</li>
+</ol>
+<p><strong>验收标准（自助验收）：</strong></p>
+<ul>
+<li>找一位家人当用户跑一遍</li>
+<li>输入真实回答，程序不报错、输出完整 = 通过 ✅</li>
+<li>两位学员互当对方的用户，效果最佳</li>
+</ul>
+<h2>八、W01 全周自查</h2>
+<ul>
+<li><input disabled="" type="checkbox"> L01：会 print，读过报错最后一行，知道 SyntaxError / NameError 长相</li>
+<li><input disabled="" type="checkbox"> L02：会变量，能推算 <code>score = score + 5</code>，趟过第一大坑</li>
+<li><input disabled="" type="checkbox"> L03：会 input，牢记「要算数先 int」，计算器跑通，记住了 ZeroDivisionError</li>
+<li><input disabled="" type="checkbox"> 周末机器人完成并给家人演示过</li>
+</ul>
+<p>W01 毕业 🎓 → W02「数字与文字魔法」。</p>
+</div>
+</section>
+</div>
+</div>
+</body>
+</html>

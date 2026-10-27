@@ -1,0 +1,1307 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>W06 · 加餐①：二分查找 + Big O（前置 W05 猜数字 + W08 函数）</title>
+<style>
+:root{--bg:#0f1420;--card:#171e2e;--card2:#1e2740;--border:#2a3550;--text:#e8ecf4;--text2:#8b96ad;--accent:#5b9dff;--ok:#3ecf8e}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+.wrap{max-width:900px;margin:0 auto;padding:28px 20px 60px}
+h1{font-size:1.5rem}
+.wk-meta{color:var(--text2);font-size:.85rem;margin:4px 0 20px}
+.lesson{border:1px solid var(--border);border-radius:12px;padding:16px 18px;margin-bottom:14px;background:var(--card2)}
+.lesson-head{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.lesson-head .lt{font-weight:700;font-size:1rem;flex:1}
+.md{font-size:.92rem;line-height:1.8;color:var(--text);overflow-wrap:break-word}
+.md h1,.md h2,.md h3{margin:14px 0 8px;font-size:1.05rem}
+.md p{margin:8px 0}
+.md code{background:rgba(91,157,255,.12);border-radius:5px;padding:2px 6px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.85em;color:#a8c8ff}
+.md pre{background:#0b0f18;border:1px solid var(--border);border-radius:10px;padding:12px 14px;overflow-x:auto;margin:10px 0}
+.md pre code{background:none;padding:0;color:#c9d7f0}
+.md ul,.md ol{margin:8px 0 8px 22px}
+.md blockquote{border-left:3px solid var(--accent);padding:4px 12px;color:var(--text2);margin:10px 0}
+.md a{color:var(--accent)}
+.md table{border-collapse:collapse;margin:10px 0;font-size:.85rem}
+.md td,.md th{border:1px solid var(--border);padding:6px 10px}
+.md input[type=checkbox]{width:15px;height:15px;accent-color:var(--ok);cursor:pointer;margin-right:6px;vertical-align:-2px}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+<h1 class="wk-title">加餐①：二分查找 + Big O（前置 W05 猜数字 + W08 函数）</h1>
+<div class="wk-meta">W06 · 6 课</div>
+</header>
+<div class="week-body" data-week="W06">
+<section class="lesson" data-lid="W06-S1">
+<div class="lesson-head"><span class="lt">二分查找：每次砍一半</span></div>
+<div class="md" data-lid="W06-S1"><!-- slug: binary-search, type: addon -->
+<h1>W06-S1 · 二分查找：每次砍一半</h1>
+<blockquote>
+<p><strong>一句话核心</strong>：在一个<strong>排好序</strong>的列表里找东西，每次看中间，砍掉一半。1000 项最多 10 次，10 亿项最多 30 次。</p>
+</blockquote>
+<blockquote>
+<p><strong>每日节奏（v1.9）：</strong> 阅读 ≈10 分钟，作业 ≈15 分钟，总共 ≤25 分钟（留 5 分钟余量给喝水发呆 🐾）
+<strong>不需要 Thonny</strong> —— 今天一个字代码都不用敲，看完就行
+难度：⭐⭐ · 本篇是加餐① 二分查找的第 1 课（前置：W05 猜数字）</p>
+</blockquote>
+<hr>
+<blockquote>
+<p><strong>📂 课前准备</strong>：先在 Thonny <code>文件 → 新建</code>，立刻 <code>文件 → 另存为...</code> 存为 <code>~/sand-hollow/&lt;你的学员ID&gt;/homework/W06-S1-practice.py</code>（ID 就是你注册沙坑用的 8 位数字）。本课所有亲手敲的代码都写进这个文件；课后作业写进同目录的 <code>W06-S1-homework.py</code>，两个文件严格分开，别混。</p>
+</blockquote>
+<h2>一、核心想法（3 分钟）</h2>
+<p>猜 1-100 之间的数（跟 W05 一样）。两种玩法：</p>
+<table>
+<thead>
+<tr>
+<th>玩法</th>
+<th>步数</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>笨办法：从 1 开始一个个猜</td>
+<td>最坏 100 步</td>
+</tr>
+<tr>
+<td>聪明办法：每次猜中间</td>
+<td>最坏 7 步</td>
+</tr>
+</tbody></table>
+<p>每次猜中间，砍掉一半——这就是<strong>二分查找（binary search）</strong>。</p>
+<p>想象一把有刻度的尺子，<strong>指针</strong>指在中间。如果目标在指针左，砍掉右边；如果在右，砍掉左边。<strong>重复，每次砍一半</strong>。</p>
+<blockquote>
+<p><strong>📖 图 1.1</strong>：每猜一次砍一半。想象 100 格雪原埋 1 根冻鱼干——第一次问第 50 格，砍掉 50 格（无论答案是大于还是小于）；第二次问第 25 格（如果剩左半）或第 75 格（如果剩右半），又砍掉一半... 7 步必中。</p>
+</blockquote>
+<h2>二、示例演算：找 67 一步步推（5 分钟）</h2>
+<p>假设目标 = 67（藏在 1-100 之间）。<strong>亲手跟着推一遍</strong>——这是今天的核心。</p>
+<table>
+<thead>
+<tr>
+<th>步骤</th>
+<th>剩下范围</th>
+<th>猜</th>
+<th>反馈</th>
+<th>砍掉</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>开始</td>
+<td>1-100</td>
+<td>—</td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr>
+<td>1</td>
+<td>1-100</td>
+<td><strong>50</strong></td>
+<td>太小</td>
+<td>1-50</td>
+</tr>
+<tr>
+<td>2</td>
+<td>51-100</td>
+<td><strong>75</strong></td>
+<td>太大</td>
+<td>76-100</td>
+</tr>
+<tr>
+<td>3</td>
+<td>51-74</td>
+<td><strong>62</strong></td>
+<td>太小</td>
+<td>51-62</td>
+</tr>
+<tr>
+<td>4</td>
+<td>63-74</td>
+<td><strong>68</strong></td>
+<td>太大</td>
+<td>69-74</td>
+</tr>
+<tr>
+<td>5</td>
+<td>63-67</td>
+<td><strong>65</strong></td>
+<td>太小</td>
+<td>63-65</td>
+</tr>
+<tr>
+<td>6</td>
+<td>66-67</td>
+<td><strong>66</strong></td>
+<td>太小</td>
+<td>66</td>
+</tr>
+<tr>
+<td>7</td>
+<td>67-67</td>
+<td><strong>67</strong></td>
+<td>命中！🎯</td>
+<td>—</td>
+</tr>
+</tbody></table>
+<p><strong>7 步找到 67。</strong> 跟 W05 猜数字一样——只是今天叫&quot;二分查找&quot;。</p>
+<h2>三、为什么偏偏是 7（3 分钟）</h2>
+<p>每问一次砍一半：100 → 50 → 25 → 12 → 6 → 3 → 1。</p>
+<p>反过来想：砍 7 次&quot;只剩 1 格&quot;，需要一开始有多少格？在 Shell 里验证：</p>
+<pre><code class="language-python">&gt;&gt;&gt; 2 ** 7
+128
+</code></pre>
+<p>128 ≥ 100，所以 7 次够。<strong>通用公式</strong>：N 格，最多要 ⌈log₂(N)⌉ 问。</p>
+<h2>四、不同 N 的对比表（3 分钟）</h2>
+<table>
+<thead>
+<tr>
+<th>列表大小 N</th>
+<th>二分最多步数</th>
+<th>公式</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>100</td>
+<td>7</td>
+<td>log₂(100)</td>
+</tr>
+<tr>
+<td>1000</td>
+<td>10</td>
+<td>log₂(1000)</td>
+</tr>
+<tr>
+<td>10000</td>
+<td>14</td>
+<td>log₂(10000)</td>
+</tr>
+<tr>
+<td>100 万</td>
+<td>20</td>
+<td>log₂(10⁶)</td>
+</tr>
+<tr>
+<td>10 亿</td>
+<td>30</td>
+<td>log₂(10⁹)</td>
+</tr>
+</tbody></table>
+<p>10 亿格：30 步——<strong>毫秒级</strong>。</p>
+<h2>五、二分的两个前提（3 分钟）</h2>
+<p>&quot;砍一半&quot;需要两个前提：</p>
+<ol>
+<li><strong>有序</strong>——必须按某种顺序排好（数字大小、字母顺序）</li>
+<li><strong>能跳中间</strong>——必须能直接看第 N 个（数组支持，链表不支持）</li>
+</ol>
+<p>如果无序，只能挨个问&quot;是 X 吗？&quot;——那就是<strong>顺序查找（linear search）</strong>，W07 会学。</p>
+<h2>六、深入了解：二分查找的历史八卦（3 分钟）</h2>
+<p>二分查找是最古老的算法之一——<strong>第一个版本 1946 年发表</strong>——但<strong>第一个真正没 bug 的版本要到 16 年后</strong>才出现。</p>
+<p>为什么？陷阱藏在边界里：</p>
+<ul>
+<li>循环条件 <code>while low &lt;= high</code> 还是 <code>while low &lt; high</code>？</li>
+<li>更新 <code>high = mid</code> 还是 <code>high = mid - 1</code>？</li>
+<li>选错就死循环或漏掉元素</li>
+</ul>
+<p><strong>多测边界</strong>：空列表、单元素、目标在第一个、目标在最后一个、目标不存在。</p>
+<p><strong>隐藏 bug</strong>：<code>mid = (low + high) // 2</code> 看起来天真，但 Java/C 里 <code>low + high</code> 超过 2³¹ 会回绕成负数。Python 原生支持大整数，没事。<strong>安全写法</strong>：<code>mid = low + (high - low) // 2</code>。</p>
+<p><strong>2006 年 Google 工程师发现 Java 标准库的二分查找有 bug——潜伏了快十年</strong>。所以第一次写错完全正常。</p>
+<h2>七、何时用（3 分钟）</h2>
+<p>二分查找的常见场景：</p>
+<ul>
+<li>📖 查字典（按字母排好序）</li>
+<li>🗄️ 数据库索引（任何排好序的索引）</li>
+<li>🐛 Git 找哪次提交引入 bug（<code>git bisect</code>——这次提交通过测试吗？）</li>
+<li>🎮 找游戏的最佳难度</li>
+<li>🔍 找&quot;是答案最多 X 吗？&quot;的临界点</li>
+</ul>
+<p><strong>Python 内置</strong>：<code>bisect.bisect_left()</code> —— <strong>生产代码里别自己实现</strong>。</p>
+<h2>八、动手练习（先做完，再看第九节答案）</h2>
+<ol>
+<li>把&quot;找 67&quot;的 7 步表亲手抄一遍（<strong>闭卷</strong>）</li>
+<li>雪原变 1-200 格，最少几次必中？用 <code>2 ** n</code> 在 Shell 里验证</li>
+<li>一本按字母排好的 10000 单词词典，找 &quot;warrior&quot;，二分最多看几次？</li>
+<li>一本 10000 词词典，找 &quot;Zhang San&quot;——这是中文名，要先按什么排？</li>
+</ol>
+<h2>九、答案（先做再看！）</h2>
+<p><strong>1.</strong>（见表）</p>
+<p><strong>2.</strong> 200 格：⌈log₂(200)⌉ = 8。<code>2 ** 7 = 128 &lt; 200</code>，<code>2 ** 8 = 256 ≥ 200</code>，8 次。</p>
+<p><strong>3.</strong> 10000 词：⌈log₂(10000)⌉ = 14。<code>2 ** 13 = 8192 &lt; 10000</code>，<code>2 ** 14 = 16384 ≥ 10000</code>，14 次。</p>
+<p><strong>4.</strong> 中文词典：按<strong>拼音</strong>（&quot;Zhang San&quot; → &quot;zhang san&quot;）或按<strong>部首</strong>。二分的前提是&quot;排好序&quot;——先定义好顺序。</p>
+<h2>十、今日口诀 + 下一节预告</h2>
+<p><strong>今日口诀</strong>：<strong>有序 + 砍中间 = 二分查找</strong>。无序 = 顺序查找。</p>
+<p><strong>下节预告</strong>：Big O——数据翻倍时，步数怎么涨。</p>
+<hr>
+<h2>✅ 今天的阅读完成自查</h2>
+<ul>
+<li><input disabled="" type="checkbox"> 我能说出 100 格 7 次够的原因（2^7 = 128 ≥ 100）</li>
+<li><input disabled="" type="checkbox"> 我能讲两个前提：有序 + 能跳中间</li>
+<li><input disabled="" type="checkbox"> 我能列出 4 个二分的真实使用场景</li>
+<li><input disabled="" type="checkbox"> 我知道顺序查找 vs 二分查找的区别</li>
+</ul>
+<p>四格全勾 → 打开 Thonny，做今天的作业 <code>W06-S1-homework.py</code></p>
+<hr>
+<blockquote>
+<p><strong>📁 作业保存规则</strong>：本课课后练习写进一个文件 <code>W06-S1-homework.py</code>（存 <code>~/sand-hollow/&lt;你的学员ID&gt;/homework/</code>），每道题开头用刚学的备注分隔：<code># --- 题 1 ---</code>、<code># --- 题 2 ---</code>……<strong>交完作业要跟你的智能体说一声</strong>才会批改，评语出现在 <code>reviews/*.review.md</code>。<strong>回报触发词：交完作业或修完坑，都回一句「修完了」</strong>——不回这句 mentor 不知道，坑会一直挂着等。</p>
+</blockquote>
+<h2>📝 今日作业（≈15 分钟，今天的 30 分钟额度还剩这些）</h2>
+<p>新建文件 <code>W06-S1-homework.py</code>（存 <code>~/sand-hollow/&lt;你的学员ID&gt;/homework/</code>），3 道题：</p>
+<ol>
+<li><strong>填表</strong>：亲手抄 1000 格雪原的&quot;每问一次砍一半&quot;表，写出每行剩余范围、划掉多少格，最后算 ⌈log₂(1000)⌉</li>
+<li><strong>反向验证</strong>：1000 格雪原保证能命中，最少几次？在 Shell 里用 <code>2 ** n ≥ 1000</code> 验证（哪个 n 刚好够？）</li>
+<li><strong>词典实战</strong>：一本按字母排好的 10000 词词典，找 &quot;Zhang San&quot;。二分查找最多看几次？验证 n。</li>
+</ol>
+<blockquote>
+<p>交完作业跟你的智能体说一声（回报触发词「修完了」），评语出现在 <code>reviews/*.review.md</code>。</p>
+</blockquote>
+<hr>
+</div>
+</section>
+<section class="lesson" data-lid="W06-S2">
+<div class="lesson-head"><span class="lt">Big O：度量速度，数据翻倍</span></div>
+<div class="md" data-lid="W06-S2"><!-- slug: big-o, type: addon -->
+<h1>W06-S2 · Big O：度量速度，数据翻倍</h1>
+<blockquote>
+<p><strong>一句话核心</strong>：<strong>Big O = 数据翻倍时，步数怎么涨</strong>。O(1) &lt; O(log n) &lt; O(n) &lt; O(n²)。先量，别猜。</p>
+</blockquote>
+<blockquote>
+<p><strong>每日节奏（v1.9）：</strong> 阅读 ≈10 分钟，作业 ≈15 分钟，总共 ≤25 分钟
+<strong>不需要 Thonny</strong> —— 今天的作业在 Shell 里 <code>2 ** n</code> 算
+难度：⭐⭐ · 本篇是加餐① 二分查找的第 2 课（前置：W06-S1）</p>
+</blockquote>
+<hr>
+<blockquote>
+<p><strong>📂 课前准备</strong>：先在 Thonny <code>文件 → 新建</code>，立刻 <code>文件 → 另存为...</code> 存为 <code>~/sand-hollow/&lt;你的学员ID&gt;/homework/W06-S2-practice.py</code>（ID 就是你注册沙坑用的 8 位数字）。本课所有亲手敲的代码都写进这个文件；课后作业写进同目录的 <code>W06-S2-homework.py</code>，两个文件严格分开，别混。</p>
+</blockquote>
+<h2>一、问题：怎么比较两个算法谁快？（3 分钟）</h2>
+<p>W06-S1 说 100 格雪原要 7 问。W07 的顺序查找（下周学）最多要 100 问。<strong>差了 14 倍</strong>——看着不少，但怎么<strong>系统地</strong>度量？</p>
+<p>像比两个孩子的身高——不看现在几厘米，看<strong>每年长几厘米</strong>。算法世界有一把专用的尺子，今天我们拿直觉版（正式名字叫<strong>大 O 记号</strong>，Big O，先混个脸熟，不用背符号）。</p>
+<h2>二、四种模式速查（5 分钟）</h2>
+<table>
+<thead>
+<tr>
+<th>模式</th>
+<th>Big O</th>
+<th>数据翻倍，时间变成</th>
+<th>例子</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>常数</td>
+<td>O(1)</td>
+<td>不变</td>
+<td>字典查找（W11）</td>
+</tr>
+<tr>
+<td>对数</td>
+<td>O(log n)</td>
+<td>+1 步</td>
+<td><strong>二分查找（今天）</strong></td>
+</tr>
+<tr>
+<td>线性</td>
+<td>O(n)</td>
+<td>×2</td>
+<td>顺序查找（W07）</td>
+</tr>
+<tr>
+<td>平方</td>
+<td>O(n²)</td>
+<td>×4</td>
+<td>冒泡排序（以后）</td>
+</tr>
+</tbody></table>
+<p>关键：<strong>翻倍测试</strong>——把 N 从 100 改到 200，时间变成：</p>
+<ul>
+<li>O(1)：不变（还是 1 步）</li>
+<li>O(log n)：7 → 8（只 +1）</li>
+<li>O(n)：100 → 200（×2）</li>
+<li>O(n²)：10000 → 40000（×4）</li>
+</ul>
+<h2>三、为什么二分查找是 O(log n)（3 分钟）</h2>
+<p>每步砍一半：100 → 50 → 25 → 12 → 6 → 3 → 1。要的步数 = 砍的次数 = <code>log₂(100) ≈ 7</code>。</p>
+<p>数据翻倍（100 → 200），步数变 <code>log₂(200) ≈ 8</code>——<strong>只 +1 步</strong>。</p>
+<blockquote>
+<p><strong>📖 图 2.1</strong>：每次砍一半。像把一摞 100 张牌每次分成两半，7 次后只剩 1 张。</p>
+</blockquote>
+<p><strong>通用公式</strong>：N 格，最多要 ⌈log₂(N)⌉ 步 = O(log n)。</p>
+<h2>四、对比：顺序查找 vs 二分查找（5 分钟）</h2>
+<p>想象一个 10000 格的问题：</p>
+<table>
+<thead>
+<tr>
+<th>算法</th>
+<th>10000 格要几步</th>
+<th>翻倍测试（10000 → 20000）</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>顺序查找（挨个问）</td>
+<td>10000 步</td>
+<td>×2 → 20000 步</td>
+</tr>
+<tr>
+<td>二分查找（砍一半）</td>
+<td>14 步</td>
+<td>+1 → 15 步</td>
+</tr>
+</tbody></table>
+<p>顺序查找是<strong>跟 N 成正比</strong>地涨：10000 → 20000 → 40000 → ...
+二分查找是<strong>对数</strong>地涨：10000 → 20000 → 40000 → ...</p>
+<ul>
+<li>10000 要 14 步</li>
+<li>100 万要 20 步</li>
+<li>10 亿要 30 步</li>
+</ul>
+<p>10 亿格：顺序 = 10 亿步（要好几年），二分 = 30 步（瞬间）。</p>
+<blockquote>
+<p><strong>📖 图 2.2</strong>：随着 N 增长，二分（蓝线）vs 顺序（红线）差距像悬崖。N=10 亿时，顺序要走 10⁹ 步（你重孙子辈），二分走 30 步（眨眼）。</p>
+</blockquote>
+<h2>五、深入了解：Big O 的由来（3 分钟）</h2>
+<p>Big O 是德国数学家 Paul Bachmann 在 1894 年发明的，符号是 &quot;O&quot;——德语 &quot;Ordnung&quot;（秩序）的首字母。原意是&quot;量级的秩序&quot;，不是英语 &quot;Order&quot;（订单）。</p>
+<p><strong>常见误读</strong>：</p>
+<ul>
+<li>&quot;O(n²) 总是比 O(n) 慢&quot;——错。N=10 时，O(n²) = 100 步，O(n) = 10 步，<strong>差 10 倍</strong>——可能 O(n²) + 常数小也快</li>
+<li>&quot;O(log n) 永远快&quot;——错。N=2 时，O(log n) = 1 步，O(1) = 1 步，<strong>没差</strong></li>
+<li><strong>永远先量，再下结论</strong>——这是 Big O 的精神</li>
+</ul>
+<h2>六、何时用：Big O 选择算法（3 分钟）</h2>
+<table>
+<thead>
+<tr>
+<th>场景</th>
+<th>选什么</th>
+<th>为什么</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>N &lt; 100</td>
+<td>顺序查找 / 简单排序</td>
+<td>简单，够快</td>
+</tr>
+<tr>
+<td>N &lt; 10000</td>
+<td>二分查找</td>
+<td>简单又快</td>
+</tr>
+<tr>
+<td>N &gt; 100000</td>
+<td><strong>永远</strong>用二分/哈希</td>
+<td>否则慢得离谱</td>
+</tr>
+<tr>
+<td>训练 AI</td>
+<td>哈希表 + 二分</td>
+<td>数据大</td>
+</tr>
+</tbody></table>
+<p><strong>AI 工程师第一课学 Big O</strong>——选错算法 = 性能差 10-100 倍。</p>
+<h2>七、动手练习（先做完，再看第八节答案）</h2>
+<ol>
+<li>100 格雪原：二分查找最多几步？顺序查找最多几步？差多少？</li>
+<li>100 万格雪原：二分查找最多几步？顺序查找最多几步？倍数？</li>
+<li>10 亿格雪原：二分查找最多几步？顺序查找最多几步？假设一步 1 微秒，顺序查找要多少年？</li>
+</ol>
+<h2>八、答案（先做再看！）</h2>
+<p><strong>1.</strong> 二分 = 7，顺序 = 100，差 = 93（但更要看倍数）</p>
+<p><strong>2.</strong> 二分 = 20，顺序 = 100 万，倍数 = 5 万倍（二分快 5 万倍）</p>
+<p><strong>3.</strong> 二分 = 30，顺序 = 10 亿 = 10⁹ 步 / 10⁶ 步每秒 = 1000 秒 = <strong>约 17 分钟</strong>。二分：瞬间。</p>
+<p>这就是二分查找厉害的地方：数据小的时候差距小，数据大的时候差距<strong>天文数字</strong>。</p>
+<h2>九、今日口诀 + 下一节预告</h2>
+<p><strong>今日口诀</strong>：Big O = <strong>数据翻倍时步数怎么涨</strong>。O(1) &lt; O(log n) &lt; O(n) &lt; O(n²)。</p>
+<p><strong>下节预告</strong>：把二分查找和顺序查找放在一起跑 Python，用 time 模块量一下时间，亲眼看看 Big O 的差距。</p>
+<hr>
+<h2>✅ 今天的阅读完成自查</h2>
+<ul>
+<li><input disabled="" type="checkbox"> 我能说出 Big O = 数据翻倍时步数怎么涨</li>
+<li><input disabled="" type="checkbox"> 我知道二分查找是 O(log n)，顺序查找是 O(n)</li>
+<li><input disabled="" type="checkbox"> 我能预测翻倍测试结果</li>
+<li><input disabled="" type="checkbox"> 我能讲 Big O 的 1894 年起源</li>
+</ul>
+<hr>
+<blockquote>
+<p><strong>📁 作业保存规则</strong>：本课课后练习写进一个文件 <code>W06-S2-homework.py</code>（存 <code>~/sand-hollow/&lt;你的学员ID&gt;/homework/</code>），每道题开头用刚学的备注分隔：<code># --- 题 1 ---</code>、<code># --- 题 2 ---</code>……<strong>交完作业要跟你的智能体说一声</strong>才会批改，评语出现在 <code>reviews/*.review.md</code>。<strong>回报触发词：交完作业或修完坑，都回一句「修完了」</strong>——不回这句 mentor 不知道，坑会一直挂着等。</p>
+</blockquote>
+<h2>📝 今日作业（≈15 分钟，今天的 30 分钟额度还剩这些）</h2>
+<p>新建文件 <code>W06-S2-homework.py</code>（存 <code>~/sand-hollow/&lt;你的学员ID&gt;/homework/</code>），3 道题：</p>
+<ol>
+<li><strong>翻倍测试</strong>：N=100，二分查找和顺序查找各几步？在 Shell 里验证</li>
+<li><strong>大 N 对比</strong>：10 亿格，二分 vs 顺序步数倍数</li>
+<li><strong>场景配 O</strong>：每个场景配 O(1) / O(log n) / O(n) / O(n²)：<ul>
+<li>排好序的电话本里查人</li>
+<li>没排好序的列表里查人</li>
+<li>Python 的 <code>in</code> 查字典</li>
+<li>排序一个列表（W14 会学）</li>
+</ul>
+</li>
+</ol>
+<blockquote>
+<p>交完作业跟你的智能体说一声（回报触发词「修完了」），评语出现在 <code>reviews/*.review.md</code>。</p>
+</blockquote>
+<hr>
+</div>
+</section>
+<section class="lesson" data-lid="W06-S3">
+<div class="lesson-head"><span class="lt">二分查找写代码：把本能变 Python</span></div>
+<div class="md" data-lid="W06-S3"><!-- slug: binary-search-code, type: addon -->
+<h1>W06-S3 · 二分查找写代码：把本能变 Python</h1>
+<blockquote>
+<p><strong>一句话核心</strong>：用 while 循环 + <code>mid = (low + high) // 2</code>，电脑替你砍一半。W05 猜数字的&quot;代码版&quot;。</p>
+</blockquote>
+<blockquote>
+<p><strong>每日节奏（v1.9）：</strong> 阅读 ≈10 分钟，作业 ≈15 分钟，总共 ≤25 分钟
+<strong>需要 Thonny</strong> —— 跑代码、动手改
+难度：⭐⭐⭐ · 本篇是加餐① 二分查找的第 3 课（前置：W06-S1 + W05 while + W08 函数）</p>
+</blockquote>
+<hr>
+<blockquote>
+<p><strong>📂 课前准备</strong>：先在 Thonny <code>文件 → 新建</code>，立刻 <code>文件 → 另存为...</code> 存为 <code>~/sand-hollow/&lt;你的学员ID&gt;/homework/W06-S3-practice.py</code>（ID 就是你注册沙坑用的 8 位数字）。本课所有亲手敲的代码都写进这个文件；课后作业写进同目录的 <code>W06-S3-homework.py</code>，两个文件严格分开，别混。</p>
+</blockquote>
+<h2>一、目标（2 分钟）</h2>
+<p>昨天你说&quot;砍一半&quot;——今天写代码。电脑偷偷想 1-100，你的代码猜，每次猜电脑回 &quot;大了 / 小了 / 命中&quot; 三选一。<strong>最多 7 猜必中</strong>。</p>
+<p>昨天是你在猜，今天让 Python 猜。</p>
+<h2>二、三步走（5 分钟）</h2>
+<p>跟 W05 猜数字一样，分三块：</p>
+<pre><code class="language-python">def guess_number(low, high):
+    &#39;&#39;&#39;Each step cuts in half, guess the middle.&#39;&#39;&#39;
+    mid = (low + high) // 2
+    print(f&#39;I guess: {mid}&#39;)
+    return mid
+
+def update_range(low, high, mid, answer):
+    &#39;&#39;&#39;Narrow range based on computer&#39;s answer -- W05 pattern.&#39;&#39;&#39;
+    if answer == &#39;smaller&#39;:
+        return mid + 1, high      # answer &lt; mid, eliminate mid and below
+    elif answer == &#39;bigger&#39;:
+        return low, mid - 1       # answer &gt; mid, eliminate mid and above
+    else:  # hit
+        return mid, mid
+
+def main():
+    low, high = 1, 100
+    while low &lt;= high:
+        mid = guess_number(low, high)
+        answer = input(&#39;bigger / smaller / hit? &#39;).strip()
+        if answer == &#39;hit&#39;:
+            break
+        low, high = update_range(low, high, mid, answer)
+    print(&#39;Found it!&#39;)
+
+main()
+</code></pre>
+<p>跑一下，让电脑猜你心里想的 1-100。<strong>平均 7 步</strong>——和你一样。</p>
+<h2>三、示例演算：电脑猜 67（5 分钟）</h2>
+<p>假设你心里想 67。<strong>亲手跟着推一遍</strong>：</p>
+<table>
+<thead>
+<tr>
+<th>步骤</th>
+<th>low</th>
+<th>high</th>
+<th>mid</th>
+<th>你回答</th>
+<th>新 low</th>
+<th>新 high</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>1</td>
+<td>1</td>
+<td>100</td>
+<td>50</td>
+<td>bigger</td>
+<td>51</td>
+<td>100</td>
+</tr>
+<tr>
+<td>2</td>
+<td>51</td>
+<td>100</td>
+<td>75</td>
+<td>smaller</td>
+<td>51</td>
+<td>74</td>
+</tr>
+<tr>
+<td>3</td>
+<td>51</td>
+<td>74</td>
+<td>62</td>
+<td>bigger</td>
+<td>63</td>
+<td>74</td>
+</tr>
+<tr>
+<td>4</td>
+<td>63</td>
+<td>74</td>
+<td>68</td>
+<td>smaller</td>
+<td>63</td>
+<td>67</td>
+</tr>
+<tr>
+<td>5</td>
+<td>63</td>
+<td>67</td>
+<td>65</td>
+<td>bigger</td>
+<td>66</td>
+<td>67</td>
+</tr>
+<tr>
+<td>6</td>
+<td>66</td>
+<td>67</td>
+<td>66</td>
+<td>bigger</td>
+<td>67</td>
+<td>67</td>
+</tr>
+<tr>
+<td>7</td>
+<td>67</td>
+<td>67</td>
+<td>67</td>
+<td>hit</td>
+<td>—</td>
+<td>—</td>
+</tr>
+</tbody></table>
+<p>7 步找到。</p>
+<h2>四、为什么&quot;砍中间&quot;？（3 分钟）</h2>
+<p>W06-S1 说砍一半——但砍哪儿？三种选择：</p>
+<table>
+<thead>
+<tr>
+<th>策略</th>
+<th>例子</th>
+<th>速度</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>永远砍第一个</td>
+<td>low 不动，high 移动</td>
+<td>顺序查找（W07 会对比）</td>
+</tr>
+<tr>
+<td>永远砍中间</td>
+<td><code>mid = (low + high) // 2</code></td>
+<td><strong>二分查找（今天）</strong></td>
+</tr>
+<tr>
+<td>随机砍</td>
+<td>没规律</td>
+<td>不可预期</td>
+</tr>
+</tbody></table>
+<p><strong>中间 = 平衡</strong>。砍完两边差不多大。最坏情况 = 平衡树深度 = log₂(N)。</p>
+<blockquote>
+<p><strong>📖 图 3.1</strong>：中间 = 平衡 = 砍完两边差不多大。这是二分为什么&quot;快&quot;的核心。</p>
+</blockquote>
+<h2>五、<code>//</code> 整除：要中间但不要小数（2 分钟）</h2>
+<p><code>(low + high) // 2</code>：</p>
+<ul>
+<li>low=1, high=100：<code>(1+100) // 2 = 50</code></li>
+<li>low=50, high=100：<code>(50+100) // 2 = 75</code></li>
+</ul>
+<p>为什么用 <code>//</code> 不用 <code>/</code>？Python 的 <code>/</code> 给出小数：<code>101/2 = 50.5</code>。做列表下标会报错。<code>//</code> 永远整数：<code>101//2 = 50</code>。</p>
+<h2>六、深入了解：二分查找为什么老出错（3 分钟）</h2>
+<p>Donald Knuth（《计算机程序设计艺术》作者）说过：&quot;二分查找看似简单，实则陷阱重重&quot;。</p>
+<p><strong>常见 bug</strong>：</p>
+<ol>
+<li><code>while low &lt; high</code>（漏 <code>=</code>）—— 漏掉 low == high 的情况</li>
+<li><code>high = mid</code>（漏 <code>-1</code>）—— 多查一次</li>
+<li><code>mid = (low + high) / 2</code>（用 <code>/</code>）—— 整数被算成小数</li>
+</ol>
+<p><strong>多测边界</strong>：</p>
+<ul>
+<li>空列表（<code>len = 0</code>）</li>
+<li>单元素（<code>len = 1</code>）</li>
+<li>目标在第一个</li>
+<li>目标在最后一个</li>
+<li>目标不存在</li>
+</ul>
+<p><strong>2006 年 Java 标准库的二分查找 bug 潜伏了快十年</strong>。你的代码也几乎肯定会有 bug——<strong>写完多测</strong>。</p>
+<h2>七、何时用：二分查找的 4 个变种（3 分钟）</h2>
+<table>
+<thead>
+<tr>
+<th>场景</th>
+<th>变种</th>
+<th>代码差异</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>找目标</td>
+<td>标准二分</td>
+<td>找到就 return</td>
+</tr>
+<tr>
+<td>找第一次出现</td>
+<td>下界</td>
+<td>不停往左缩</td>
+</tr>
+<tr>
+<td>找最后一次出现</td>
+<td>上界</td>
+<td>不停往右缩</td>
+</tr>
+<tr>
+<td>找&quot;插入位置&quot;</td>
+<td>二分插入</td>
+<td>找不到就返回 mid</td>
+</tr>
+</tbody></table>
+<p>W06-S4 的词典查找就是标准版。W06-S5 的&quot;选对算法&quot;会用上界。</p>
+<h2>八、动手练习（先做完，再看第九节答案）</h2>
+<ol>
+<li>跑上面的代码，让电脑猜 50、25、75——验证每猜步数</li>
+<li>改 low/high 为 1-1000，预测最多几步，验证</li>
+<li>改策略：<code>mid = low</code>（永远砍第一个）——找 100 要几步？</li>
+<li>故意写错一处：把 <code>//</code> 改成 <code>/</code>——看什么错</li>
+</ol>
+<h2>九、答案</h2>
+<p><strong>1.</strong> 50：最多 1；25：最多 7（砍：25→13→19→16→22→...）；75：最多 7（类似）</p>
+<p><strong>2.</strong> 1-1000：最多 10（2^10 = 1024 ≥ 1000）</p>
+<p><strong>3.</strong> <strong>永远砍第一个 = 顺序查找 = 100 步</strong>（没优化）。下周 W07 的顺序查找就是这个。</p>
+<p><strong>4.</strong> <code>TypeError: list indices must be integers or slices, not float</code>——<code>/2</code> 返回浮点 50.5，列表不接受。</p>
+<h2>十、今日口诀 + 下一节预告</h2>
+<p><strong>今日口诀</strong>：<strong>有序 + 砍中间 = 二分查找</strong>。跟 W05 的 <code>// 2</code> 取中点一样，今天只是把它包成函数。</p>
+<p><strong>下节预告</strong>：把二分查找用到真实场景——查一本 10000 词的词典。</p>
+<hr>
+<h2>✅ 今天的阅读完成自查</h2>
+<ul>
+<li><input disabled="" type="checkbox"> 我能写 <code>mid = (low + high) // 2</code></li>
+<li><input disabled="" type="checkbox"> 我能说出为什么用 <code>//</code> 不用 <code>/</code></li>
+<li><input disabled="" type="checkbox"> 我能跑电脑猜我心里数的程序</li>
+<li><input disabled="" type="checkbox"> 我能列出 3 个二分的常见 bug</li>
+</ul>
+<hr>
+<blockquote>
+<p><strong>📁 作业保存规则</strong>：本课课后练习写进一个文件 <code>W06-S3-homework.py</code>（存 <code>~/sand-hollow/&lt;你的学员ID&gt;/homework/</code>），每道题开头用刚学的备注分隔：<code># --- 题 1 ---</code>、<code># --- 题 2 ---</code>……<strong>交完作业要跟你的智能体说一声</strong>才会批改，评语出现在 <code>reviews/*.review.md</code>。<strong>回报触发词：交完作业或修完坑，都回一句「修完了」</strong>——不回这句 mentor 不知道，坑会一直挂着等。</p>
+</blockquote>
+<h2>📝 今日作业（≈15 分钟，今天的 30 分钟额度还剩这些）</h2>
+<p>新建文件 <code>W06-S3-homework.py</code>（存 <code>~/sand-hollow/&lt;你的学员ID&gt;/homework/</code>），3 道题：</p>
+<ol>
+<li><strong>反向游戏</strong>：电脑想 1-100，<strong>你</strong>猜。数你一共猜了几次，跟二分查找的 7 比比</li>
+<li><strong>函数封装</strong>：把猜数字包成 <code>def binary_search(low, high)</code>，返回 <code>(found, mid, count)</code></li>
+<li><strong>边界错误</strong>：用户输入&quot;小了&quot;但 mid = 1 时，low &gt; high 会怎样？加边界检查</li>
+</ol>
+<blockquote>
+<p>交完作业跟你的智能体说一声（回报触发词「修完了」），评语出现在 <code>reviews/*.review.md</code>。</p>
+</blockquote>
+<hr>
+</div>
+</section>
+<section class="lesson" data-lid="W06-S4">
+<div class="lesson-head"><span class="lt">二分查找实战：查一本真的词典</span></div>
+<div class="md" data-lid="W06-S4"><!-- slug: binary-search-practice, type: addon -->
+<h1>W06-S4 · 二分查找实战：查一本真的词典</h1>
+<blockquote>
+<p><strong>一句话核心</strong>：在排好序的列表里查东西，二分永远 ≤ log₂(N) 步。10000 词要 14 步，100 万词要 20 步。</p>
+</blockquote>
+<blockquote>
+<p><strong>每日节奏（v1.9）：</strong> 阅读 ≈8 分钟，作业 ≈17 分钟，总共 ≤25 分钟
+<strong>需要 Thonny</strong> —— 跑代码、量时间
+难度：⭐⭐⭐ · 本篇是加餐① 二分查找的第 4 课（前置：W06-S3 + W07 列表）</p>
+</blockquote>
+<hr>
+<blockquote>
+<p><strong>📂 课前准备</strong>：先在 Thonny <code>文件 → 新建</code>，立刻 <code>文件 → 另存为...</code> 存为 <code>~/sand-hollow/&lt;你的学员ID&gt;/homework/W06-S4-practice.py</code>（ID 就是你注册沙坑用的 8 位数字）。本课所有亲手敲的代码都写进这个文件；课后作业写进同目录的 <code>W06-S4-homework.py</code>，两个文件严格分开，别混。</p>
+</blockquote>
+<h2>一、真问题：10000 词词典（3 分钟）</h2>
+<p>想象一本 10000 词的英文词典，按字母顺序排好。查 &quot;warrior&quot;。</p>
+<p>两种方法：</p>
+<ul>
+<li><strong>顺序查找</strong>：逐页翻——最坏 10000 次</li>
+<li><strong>二分查找</strong>：翻到中间页，决定左还是右，重复——最坏 14 次</li>
+</ul>
+<p>今天：两种都写，跑起来量时间，亲眼看 Big O。</p>
+<h2>二、顺序查找代码（5 分钟）</h2>
+<pre><code class="language-python">def linear_search(word_list, target):
+    &#39;&#39;&#39;Page through until found or done.&#39;&#39;&#39;
+    for i, word in enumerate(word_list):
+        if word == target:
+            return i
+    return -1
+
+# Sorted word list (small sample)
+words = [&#39;apple&#39;, &#39;banana&#39;, &#39;cherry&#39;, &#39;date&#39;, &#39;elderberry&#39;, &#39;fig&#39;, &#39;grape&#39;]
+print(linear_search(words, &#39;cherry&#39;))   # 2
+print(linear_search(words, &#39;kiwi&#39;))      # -1
+</code></pre>
+<p>最坏：目标是最后一个单词或不在列表里。步数 = N（10000）。</p>
+<h2>三、二分查找代码（5 分钟）</h2>
+<pre><code class="language-python">def binary_search(word_list, target):
+    &#39;&#39;&#39;Cut in half each time. word_list must be sorted.&#39;&#39;&#39;
+    low = 0
+    high = len(word_list) - 1
+    while low &lt;= high:
+        mid = (low + high) // 2
+        if word_list[mid] == target:
+            return mid
+        elif word_list[mid] &lt; target:
+            low = mid + 1   # target is in the right half
+        else:
+            high = mid - 1  # target is in the left half
+    return -1
+
+words = [&#39;apple&#39;, &#39;banana&#39;, &#39;cherry&#39;, &#39;date&#39;, &#39;elderberry&#39;, &#39;fig&#39;, &#39;grape&#39;]
+print(binary_search(words, &#39;cherry&#39;))   # 2
+print(binary_search(words, &#39;kiwi&#39;))      # -1
+</code></pre>
+<p>最坏：10000 词列表。步数 = log₂(10000) ≈ 14。</p>
+<h2>四、用 time 模块量时间（5 分钟）</h2>
+<pre><code class="language-python">import time
+
+# Make a 10000-word sorted list (simplified: word00000 ... word09999)
+words = [f&#39;word{i:05d}&#39; for i in range(10000)]
+
+# Worst case: search for last word
+target = &#39;word09999&#39;
+
+start = time.time()
+linear_search(words, target)
+linear_time = time.time() - start
+
+start = time.time()
+binary_search(words, target)
+binary_time = time.time() - start
+
+print(f&#39;Linear: {linear_time:.4f}s&#39;)
+print(f&#39;Binary: {binary_time:.4f}s&#39;)
+print(f&#39;Binary is {linear_time / binary_time:.0f}x faster than linear&#39;)
+</code></pre>
+<p>跑一下。看差距。在 10000 词上二分查找可能比顺序查找快 100-1000 倍。</p>
+<h2>五、示例演算：找 &quot;cherry&quot;（3 分钟）</h2>
+<p>在 <code>[&#39;apple&#39;, &#39;banana&#39;, &#39;cherry&#39;, &#39;date&#39;, &#39;elderberry&#39;, &#39;fig&#39;, &#39;grape&#39;]</code> 里找 &quot;cherry&quot;。</p>
+<table>
+<thead>
+<tr>
+<th>步骤</th>
+<th>low</th>
+<th>high</th>
+<th>mid</th>
+<th>word_list[mid]</th>
+<th>反馈</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>1</td>
+<td>0</td>
+<td>6</td>
+<td>3</td>
+<td>date</td>
+<td>date &gt; cherry，往左</td>
+</tr>
+<tr>
+<td>2</td>
+<td>0</td>
+<td>2</td>
+<td>1</td>
+<td>banana</td>
+<td>banana &lt; cherry，往右</td>
+</tr>
+<tr>
+<td>3</td>
+<td>2</td>
+<td>2</td>
+<td>2</td>
+<td>cherry</td>
+<td>命中！返回 2</td>
+</tr>
+</tbody></table>
+<p>3 步找到。</p>
+<h2>六、深入了解：为什么 AI 离不开搜索（3 分钟）</h2>
+<p><strong>AI 系统的核心 = 搜索 + 优化</strong>：</p>
+<ul>
+<li><strong>推荐系统</strong>：搜&quot;和你像的人&quot;——把 1 亿用户里跟你行为最像的找出来</li>
+<li><strong>搜索引擎</strong>：搜几十亿网页——你输入&quot;算法&quot;，0.1 秒返回几百万结果</li>
+<li><strong>聊天机器人</strong>：搜&quot;最合适的回答&quot;——在 1 万亿 token 知识库找相关段</li>
+</ul>
+<p><strong>加速招</strong>：</p>
+<ul>
+<li><strong>预排序</strong>：排好序的列表能二分</li>
+<li><strong>索引</strong>：数据库给字段建索引（B 树、红黑树）</li>
+<li><strong>缓存</strong>：算过的存起来（memcached、Redis）</li>
+<li><strong>向量搜索</strong>：把文字变成数字&quot;指纹&quot;，搜指纹相近的（FAISS、Pinecone）</li>
+</ul>
+<p><strong>2024-2026 AI 实验室最卷的方向就是搜索算法</strong>——ChatGPT 用的&quot;向量数据库&quot;就是搜索算法的超级加强版。</p>
+<h2>七、何时用：二分 vs 顺序 vs 哈希（3 分钟）</h2>
+<table>
+<thead>
+<tr>
+<th>场景</th>
+<th>选什么</th>
+<th>为什么</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>排好序的列表</td>
+<td>二分</td>
+<td>O(log n)</td>
+</tr>
+<tr>
+<td>没排好序的列表</td>
+<td>顺序</td>
+<td>排序代价 &gt; 搜索代价</td>
+</tr>
+<tr>
+<td>反复查同一份数据</td>
+<td><strong>哈希表</strong>（Python dict）</td>
+<td>O(1)</td>
+</tr>
+<tr>
+<td>一次性查</td>
+<td>顺序</td>
+<td>简单</td>
+</tr>
+</tbody></table>
+<p><strong>AI 工程师选错 = 慢 100 倍</strong>。先排序/建索引，再二分/哈希。</p>
+<h2>八、动手练习</h2>
+<ol>
+<li>在 10000 词列表上跑两个函数，查 &quot;word09999&quot;（最坏情况）</li>
+<li>试试查 &quot;word00000&quot;（第一个词）——两个都应该很快</li>
+<li>试试查 &quot;word05000&quot;（中间）——二分超级快，顺序慢</li>
+</ol>
+<h2>九、答案</h2>
+<ol>
+<li>顺序 ~0.001-0.01 秒，二分 ~0.0001-0.001 秒。比值 10-100 倍。</li>
+<li>两个都快（顺序 1 步，二分 1 步）</li>
+<li>顺序：5000 步；二分：~13 步</li>
+</ol>
+<h2>十、今日口诀 + 下一节预告</h2>
+<p><strong>今日口诀</strong>：二分查找要<strong>排好序的数据</strong>。没排好序？先排序再二分。</p>
+<p><strong>下节预告</strong>：在同一问题上跑多个算法——亲眼看 Big O。</p>
+<hr>
+<h2>✅ 今天的阅读完成自查</h2>
+<ul>
+<li><input disabled="" type="checkbox"> 我能写顺序查找和二分查找</li>
+<li><input disabled="" type="checkbox"> 我知道二分查找要排好序的数据</li>
+<li><input disabled="" type="checkbox"> 我会用 <code>time.time()</code> 量速度</li>
+<li><input disabled="" type="checkbox"> 我能列出 3 个 AI 用搜索的真实场景</li>
+</ul>
+<hr>
+<blockquote>
+<p><strong>📁 作业保存规则</strong>：本课课后练习写进一个文件 <code>W06-S4-homework.py</code>（存 <code>~/sand-hollow/&lt;你的学员ID&gt;/homework/</code>），每道题开头用刚学的备注分隔：<code># --- 题 1 ---</code>、<code># --- 题 2 ---</code>……<strong>交完作业要跟你的智能体说一声</strong>才会批改，评语出现在 <code>reviews/*.review.md</code>。<strong>回报触发词：交完作业或修完坑，都回一句「修完了」</strong>——不回这句 mentor 不知道，坑会一直挂着等。</p>
+</blockquote>
+<h2>📝 今日作业（≈17 分钟，今天的 30 分钟额度还剩这些）</h2>
+<p>新建文件 <code>W06-S4-homework.py</code>（存 <code>~/sand-hollow/&lt;你的学员ID&gt;/homework/</code>），3 道题：</p>
+<ol>
+<li><strong>电话本搜索</strong>：1000 个人名排好序，找 &quot;Zhang San&quot;。二分最多看几次？顺序最多看几次？差多少？</li>
+<li><strong>速度测试</strong>：在 1000 元素列表上跑你的顺序 vs 二分，打印比值</li>
+<li><strong>插入位置</strong>：给排好序的列表和新值，找插入位置（保持有序）。提示：用二分查找</li>
+</ol>
+<blockquote>
+<p>交完作业跟你的智能体说一声（回报触发词「修完了」），评语出现在 <code>reviews/*.review.md</code>。</p>
+</blockquote>
+<hr>
+</div>
+</section>
+<section class="lesson" data-lid="W06-S5">
+<div class="lesson-head"><span class="lt">选对算法：复杂度在真实场景</span></div>
+<div class="md" data-lid="W06-S5"><!-- slug: algorithm-compare, type: addon -->
+<h1>W06-S5 · 选对算法：复杂度在真实场景</h1>
+<blockquote>
+<p><strong>一句话核心</strong>：<strong>N 大了，选错算法 = 慢 100 倍</strong>。先量，别猜。先排序/建索引，再二分/哈希。</p>
+</blockquote>
+<blockquote>
+<p><strong>每日节奏（v1.9）：</strong> 阅读 ≈8 分钟，作业 ≈17 分钟，总共 ≤25 分钟
+<strong>需要 Thonny</strong> —— 量、比较、选
+难度：⭐⭐⭐ · 本篇是加餐① 二分查找的第 5 课（前置：W06-S4 + W07 列表 + W08 函数）</p>
+</blockquote>
+<hr>
+<blockquote>
+<p><strong>📂 课前准备</strong>：先在 Thonny <code>文件 → 新建</code>，立刻 <code>文件 → 另存为...</code> 存为 <code>~/sand-hollow/&lt;你的学员ID&gt;/homework/W06-S5-practice.py</code>（ID 就是你注册沙坑用的 8 位数字）。本课所有亲手敲的代码都写进这个文件；课后作业写进同目录的 <code>W06-S5-homework.py</code>，两个文件严格分开，别混。</p>
+</blockquote>
+<h2>一、四种算法模式速查表（5 分钟）</h2>
+<table>
+<thead>
+<tr>
+<th>模式</th>
+<th>Big O</th>
+<th>例子</th>
+<th>何时用</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>常数</td>
+<td>O(1)</td>
+<td>字典查找（W11）</td>
+<td>直接访问</td>
+</tr>
+<tr>
+<td>对数</td>
+<td>O(log n)</td>
+<td><strong>二分查找（今天）</strong></td>
+<td>排好序的数据</td>
+</tr>
+<tr>
+<td>线性</td>
+<td>O(n)</td>
+<td>顺序查找</td>
+<td>没排好序、N 小</td>
+</tr>
+<tr>
+<td>平方</td>
+<td>O(n²)</td>
+<td>冒泡排序</td>
+<td>只 N 小</td>
+</tr>
+</tbody></table>
+<p><strong>经验法则</strong>：</p>
+<ul>
+<li>N &lt; 100：随便选，挑最简单的</li>
+<li>N &lt; 10000：顺序勉强 OK，二分更好</li>
+<li>N &gt; 100000：<strong>永远</strong>用二分查找（或哈希表）</li>
+</ul>
+<h2>二、先排序，再搜索——AI 最常用的模式（5 分钟）</h2>
+<p>现实 AI 几乎都这么干：</p>
+<ol>
+<li><strong>排序</strong>数据一次（贵）</li>
+<li><strong>二分查找</strong>多次（便宜）</li>
+</ol>
+<p>例子：AI 搜索引擎把文档按相关性排序，然后在前 K 个里二分搜。同样招——你查词典找 &quot;warrior&quot;。</p>
+<h2>三、在同一问题上跑四个算法（10 分钟）</h2>
+<pre><code class="language-python">import time
+
+def linear_search(arr, target):
+    for i in range(len(arr)):
+        if arr[i] == target:
+            return i
+    return -1
+
+def binary_search(arr, target):
+    low, high = 0, len(arr) - 1
+    while low &lt;= high:
+        mid = (low + high) // 2
+        if arr[mid] == target:
+            return mid
+        elif arr[mid] &lt; target:
+            low = mid + 1
+        else:
+            high = mid - 1
+    return -1
+
+def in_list(arr, target):
+    &#39;&#39;&#39;Python&#39;s built-in `in` operator.&#39;&#39;&#39;
+    return target in arr
+
+def set_lookup(s, target):
+    &#39;&#39;&#39;Convert to set, then lookup.&#39;&#39;&#39;
+    return target in s
+
+# Make 10000-element sorted list
+N = 10000
+sorted_arr = list(range(N))   # 0, 1, 2, ..., 9999
+s = set(sorted_arr)            # set version
+# Worst case (last element)
+target = N - 1
+
+# Time each
+for name, fn in [(&#39;Linear&#39;, linear_search), (&#39;Binary&#39;, binary_search),
+                 (&#39;in_list&#39;, in_list), (&#39;set_lookup&#39;, set_lookup)]:
+    start = time.time()
+    result = fn(sorted_arr if &#39;set&#39; not in name else s, target)
+    elapsed = time.time() - start
+    print(f&#39;{name:10s}: {elapsed:.6f}s  found={result}&#39;)
+</code></pre>
+<p>跑一下。惊喜：<strong>集合查找最快</strong>（哈希，O(1)）。二分紧随其后。顺序最慢。</p>
+<h2>四、示例：10000 元素跑四个算法（3 分钟）</h2>
+<table>
+<thead>
+<tr>
+<th>N</th>
+<th>顺序</th>
+<th>二分</th>
+<th>in 列表</th>
+<th>集合</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>100</td>
+<td>0.00001s</td>
+<td>0.00001s</td>
+<td>0.00001s</td>
+<td>0.00001s</td>
+</tr>
+<tr>
+<td>10000</td>
+<td>0.0005s</td>
+<td>0.00005s</td>
+<td>0.00005s</td>
+<td>0.00001s</td>
+</tr>
+<tr>
+<td>1000000</td>
+<td>0.05s</td>
+<td>0.0001s</td>
+<td>0.001s</td>
+<td>0.00001s</td>
+</tr>
+</tbody></table>
+<p>N=100 万时：<strong>二分比顺序快 500 倍；集合快 5000 倍</strong>。大数据，选对算法很关键。</p>
+<h2>五、深入了解：AI 工程师怎么用 Big O（3 分钟）</h2>
+<p><strong>AI 工程师的工作日常</strong>：</p>
+<ul>
+<li><strong>选模型</strong>：Transformer vs RNN vs LSTM——每种有不同 Big O</li>
+<li><strong>选搜索算法</strong>：二分 vs 哈希 vs 向量搜索</li>
+<li><strong>选数据结构</strong>：数组 vs 链表 vs 树 vs 图</li>
+<li><strong>选优化方法</strong>：梯度下降 vs 牛顿法——前者 O(n)，后者 O(n²)</li>
+</ul>
+<p><strong>真实案例</strong>：</p>
+<ul>
+<li><strong>2017 年 Transformer 论文</strong>：把 O(n²) 的 RNN 换成 O(n log n) 的注意力机制，<strong>让大模型训练成为可能</strong></li>
+<li><strong>2020 年向量搜索</strong>：把 O(n) 的搜索换成 O(log n) 的近似最近邻，<strong>让 ChatGPT 实时响应成为可能</strong></li>
+</ul>
+<p><strong>没学 Big O 的 AI 工程师 = 没学过刹车的赛车手</strong>——飞出去是迟早的事。</p>
+<h2>六、何时用：选算法 4 步法（3 分钟）</h2>
+<ol>
+<li><strong>问 N 多大</strong>？N &lt; 100 随便选；N &gt; 10000 选对算法</li>
+<li><strong>数据排好序了吗</strong>？没排，排序一次（贵），然后二分（便宜）</li>
+<li><strong>查一次还是反复查</strong>？反复查：建索引 / 哈希表</li>
+<li><strong>量一下</strong>：<code>time.time()</code> 包你的函数，跑 N=100, 10000, 1000000，看时间</li>
+</ol>
+<p><strong>永远先量，再优化</strong>。猜 = 浪费时间。</p>
+<h2>七、动手练习</h2>
+<ol>
+<li>在 N=100、N=10000、N=1000000 上跑四个算法——写表格</li>
+<li>对每个 N，哪个最快？最慢？比值多少？</li>
+</ol>
+<h2>八、答案</h2>
+<table>
+<thead>
+<tr>
+<th>N</th>
+<th>顺序</th>
+<th>二分</th>
+<th>in 列表</th>
+<th>集合</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>100</td>
+<td>0.00001s</td>
+<td>0.00001s</td>
+<td>0.00001s</td>
+<td>0.00001s</td>
+</tr>
+<tr>
+<td>10000</td>
+<td>0.0005s</td>
+<td>0.00005s</td>
+<td>0.00005s</td>
+<td>0.00001s</td>
+</tr>
+<tr>
+<td>1000000</td>
+<td>0.05s</td>
+<td>0.0001s</td>
+<td>0.001s</td>
+<td>0.00001s</td>
+</tr>
+</tbody></table>
+<p>N=100 万时：<strong>二分比顺序快 500 倍；集合快 5000 倍</strong>。</p>
+<h2>九、今日口诀 + 周末预告</h2>
+<p><strong>今日口诀</strong>：<strong>先排序 + 二分查找 = AI 的看家本领</strong>。先量，别猜。</p>
+<p><strong>周末预告</strong>：词典寻宝赛，多轮对决，统计总用时比一比。</p>
+<hr>
+<h2>✅ 今天的阅读完成自查</h2>
+<ul>
+<li><input disabled="" type="checkbox"> 我能说出 4 种算法模式（O(1)、O(log n)、O(n)、O(n²)）</li>
+<li><input disabled="" type="checkbox"> 我能根据场景选对算法</li>
+<li><input disabled="" type="checkbox"> 我会用 <code>time.time()</code> 量函数速度</li>
+<li><input disabled="" type="checkbox"> 我能讲 Transformer 怎么从 O(n²) 变成 O(n log n)</li>
+</ul>
+<hr>
+<blockquote>
+<p><strong>📁 作业保存规则</strong>：本课课后练习写进一个文件 <code>W06-S5-homework.py</code>（存 <code>~/sand-hollow/&lt;你的学员ID&gt;/homework/</code>），每道题开头用刚学的备注分隔：<code># --- 题 1 ---</code>、<code># --- 题 2 ---</code>……<strong>交完作业要跟你的智能体说一声</strong>才会批改，评语出现在 <code>reviews/*.review.md</code>。<strong>回报触发词：交完作业或修完坑，都回一句「修完了」</strong>——不回这句 mentor 不知道，坑会一直挂着等。</p>
+</blockquote>
+<h2>📝 今日作业（≈17 分钟，今天的 30 分钟额度还剩这些）</h2>
+<p>新建文件 <code>W06-S5-homework.py</code>（存 <code>~/sand-hollow/&lt;你的学员ID&gt;/homework/</code>），3 道题：</p>
+<ol>
+<li><strong>模式匹配</strong>：每个场景配 O(1)、O(log n)、O(n)、O(n²)：<ul>
+<li>排好序的电话本里查人</li>
+<li>没排好序的列表里查人</li>
+<li>Python 的 <code>in</code> 查字典</li>
+<li>排序一个列表（W14 会学）</li>
+</ul>
+</li>
+<li><strong>速度测试</strong>：N=100000 上跑顺序 vs 二分，算比值</li>
+<li><strong>找瓶颈</strong>：10 亿格，哪个算法&quot;够快&quot;？</li>
+</ol>
+<blockquote>
+<p>交完作业跟你的智能体说一声（回报触发词「修完了」），评语出现在 <code>reviews/*.review.md</code>。</p>
+</blockquote>
+<hr>
+</div>
+</section>
+<section class="lesson" data-lid="W06-weekend">
+<div class="lesson-head"><span class="lt">词典寻宝赛 + 读代码挑战</span></div>
+<div class="md" data-lid="W06-weekend"><!-- slug: treasure, type: addon -->
+<h1>W06-weekend · 词典寻宝赛 + 读代码挑战</h1>
+<blockquote>
+<p><strong>一句话核心</strong>：造一个寻宝游戏，让电脑二分 vs 顺序，看谁赢。理解边界 bug 怎么写错二分查找。</p>
+</blockquote>
+<blockquote>
+<p><strong>每日节奏（v1.9）：</strong> 周末项目 ≈60 分钟（纯动手，没阅读）
+<strong>写代码时间</strong> —— 设计、写、调试
+难度：⭐⭐⭐⭐ · 前置：W06 五节全过</p>
+</blockquote>
+<hr>
+<blockquote>
+<p><strong>📂 课前准备 · 随堂练习文件</strong>：先在 Thonny <code>文件 → 新建</code>，立刻 <code>文件 → 另存为...</code> 存为 <code>~/sand-hollow/&lt;你的学员ID&gt;/homework/W06-weekend-practice.py</code>。周末代码都写在这里。</p>
+</blockquote>
+<h2>⓪ 🤖 课前 AI 一分钟 · 第 30 颗：AI = 搜索 + 优化（3 分钟）</h2>
+<p>今天的周末：建一个词典寻宝游戏，数你的代码跑几步，跟同学比一比。</p>
+<p><strong>AI 大部分就是搜索 + 优化</strong>：推荐系统 = 搜&quot;和你像的人&quot;；导航系统 = 搜&quot;最短路径&quot;；聊天机器人 = 搜&quot;最合适的回答&quot;。都建立在今天的二分 + Big O 上。</p>
+<p><strong>今日口诀</strong>：<strong>最快的算法是不用跑的算法</strong>。缓存、预计算、排序一次。AI 工程师 90% 的优化花在这。</p>
+<p><strong>⚔️ 判一判</strong>：</p>
+<blockquote>
+<ol>
+<li>AI 大部分就是搜索算法</li>
+<li>排序数据是浪费（二分要排好序，但排序贵）</li>
+</ol>
+</blockquote>
+<details><summary>答案</summary>
+
+<p><strong>1.</strong> ✓ 搜索 + 排序 + 检索 = AI 工作量的 90%；<strong>2.</strong> ✗ 排一次，查多次，永远更便宜。AI 工程师默认先排序。</p>
+</details>
+
+<hr>
+<h2>一、项目：词典寻宝赛（60 分钟）</h2>
+<p>建一个 3 轮寻宝游戏：</p>
+<ol>
+<li>玩家在 10000 词词典里选一个秘密词</li>
+<li>电脑用二分查找找它，数猜了几次</li>
+<li>电脑用顺序查找，数猜了几次</li>
+<li>比一比：二分最多 14 步，顺序最多 10000 步——二分完胜！</li>
+</ol>
+<h2>二、分步走（10 分钟）</h2>
+<pre><code class="language-python">import random
+
+# Step 1: make a 10000-word dictionary (simplified)
+dictionary = [f&#39;word{i:05d}&#39; for i in range(10000)]
+
+# Step 2: player picks a secret word
+print(&#39;Pick a secret word between word00000 and word09999&#39;)
+print(&#39;(type any number 0-9999)&#39;)
+secret_num = int(input(&#39;Your choice: &#39;))
+secret_word = dictionary[secret_num]
+print(f&#39;Secret set: {secret_word}&#39;)
+input(&#39;Press Enter when ready...&#39;)
+
+# Step 3: computer uses binary search
+def binary_search_count(word_list, target):
+    low = 0
+    high = len(word_list) - 1
+    count = 0
+    while low &lt;= high:
+        mid = (low + high) // 2
+        count = count + 1
+        if word_list[mid] == target:
+            return count
+        elif word_list[mid] &lt; target:
+            low = mid + 1
+        else:
+            high = mid - 1
+    return -1
+
+# Step 4: computer uses linear search
+def linear_search_count(word_list, target):
+    count = 0
+    for i in range(len(word_list)):
+        count = count + 1
+        if word_list[i] == target:
+            return count
+    return -1
+
+# Run both
+binary_guesses = binary_search_count(dictionary, secret_word)
+linear_guesses = linear_search_count(dictionary, secret_word)
+
+print(f&#39;\nResults:&#39;)
+print(f&#39;  Binary search: {binary_guesses} guesses&#39;)
+print(f&#39;  Linear search: {linear_guesses} guesses&#39;)
+print(f&#39;  Linear is {linear_guesses / binary_guesses:.0f}x slower than binary&#39;)
+</code></pre>
+<h2>三、跑一下看差距（10 分钟）</h2>
+<p>跑代码。试几个秘密数字：</p>
+<ul>
+<li>0（第一个词）</li>
+<li>9999（最后一个词）</li>
+<li>5000（中间）</li>
+<li>随机</li>
+</ul>
+<p>注意：二分<strong>永远 ≤14 步</strong>。顺序跟秘密数字<strong>成正比</strong>。</p>
+<h2>四、加分：读代码挑战（15 分钟）</h2>
+<p>不看运行结果，找出下面代码里的 3 个 bug：</p>
+<pre><code class="language-python">def binary_search_buggy(arr, target):
+    low = 0
+    high = len(arr)          # bug 1?
+    while low &lt; high:         # bug 2?
+        mid = (low + high) / 2  # bug 3?
+        if arr[mid] == target:
+            return mid
+        elif arr[mid] &gt; target:
+            high = mid
+        else:
+            low = mid + 1
+    return -1
+</code></pre>
+<p>找出每个 bug。<strong>然后修，再跑</strong>。</p>
+<details><summary>提示</summary>
+
+<ol>
+<li><code>high = len(arr)</code>——应该是 <code>len(arr) - 1</code>（少减一错误，跳过最后一个）</li>
+<li><code>while low &lt; high</code>——应该是 <code>while low &lt;= high</code>（漏掉 low == high 的情况）</li>
+<li><code>/ 2</code>——应该是 <code>// 2</code>（整除；Python 这里也能跑，但惯例用整除）</li>
+</ol>
+</details>
+
+<h2>五、提交（5 分钟）</h2>
+<p>存到 <code>W06-weekend-practice.py</code>。跟 mentor 说&quot;<strong>修完了</strong>&quot;。</p>
+<h2>六、反思（5 分钟）</h2>
+<p>这周学了什么？</p>
+<ul>
+<li>二分查找：每步砍一半，O(log n)</li>
+<li>Big O：数据翻倍时步数怎么涨</li>
+<li>选算法：先量，别猜</li>
+<li>AI 就建立在这些基本功上</li>
+</ul>
+<p>下周：W07 列表（list）——存一堆值，循环遍历它们。有了二分查找基础，你会明白为什么排好序的列表能二分。</p>
+<hr>
+<h2>✅ 周末自查</h2>
+<ul>
+<li><input disabled="" type="checkbox"> 建好词典寻宝赛，跑过</li>
+<li><input disabled="" type="checkbox"> 试过 3+ 个秘密数字，看到二分永远 ≤14</li>
+<li><input disabled="" type="checkbox"> 找到并修了 3 个 bug</li>
+<li><input disabled="" type="checkbox"> 存到 <code>W06-weekend-practice.py</code></li>
+</ul>
+<p>四格全勾 → 周末完成。下周：W07。</p>
+<hr>
+<h2>👀 C++ 认脸时刻（1 分钟 · 只看不敲）</h2>
+<pre><code class="language-cpp">#include &lt;iostream&gt;
+#include &lt;vector&gt;
+int main() {
+    std::vector&lt;int&gt; arr = {0, 1, 2, 3, 4, 5};
+    int target = 3;
+    // C++23 has std::find (linear); binary_search returns bool
+    bool found = std::binary_search(arr.begin(), arr.end(), target);
+    auto it = std::lower_bound(arr.begin(), arr.end(), target);
+    int index = it - arr.begin();   // 3
+    std::cout &lt;&lt; &quot;found=&quot; &lt;&lt; found &lt;&lt; &quot; index=&quot; &lt;&lt; index &lt;&lt; std::endl;
+}
+</code></pre>
+<p>三个认脸：</p>
+<ul>
+<li><code>std::lower_bound</code> 返回第一个 ≥ target 的迭代器</li>
+<li><code>it - arr.begin()</code> = 下标（指针算术）</li>
+<li>跟 Python 的 <code>bisect.bisect_left(arr, target)</code> 一个意思</li>
+</ul>
+</div>
+</section>
+</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,897 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>W13 · 字典：用名字找东西（前置 W12 加餐③）</title>
+<style>
+:root{--bg:#0f1420;--card:#171e2e;--card2:#1e2740;--border:#2a3550;--text:#e8ecf4;--text2:#8b96ad;--accent:#5b9dff;--ok:#3ecf8e}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+.wrap{max-width:900px;margin:0 auto;padding:28px 20px 60px}
+h1{font-size:1.5rem}
+.wk-meta{color:var(--text2);font-size:.85rem;margin:4px 0 20px}
+.lesson{border:1px solid var(--border);border-radius:12px;padding:16px 18px;margin-bottom:14px;background:var(--card2)}
+.lesson-head{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.lesson-head .lt{font-weight:700;font-size:1rem;flex:1}
+.md{font-size:.92rem;line-height:1.8;color:var(--text);overflow-wrap:break-word}
+.md h1,.md h2,.md h3{margin:14px 0 8px;font-size:1.05rem}
+.md p{margin:8px 0}
+.md code{background:rgba(91,157,255,.12);border-radius:5px;padding:2px 6px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.85em;color:#a8c8ff}
+.md pre{background:#0b0f18;border:1px solid var(--border);border-radius:10px;padding:12px 14px;overflow-x:auto;margin:10px 0}
+.md pre code{background:none;padding:0;color:#c9d7f0}
+.md ul,.md ol{margin:8px 0 8px 22px}
+.md blockquote{border-left:3px solid var(--accent);padding:4px 12px;color:var(--text2);margin:10px 0}
+.md a{color:var(--accent)}
+.md table{border-collapse:collapse;margin:10px 0;font-size:.85rem}
+.md td,.md th{border:1px solid var(--border);padding:6px 10px}
+.md input[type=checkbox]{width:15px;height:15px;accent-color:var(--ok);cursor:pointer;margin-right:6px;vertical-align:-2px}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+<h1 class="wk-title">字典：用名字找东西（前置 W12 加餐③）</h1>
+<div class="wk-meta">W13 · 6 课</div>
+</header>
+<div class="week-body" data-week="W13">
+<section class="lesson" data-lid="W13-S1">
+<div class="lesson-head"><span class="lt">字典初见：用名字找东西</span></div>
+<div class="md" data-lid="W13-S1"><!-- slug: dict-intro, type: base -->
+<h2>⓪ 🤖 课前 AI 一分钟 · 第 43 颗：AI 也会&quot;用名字找&quot;——KV（3 分钟）</h2>
+<blockquote>
+<p><strong>第 43 颗</strong></p>
+</blockquote>
+<p>AI 配置 = key-value（如 batch_size=32）。Python dict = <strong>用名字找东西</strong>。</p>
+<p><strong>今日口诀</strong>：AI 配置 = key-value（如 batch_size=32）。</p>
+<p><strong>⚔️ 判一判</strong>（AI 营线上测评题型热身，先自己答再看答案）：</p>
+<blockquote>
+<ol>
+<li>dict 用 key 找 value</li>
+<li>AI 配置是 KV 字典</li>
+</ol>
+</blockquote>
+<details><summary>答案</summary>
+
+<p><strong>1.</strong> ✓ d[&quot;name&quot;] 找值<br><strong>2.</strong> ✓ config = {&quot;lr&quot;: 0.01, &quot;batch&quot;: 32}</p>
+</details>
+
+<hr>
+<h1>W13-S1 · 字典初见：用名字找东西</h1>
+<blockquote>
+<p><strong>每日节奏（v1.9）：</strong> 本篇纯阅读 ≈10 分钟，读完做当天作业 ≈10 分钟，总共 ≤25 分钟
+<strong>不需要 Thonny</strong>——正文一个字都不用敲，作业时间才开编辑器
+难度：⭐⭐ · 本篇对应原字典第一课（文件名 W11-L01）的概念 + 建字典部分</p>
+</blockquote>
+<hr>
+<h2>一、列表的痛点（3 分钟）</h2>
+<p>W06 的列表用<strong>编号</strong>找东西：<code>prey[0]</code>、<code>prey[2]</code>。编号好使，但有痛点——</p>
+<p>记住「猫武士档案里第 3 项是皮毛颜色」太难了。人类的记法是<strong>用名字</strong>：「皮毛颜色是什么？」「<code>cat[&quot;color&quot;]</code>」。</p>
+<p><strong>字典（dict）= 名字 → 东西 的映射表</strong>，像查电话簿：翻到名字，直接拿到号码。W07 冒险岛你其实偷偷用过它存玩家状态，今天正式拜师。</p>
+<h2>二、字典的长相（4 分钟）</h2>
+<pre><code class="language-python">cat = {
+    &quot;name&quot;: &quot;Whiskers&quot;,
+    &quot;age&quot;: 3,
+    &quot;color&quot;: &quot;tabby&quot;,
+    &quot;is_indoor&quot;: True,
+}
+
+print(cat[&quot;name&quot;])        # Whiskers
+print(cat[&quot;age&quot;])         # 3
+print(cat[&quot;color&quot;])       # tabby
+</code></pre>
+<p>逐字拆解：</p>
+<table>
+<thead>
+<tr>
+<th>部件</th>
+<th>作用</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>{ }</code></td>
+<td>花括号包住整个字典（列表是方括号 <code>[ ]</code>）</td>
+</tr>
+<tr>
+<td><code>&quot;name&quot;: &quot;Whiskers&quot;</code></td>
+<td>一对<strong>键值对</strong>：名字 → 东西</td>
+</tr>
+<tr>
+<td>键（key）</td>
+<td>「名字」，通常是字符串，要加引号</td>
+</tr>
+<tr>
+<td>值（value）</td>
+<td>「东西」——字符串、数字、布尔，啥都行</td>
+</tr>
+<tr>
+<td><code>cat[&quot;name&quot;]</code></td>
+<td>用键取值：报名字，拿东西</td>
+</tr>
+</tbody></table>
+<p>逗号隔开每一对，最后一对后面的逗号可写可不写（写了更方便以后加行）。</p>
+<h2>三、和列表长得像，规矩不同（2 分钟）</h2>
+<p><code>cat[&quot;name&quot;]</code> 和 <code>prey[0]</code> 都是方括号取东西——<strong>但方括号里装的不一样</strong>：</p>
+<ul>
+<li>列表：装<strong>位置编号</strong>（整数，从 0 开始）</li>
+<li>字典：装<strong>键</strong>（名字字符串）</li>
+</ul>
+<p>所以 <code>cat[0]</code> 会报错：<code>KeyError: 0</code>——字典里没有叫 <code>0</code> 的键。KeyError 是字典世界的常客，意思是「查无此名」。</p>
+<h2>四、什么时候用字典（1 分钟）</h2>
+<table>
+<thead>
+<tr>
+<th>场景</th>
+<th>用谁</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>一周温度排排坐</td>
+<td>列表（位置有意义）</td>
+</tr>
+<tr>
+<td>猫档案：名字 / 年龄 / 毛色</td>
+<td>字典（名字有意义）</td>
+</tr>
+<tr>
+<td>通讯录：人名 → 电话</td>
+<td>字典（按名查号）</td>
+</tr>
+</tbody></table>
+<p><strong>判断口诀：位置重要用列表，名字重要用字典。</strong></p>
+<p><strong>今日口诀：</strong> 花括号、冒号配对、键找值——电话簿思维。</p>
+<hr>
+<h2>✅ 今天的阅读完成自查</h2>
+<ul>
+<li><input disabled="" type="checkbox"> 我能说出键、值、键值对分别是什么</li>
+<li><input disabled="" type="checkbox"> 我知道列表方括号装编号、字典方括号装键名</li>
+<li><input disabled="" type="checkbox"> 我知道 <code>cat[0]</code> 报 KeyError 的原因</li>
+</ul>
+<p>三格全勾 → 打开作业</p>
+<hr>
+<blockquote>
+<p><strong>📁 作业保存规则</strong>：本课课后练习写进一个文件 <code>W13-S1-homework.py</code>（存 <code>~/sand-hollow/&lt;你的学员ID&gt;/homework/</code>），每道题开头用刚学的备注分隔：<code># --- 题 1 ---</code>、<code># --- 题 2 ---</code>……<strong>交完作业要跟你的智能体说一声</strong>才会批改，评语出现在 <code>reviews/*.review.md</code>。<strong>回报触发词：交完作业或修完坑，都回一句「修完了」</strong>——不回这句 mentor 不知道，坑会一直挂着等。</p>
+</blockquote>
+<h2>📝 今日作业（≈10 分钟）</h2>
+<p>新建 <code>W13-S1-homework.py</code>，3 道题：</p>
+<ol>
+<li><strong>建档案</strong>：建一个 <code>pet</code> 字典，键有 <code>&quot;name&quot;</code>、<code>&quot;age&quot;</code>、<code>&quot;color&quot;</code>、<code>&quot;likes_fish&quot;</code>（布尔值），内容自己编，print 整个字典看长相</li>
+<li><strong>逐个取</strong>：用键取出 name 和 likes_fish 并打印；再故意写 <code>pet[&quot;naem&quot;]</code>（拼错的 name），运行，把报错最后一行抄进注释——认认 KeyError 的脸</li>
+<li><strong>列表 vs 字典笔猜</strong>：先笔猜再运行——<code>scores = [90, 85, 77]</code>，<code>print(scores[1])</code> 打出几？如果换成字典 <code>scores = {&quot;math&quot;: 90, &quot;english&quot;: 85}</code>，取英语分该怎么写？</li>
+</ol>
+<blockquote>
+<p>交完说「<strong>修完了</strong>」。明天 S2：字典的增删改查四件套 🐾</p>
+</blockquote>
+<h2>👀 C++ 认脸时刻（1 分钟 · 只看不敲）</h2>
+<p>C++ 的对应写法：</p>
+<pre><code class="language-cpp">#include &lt;iostream&gt;
+#include &lt;map&gt;
+int main() {
+    std::map&lt;std::string, int&gt; config;
+    config[&quot;lr&quot;] = 1;
+    config[&quot;batch&quot;] = 32;
+    std::cout &lt;&lt; config[&quot;lr&quot;] &lt;&lt; std::endl;
+    return 0;
+}
+</code></pre>
+<p>三个认脸：</p>
+<ol>
+<li><code>std::map&lt;string, int&gt;</code> KV 字典</li>
+<li><code>config[&quot;lr&quot;]</code> 用 key 找 value</li>
+<li>Python <code>config = {&quot;lr&quot;: 1, &quot;batch&quot;: 32}</code></li>
+</ol>
+<blockquote>
+<p>AI 营笔试的编程题用 C++ 出。不用会写，<strong>认得脸</strong>就行。</p>
+</blockquote>
+</div>
+</section>
+<section class="lesson" data-lid="W13-S2">
+<div class="lesson-head"><span class="lt">增删改查：字典四件套</span></div>
+<div class="md" data-lid="W13-S2"><!-- slug: dict-crud, type: base -->
+<h2>⓪ 🤖 课前 AI 一分钟 · 第 44 颗：AI 也会&quot;增删改查&quot;——dict CRUD（3 分钟）</h2>
+<blockquote>
+<p><strong>第 44 颗</strong></p>
+</blockquote>
+<p>AI 训练 = 增删改查配置（lr/batch/epoch）。Python dict CRUD = <strong>基本功</strong>。</p>
+<p><strong>今日口诀</strong>：AI 训练 = 增删改查配置（lr/batch/epoch）。</p>
+<p><strong>⚔️ 判一判</strong>（AI 营线上测评题型热身，先自己答再看答案）：</p>
+<blockquote>
+<ol>
+<li>dict 增删改查用 d[k] = v / del / in</li>
+<li>AI 配置也是增删改查</li>
+</ol>
+</blockquote>
+<details><summary>答案</summary>
+
+<p><strong>1.</strong> ✓ d[&quot;x&quot;] = 1; del d[&quot;x&quot;]; &quot;x&quot; in d<br><strong>2.</strong> ✓ config[&quot;lr&quot;] = 0.001</p>
+</details>
+
+<hr>
+<h1>W13-S2 · 增删改查：字典四件套</h1>
+<blockquote>
+<p><strong>每日节奏（v1.9）：</strong> 本篇纯阅读 ≈11 分钟，读完做当天作业 ≈10 分钟，总共 ≤25 分钟
+<strong>不需要 Thonny</strong>——正文一个字都不用敲，作业时间才开编辑器
+难度：⭐⭐ · 本篇对应原字典第一课（文件名 W11-L01）的增删改查部分</p>
+</blockquote>
+<hr>
+<h2>一、四件套一次看全（5 分钟）</h2>
+<pre><code class="language-python">cat = {&quot;name&quot;: &quot;Whiskers&quot;, &quot;age&quot;: 3}
+
+cat[&quot;color&quot;] = &quot;tabby&quot;     # 增：新键赋值
+print(cat[&quot;name&quot;])         # 查：键取值
+cat[&quot;age&quot;] = 4             # 改：老键重新赋值
+del cat[&quot;color&quot;]           # 删：del + 键
+print(cat)
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>动作</th>
+<th>写法</th>
+<th>一句话</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>增</td>
+<td><code>cat[&quot;color&quot;] = &quot;tabby&quot;</code></td>
+<td>键不存在 → 新添一对</td>
+</tr>
+<tr>
+<td>查</td>
+<td><code>cat[&quot;name&quot;]</code></td>
+<td>报名字，拿东西</td>
+</tr>
+<tr>
+<td>改</td>
+<td><code>cat[&quot;age&quot;] = 4</code></td>
+<td>键已存在 → 覆盖旧值</td>
+</tr>
+<tr>
+<td>删</td>
+<td><code>del cat[&quot;color&quot;]</code></td>
+<td>整对搬走</td>
+</tr>
+</tbody></table>
+<p><strong>增和改是同一招</strong>：<code>字典[键] = 值</code>——键不存在就是增，存在就是改。Python 自己会看。</p>
+<h2>二、in：查岗再进门（3 分钟）</h2>
+<p>查一个<strong>不存在的键</strong>会 KeyError 摔门。礼貌的做法是先敲门：</p>
+<pre><code class="language-python">contacts = {&quot;Alice&quot;: &quot;13800138001&quot;, &quot;Bob&quot;: &quot;13800138002&quot;}
+
+name = input(&quot;Name to look up: &quot;)
+if name in contacts:
+    print(f&quot;{name}&#39;s number: {contacts[name]}&quot;)
+else:
+    print(f&quot;{name} not in contacts&quot;)
+</code></pre>
+<p><code>in</code> 检查键在不在，返回 True / False（W03 的布尔值又上岗了）。<strong>凡是查别人输入的键，先 in 后取</strong>——这是字典世界的安检门。</p>
+<h2>三、小坑两枚（2 分钟）</h2>
+<pre><code class="language-text">cat = {&quot;name&quot;: &quot;Whiskers&quot;, &quot;age&quot;: 3}
+cat = {}        # ❌ 这是「换了个新空字典」，不是清空原字典
+</code></pre>
+<p><code>cat = {}</code> 是<strong>新建</strong>一个空字典贴上旧名字，原来的档案被整个扔掉（想清空原字典用 <code>cat.clear()</code>，混个脸熟）。</p>
+<p>另一枚：改值写成 <code>cat = {&quot;age&quot;: 4}</code> 以为「只改年龄」——错，这同样是<strong>整个换新</strong>。改一个键，用 <code>cat[&quot;age&quot;] = 4</code>。</p>
+<h2>四、四件套手感表（1 分钟）</h2>
+<table>
+<thead>
+<tr>
+<th>你想</th>
+<th>你写</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>加一项</td>
+<td><code>d[&quot;新键&quot;] = 值</code></td>
+</tr>
+<tr>
+<td>看一项</td>
+<td><code>d[&quot;键&quot;]</code>（先 in 检查更稳）</td>
+</tr>
+<tr>
+<td>换一项</td>
+<td><code>d[&quot;老键&quot;] = 新值</code></td>
+</tr>
+<tr>
+<td>扔一项</td>
+<td><code>del d[&quot;键&quot;]</code></td>
+</tr>
+</tbody></table>
+<p><strong>今日口诀：</strong> 增改同招看键在不在，查先敲门（in），删用 del。</p>
+<hr>
+<h2>✅ 今天的阅读完成自查</h2>
+<ul>
+<li><input disabled="" type="checkbox"> 我知道增和改都是 <code>d[&quot;键&quot;] = 值</code>，区别只在键存不存在</li>
+<li><input disabled="" type="checkbox"> 我会先 <code>in</code> 检查再取值，躲开 KeyError</li>
+<li><input disabled="" type="checkbox"> 我知道 <code>cat = {}</code> 是换新字典、不是清空</li>
+</ul>
+<p>三格全勾 → 打开作业</p>
+<hr>
+<blockquote>
+<p><strong>📁 作业保存规则</strong>：本课课后练习写进一个文件 <code>W13-S2-homework.py</code>（存 <code>~/sand-hollow/&lt;你的学员ID&gt;/homework/</code>），每道题开头用刚学的备注分隔：<code># --- 题 1 ---</code>、<code># --- 题 2 ---</code>……<strong>交完作业要跟你的智能体说一声</strong>才会批改，评语出现在 <code>reviews/*.review.md</code>。<strong>回报触发词：交完作业或修完坑，都回一句「修完了」</strong>——不回这句 mentor 不知道，坑会一直挂着等。</p>
+</blockquote>
+<h2>📝 今日作业（≈10 分钟）</h2>
+<p>新建 <code>W13-S2-homework.py</code>，3 道题：</p>
+<ol>
+<li><strong>四件套走一遍</strong>：建 <code>my_info</code> 字典（name / age / city 三对）→ 加一对 hobby → 把 age 改大 1 → del 掉 city——每步之后 print 一次字典，看它变化</li>
+<li><strong>安检门通讯录</strong>：抄正文第二节的通讯录代码跑通；输入一个不在里面的名字，确认走的是 else 那行</li>
+<li><strong>先猜再跑</strong>：<code>d = {&quot;a&quot;: 1}</code>，执行 <code>d[&quot;a&quot;] = 2</code>，再执行 <code>d[&quot;b&quot;] = 3</code>——笔猜 print(d) 长什么样，再运行对答案</li>
+</ol>
+<blockquote>
+<p>交完说「<strong>修完了</strong>」。明天 S3：for 遍历字典，把档案一行行抖出来 🐾</p>
+</blockquote>
+<h2>👀 C++ 认脸时刻（1 分钟 · 只看不敲）</h2>
+<p>C++ 的对应写法：</p>
+<pre><code class="language-cpp">#include &lt;iostream&gt;
+#include &lt;map&gt;
+int main() {
+    std::map&lt;std::string, int&gt; d;
+    d[&quot;x&quot;] = 1;          // 增
+    d.erase(&quot;x&quot;);        // 删
+    d[&quot;y&quot;] = d.count(&quot;y&quot;) ? d[&quot;y&quot;] : 0;  // 改
+    return 0;
+}
+</code></pre>
+<p>三个认脸：</p>
+<ol>
+<li><code>d[&quot;x&quot;] = 1</code> 增</li>
+<li><code>d.erase(&quot;x&quot;)</code> 删</li>
+<li>Python 一样：d[&quot;x&quot;] = 1; del d[&quot;x&quot;]</li>
+</ol>
+<blockquote>
+<p>AI 营笔试的编程题用 C++ 出。不用会写，<strong>认得脸</strong>就行。</p>
+</blockquote>
+</div>
+</section>
+<section class="lesson" data-lid="W13-S3">
+<div class="lesson-head"><span class="lt">遍历：把字典抖出来</span></div>
+<div class="md" data-lid="W13-S3"><!-- slug: dict-iterate, type: base -->
+<h2>⓪ 🤖 课前 AI 一分钟 · 第 45 颗：AI 也会&quot;遍历字典&quot;——keys/values/items（3 分钟）</h2>
+<blockquote>
+<p><strong>第 45 颗</strong></p>
+</blockquote>
+<p>AI 训练遍历配置 = keys()/values()/items()。Python dict 遍历 = <strong>3 种方式</strong>。</p>
+<p><strong>今日口诀</strong>：AI 训练遍历配置 = keys()/values()/items()。</p>
+<p><strong>⚔️ 判一判</strong>（AI 营线上测评题型热身，先自己答再看答案）：</p>
+<blockquote>
+<ol>
+<li>dict.keys() 拿所有 key</li>
+<li>dict.items() 拿 key+value</li>
+</ol>
+</blockquote>
+<details><summary>答案</summary>
+
+<p><strong>1.</strong> ✓ for k in d.keys():<br><strong>2.</strong> ✓ for k, v in d.items():</p>
+</details>
+
+<hr>
+<h1>W13-S3 · 遍历：把字典抖出来</h1>
+<blockquote>
+<p><strong>每日节奏（v1.9）：</strong> 本篇纯阅读 ≈12 分钟，读完做当天作业 ≈10 分钟，总共 ≤25 分钟
+<strong>不需要 Thonny</strong>——正文一个字都不用敲，作业时间才开编辑器
+难度：⭐⭐ · 本篇对应原字典第一课（文件名 W11-L01）的 for 遍历 + f-string 复习</p>
+</blockquote>
+<hr>
+<h2>一、for 遍历字典：默认发钥匙（3 分钟）</h2>
+<p>列表遍历给你<strong>元素</strong>，字典遍历给你<strong>键</strong>：</p>
+<pre><code class="language-python">cat = {&quot;name&quot;: &quot;Whiskers&quot;, &quot;age&quot;: 3, &quot;color&quot;: &quot;tabby&quot;}
+
+for key in cat:
+    print(key)
+</code></pre>
+<p>输出三行：<code>name</code>、<code>age</code>、<code>color</code>——只发钥匙（键），不发东西。想要值？拿钥匙再开一次门：<code>cat[key]</code>。</p>
+<h2>二、键值一起拿（4 分钟）</h2>
+<p>f-string（W02 老朋友）和循环合体，档案表一行行打出来：</p>
+<pre><code class="language-python">for key in cat:
+    print(f&quot;{key} -&gt; {cat[key]}&quot;)
+</code></pre>
+<p>输出：</p>
+<pre><code class="language-text">name -&gt; Whiskers
+age -&gt; 3
+color -&gt; tabby
+</code></pre>
+<p>套路拆解：</p>
+<ul>
+<li><code>for key in cat:</code> → 钥匙一把把轮流传</li>
+<li><code>cat[key]</code> → 拿当前钥匙开当前门（key 是变量，<strong>不加引号</strong>）</li>
+<li><code>f&quot;{key} -&gt; {cat[key]}&quot;</code> → 一行排版，箭头看着清爽</li>
+</ul>
+<p><strong>高频小坑：</strong> <code>cat[&quot;key&quot;]</code>（手滑加引号）→ 找叫 &quot;key&quot; 的键 → KeyError。引号一加，变量变字符串——W02 的种族铁律又来了。</p>
+<h2>三、实战：全班点名器（4 分钟）</h2>
+<p>字典 + 遍历 + 判断（W03），三周武功合体：</p>
+<pre><code class="language-python">scores = {&quot;Alice&quot;: 92, &quot;Bob&quot;: 78, &quot;Cathy&quot;: 85}
+
+for name in scores:
+    score = scores[name]
+    if score &gt;= 90:
+        mark = &quot;A&quot;
+    elif score &gt;= 80:
+        mark = &quot;B&quot;
+    else:
+        mark = &quot;C&quot;
+    print(f&quot;{name}: {score} -&gt; {mark}&quot;)
+</code></pre>
+<p>输出三行成绩单，每人自动定级。看懂这段 = 列表周学的「累加器 + 遍历」思想完整搬进了字典世界：<strong>遍历 → 每项加工 → 输出</strong>。</p>
+<h2>四、遍历顺序小知识（1 分钟）</h2>
+<p>字典不保证按键排序输出（Python 3.7+ 按插入顺序，混个脸熟即可）。要排序输出可以先把键排一遍——现在不用背，知道「顺序不是天生有序」就行。</p>
+<p><strong>今日口诀：</strong> for 发钥匙，取值靠 <code>cat[key]</code>，f-string 排版好。</p>
+<hr>
+<h2>✅ 今天的阅读完成自查</h2>
+<ul>
+<li><input disabled="" type="checkbox"> 我知道 <code>for key in cat</code> 拿到的是键不是值</li>
+<li><input disabled="" type="checkbox"> 我知道 <code>cat[key]</code> 里 key 不加引号，加引号会 KeyError</li>
+<li><input disabled="" type="checkbox"> 我能看懂点名器：遍历 → 每项加工 → 输出</li>
+</ul>
+<p>三格全勾 → 打开作业</p>
+<hr>
+<blockquote>
+<p><strong>📁 作业保存规则</strong>：本课课后练习写进一个文件 <code>W13-S3-homework.py</code>（存 <code>~/sand-hollow/&lt;你的学员ID&gt;/homework/</code>），每道题开头用刚学的备注分隔：<code># --- 题 1 ---</code>、<code># --- 题 2 ---</code>……<strong>交完作业要跟你的智能体说一声</strong>才会批改，评语出现在 <code>reviews/*.review.md</code>。<strong>回报触发词：交完作业或修完坑，都回一句「修完了」</strong>——不回这句 mentor 不知道，坑会一直挂着等。</p>
+</blockquote>
+<h2>📝 今日作业（≈10 分钟）</h2>
+<p>新建 <code>W13-S3-homework.py</code>，3 道题：</p>
+<ol>
+<li><strong>档案表</strong>：建一个 4 对键值的 <code>hero</code> 字典（名字 / 血量 / 攻击 / 防御），用 for + f-string 打成 <code>键 -&gt; 值</code> 表格</li>
+<li><strong>陷阱题</strong>：把作业 1 里的 <code>cat[key]</code> 位置故意写成 <code>hero[&quot;key&quot;]</code> 运行一次，抄下报错最后一行；改回来跑通——一句话注释写区别</li>
+<li><strong>等级报告</strong>：抄正文第三节的点名器跑通；给 scores 加一个 <code>&quot;Dan&quot;: 60</code>，看看 Dan 拿到什么等级（注意他走的是哪条分支，注释里写）</li>
+</ol>
+<blockquote>
+<p>交完说「<strong>修完了</strong>」。明天 S4：嵌套——字典里套列表、套字典，数据盖楼 🐾</p>
+</blockquote>
+<h2>👀 C++ 认脸时刻（1 分钟 · 只看不敲）</h2>
+<p>C++ 的对应写法：</p>
+<pre><code class="language-cpp">#include &lt;iostream&gt;
+#include &lt;map&gt;
+int main() {
+    std::map&lt;std::string, int&gt; d = {{&quot;a&quot;, 1}, {&quot;b&quot;, 2}};
+    for (auto&amp; [k, v] : d) {
+        std::cout &lt;&lt; k &lt;&lt; &quot;=&quot; &lt;&lt; v &lt;&lt; std::endl;
+    }
+    return 0;
+}
+</code></pre>
+<p>三个认脸：</p>
+<ol>
+<li>C++17 结构化绑定 <code>[k, v]</code></li>
+<li><code>for (auto&amp; [k, v] : d)</code> 遍历</li>
+<li>Python 一样：for k, v in d.items():</li>
+</ol>
+<blockquote>
+<p>AI 营笔试的编程题用 C++ 出。不用会写，<strong>认得脸</strong>就行。</p>
+</blockquote>
+</div>
+</section>
+<section class="lesson" data-lid="W13-S4">
+<div class="lesson-head"><span class="lt">嵌套：字典里的字典</span></div>
+<div class="md" data-lid="W13-S4"><!-- slug: dict-nested, type: base -->
+<h2>⓪ 🤖 课前 AI 一分钟 · 第 46 颗：AI 也会&quot;嵌套字典&quot;——配置树（3 分钟）</h2>
+<blockquote>
+<p><strong>第 46 颗</strong></p>
+</blockquote>
+<p>AI 配置 = 嵌套 dict（model → layer → params）。Python 嵌套 dict = <strong>配置树</strong>。</p>
+<p><strong>今日口诀</strong>：AI 配置 = 嵌套 dict（model → layer → params）。</p>
+<p><strong>⚔️ 判一判</strong>（AI 营线上测评题型热身，先自己答再看答案）：</p>
+<blockquote>
+<ol>
+<li>dict 可以嵌套</li>
+<li>AI 配置树是嵌套 dict</li>
+</ol>
+</blockquote>
+<details><summary>答案</summary>
+
+<p><strong>1.</strong> ✓ d = {&quot;model&quot;: {&quot;layer1&quot;: {&quot;lr&quot;: 0.01}}}<br><strong>2.</strong> ✓ config[&quot;model&quot;][&quot;layer1&quot;][&quot;lr&quot;]</p>
+</details>
+
+<hr>
+<h1>W13-S4 · 嵌套：字典里的字典</h1>
+<blockquote>
+<p><strong>每日节奏（v1.9）：</strong> 本篇纯阅读 ≈14 分钟，读完做当天作业 ≈10 分钟，总共 ≤25 分钟
+<strong>不需要 Thonny</strong>——正文一个字都不用敲，作业时间才开编辑器
+难度：⭐⭐⭐ · 本篇对应原字典第二课（文件名 W11-L02）——数据盖楼篇</p>
+</blockquote>
+<hr>
+<h2>一、值可以是任何东西（2 分钟）</h2>
+<p>S1 说过：值可以是字符串、数字、布尔。其实——<strong>值还可以是列表、甚至是另一个字典</strong>。</p>
+<p>「字典里套字典 / 套列表」叫<strong>嵌套</strong>。现实数据全是嵌套：游戏角色有名字（字符串）、血量（数字）、<strong>背包（列表）</strong>、<strong>属性面板（字典）</strong>——一张档案装下一切。</p>
+<h2>二、字典套列表：背包（4 分钟）</h2>
+<pre><code class="language-python">player = {
+    &quot;name&quot;: &quot;Paw&quot;,
+    &quot;hp&quot;: 100,
+    &quot;inventory&quot;: [&quot;sword&quot;, &quot;shield&quot;, &quot;potion&quot;],
+}
+
+print(player[&quot;inventory&quot;])         # 整个列表
+print(player[&quot;inventory&quot;][0])      # sword——先键后索引
+player[&quot;inventory&quot;].append(&quot;key&quot;)  # 往背包塞新东西
+print(player[&quot;inventory&quot;])
+</code></pre>
+<p><strong>两步取值：</strong> <code>player[&quot;inventory&quot;][0]</code> = 先用键 <code>&quot;inventory&quot;</code> 拿到列表，再用索引 <code>[0]</code> 拿第 1 件——W06 的 append 照常能用，因为拿到的就是列表本尊。</p>
+<h2>三、字典套字典：属性面板（4 分钟）</h2>
+<pre><code class="language-python">cat = {
+    &quot;name&quot;: &quot;Whiskers&quot;,
+    &quot;stats&quot;: {
+        &quot;hp&quot;: 50,
+        &quot;attack&quot;: 12,
+        &quot;defense&quot;: 5,
+    },
+}
+
+print(cat[&quot;name&quot;])            # Whiskers
+print(cat[&quot;stats&quot;][&quot;hp&quot;])     # 50——一层层下钻
+cat[&quot;stats&quot;][&quot;hp&quot;] += 10      # 嵌套改值
+print(cat[&quot;stats&quot;][&quot;hp&quot;])     # 60
+</code></pre>
+<p>读法像剥洋葱：<code>cat[&quot;stats&quot;]</code> 剥出内层字典，<code>[&quot;hp&quot;]</code> 再剥出数字。修改也是同一条路——<strong>寻址到哪层，就在哪层动手</strong>。</p>
+<h2>四、三层楼：班级花名册（3 分钟）</h2>
+<pre><code class="language-python">classes = {
+    &quot;Math&quot;: [
+        {&quot;name&quot;: &quot;Alice&quot;, &quot;score&quot;: 92},
+        {&quot;name&quot;: &quot;Bob&quot;, &quot;score&quot;: 78},
+    ],
+    &quot;English&quot;: [
+        {&quot;name&quot;: &quot;Alice&quot;, &quot;score&quot;: 88},
+    ],
+}
+
+for subject in classes:
+    for student in classes[subject]:
+        print(f&quot;{subject}: {student[&#39;name&#39;]} got {student[&#39;score&#39;]}&quot;)
+</code></pre>
+<p>结构：外层字典（科目 → 列表）→ 列表（一个个学生）→ 每个学生又是字典。三层楼，<strong>每层都是学过的结构</strong>——嵌套不发明新东西，只是老朋友叠罗汉。</p>
+<h2>五、下钻心法（1 分钟）</h2>
+<p>嵌套读晕了就<strong>一层层 print</strong>：<code>print(cat[&quot;stats&quot;])</code> 先看内层长啥样，再往下钻。KeyError 套娃（<code>&quot;stat&quot;</code> 少个 s）十有八九靠这招现形。</p>
+<p><strong>今日口诀：</strong> 键开门、索引拿人、一层一层下钻。</p>
+<hr>
+<h2>✅ 今天的阅读完成自查</h2>
+<ul>
+<li><input disabled="" type="checkbox"> 我能说出 <code>player[&quot;inventory&quot;][0]</code> 的两步含义</li>
+<li><input disabled="" type="checkbox"> 我能读懂 <code>cat[&quot;stats&quot;][&quot;hp&quot;] += 10</code> 改的是哪层的什么</li>
+<li><input disabled="" type="checkbox"> 三层花名册我能对上「字典 → 列表 → 字典」每层是谁</li>
+</ul>
+<p>三格全勾 → 打开作业</p>
+<hr>
+<blockquote>
+<p><strong>📁 作业保存规则</strong>：本课课后练习写进一个文件 <code>W13-S4-homework.py</code>（存 <code>~/sand-hollow/&lt;你的学员ID&gt;/homework/</code>），每道题开头用刚学的备注分隔：<code># --- 题 1 ---</code>、<code># --- 题 2 ---</code>……<strong>交完作业要跟你的智能体说一声</strong>才会批改，评语出现在 <code>reviews/*.review.md</code>。<strong>回报触发词：交完作业或修完坑，都回一句「修完了」</strong>——不回这句 mentor 不知道，坑会一直挂着等。</p>
+</blockquote>
+<h2>📝 今日作业（≈10 分钟）</h2>
+<p>新建 <code>W13-S4-homework.py</code>，3 道题：</p>
+<ol>
+<li><strong>背包扩容</strong>：建 S2 的 player 字典，append 一件 <code>&quot;map&quot;</code>，再 print <code>player[&quot;inventory&quot;][3]</code> 验证</li>
+<li><strong>属性面板</strong>：建 S3 的 cat 字典，把 <code>cat[&quot;stats&quot;][&quot;defense&quot;]</code> 加 3，print 整个 stats 确认</li>
+<li><strong>花名册点名</strong>：抄第四节代码跑通；给 English 班 append 一个新学生字典 <code>{&quot;name&quot;: &quot;Dan&quot;, &quot;score&quot;: 90}</code>，重跑——Dan 出现在哪个科目下？</li>
+</ol>
+<blockquote>
+<p>交完说「<strong>修完了</strong>」。明天 S5：宠物图鉴组装——字典周收官大战 🐾</p>
+</blockquote>
+<h2>👀 C++ 认脸时刻（1 分钟 · 只看不敲）</h2>
+<p>C++ 的对应写法：</p>
+<pre><code class="language-cpp">#include &lt;iostream&gt;
+#include &lt;map&gt;
+int main() {
+    std::map&lt;std::string, std::map&lt;std::string, int&gt;&gt; config;
+    config[&quot;model&quot;][&quot;lr&quot;] = 1;
+    config[&quot;model&quot;][&quot;batch&quot;] = 32;
+    return 0;
+}
+</code></pre>
+<p>三个认脸：</p>
+<ol>
+<li>C++ 嵌套 map（复杂）</li>
+<li><code>config[&quot;model&quot;][&quot;lr&quot;]</code> 嵌套访问</li>
+<li>Python 嵌套 dict 简洁 10 倍</li>
+</ol>
+<blockquote>
+<p>AI 营笔试的编程题用 C++ 出。不用会写，<strong>认得脸</strong>就行。</p>
+</blockquote>
+</div>
+</section>
+<section class="lesson" data-lid="W13-S5">
+<div class="lesson-head"><span class="lt">宠物图鉴：函数 + 字典合体</span></div>
+<div class="md" data-lid="W13-S5"><!-- slug: dict-codex, type: base -->
+<h2>⓪ 🤖 课前 AI 一分钟 · 第 47 颗：AI 也会&quot;宠物图鉴&quot;——CRUD + 列表（3 分钟）</h2>
+<blockquote>
+<p><strong>第 47 颗</strong></p>
+</blockquote>
+<p>AI 宠物图鉴 = 嵌套 dict + 列表（每个宠物有属性 + 技能列表）。Python 综合 = <strong>CRUD + 列表</strong>。</p>
+<p><strong>今日口诀</strong>：AI 宠物图鉴 = 嵌套 dict + 列表（每个宠物有属性 + 技能列表）。</p>
+<p><strong>⚔️ 判一判</strong>（AI 营线上测评题型热身，先自己答再看答案）：</p>
+<blockquote>
+<ol>
+<li>宠物图鉴 = 字典存宠物数据</li>
+<li>AI 应用 = 数据 + 函数</li>
+</ol>
+</blockquote>
+<details><summary>答案</summary>
+
+<p><strong>1.</strong> ✓ pet = {&quot;name&quot;: &quot;喵&quot;, &quot;skills&quot;: [&quot;爬树&quot;]}<br><strong>2.</strong> ✓ 字典 + 列表 = 复杂数据</p>
+</details>
+
+<hr>
+<h1>W13-S5 · 宠物图鉴：函数 + 字典合体</h1>
+<blockquote>
+<p><strong>每日节奏（v1.9）：</strong> 本篇纯阅读 ≈13 分钟，读完做当天作业 ≈10 分钟，总共 ≤25 分钟
+<strong>不需要 Thonny</strong>——正文一个字都不用敲，作业时间才开编辑器
+难度：⭐⭐⭐ · 本篇对应原字典第三课（文件名 W11-L03）——W10 收官大战！</p>
+</blockquote>
+<hr>
+<h2>一、图鉴的数据楼（3 分钟）</h2>
+<p>每只宠物一个字典，整个图鉴也是字典（键 = 宠物名）——昨天三层楼的直接应用：</p>
+<pre><code class="language-python">codex = {
+    &quot;Whiskers&quot;: {
+        &quot;species&quot;: &quot;cat&quot;,
+        &quot;stats&quot;: {&quot;hp&quot;: 50, &quot;attack&quot;: 12},
+        &quot;skills&quot;: [&quot;scratch&quot;, &quot;purr&quot;],
+    },
+    &quot;Rex&quot;: {
+        &quot;species&quot;: &quot;dog&quot;,
+        &quot;stats&quot;: {&quot;hp&quot;: 80, &quot;attack&quot;: 18},
+        &quot;skills&quot;: [&quot;bite&quot;, &quot;fetch&quot;],
+    },
+}
+</code></pre>
+<p>结构：codex → 宠物 →（species / stats / skills）。数据库雏形就这么几行。</p>
+<h2>二、查询函数：show_pet（4 分钟）</h2>
+<pre><code class="language-python">def show_pet(codex, name):
+    if name not in codex:
+        print(f&quot;{name} not in codex&quot;)
+        return
+    pet = codex[name]
+    print(f&quot;=== {name} ({pet[&#39;species&#39;]}) ===&quot;)
+    print(f&quot;HP {pet[&#39;stats&#39;][&#39;hp&#39;]} / ATK {pet[&#39;stats&#39;][&#39;attack&#39;]}&quot;)
+    print(f&quot;Skills: {&#39;, &#39;.join(pet[&#39;skills&#39;])}&quot;)
+
+show_pet(codex, &quot;Whiskers&quot;)
+</code></pre>
+<p>看两个要点：</p>
+<ul>
+<li><strong>安检门</strong>：<code>not in</code> 拦住查无此宠，查不到就 <code>return</code> 退场</li>
+<li><code>&#39;, &#39;.join(...)</code>：把技能列表粘成一句话（字符串功夫的亲戚）</li>
+</ul>
+<h2>三、加宠物：add_pet（3 分钟）</h2>
+<pre><code class="language-python">def add_pet(codex, name, species, hp, attack):
+    if name in codex:
+        print(f&quot;{name} already exists&quot;)
+        return
+    codex[name] = {&quot;species&quot;: species,
+                   &quot;stats&quot;: {&quot;hp&quot;: hp, &quot;attack&quot;: attack},
+                   &quot;skills&quot;: []}
+
+add_pet(codex, &quot;Tweety&quot;, &quot;bird&quot;, 30, 8)
+</code></pre>
+<p><strong>防覆盖检查</strong>：名字已存在就直接退——不然 <code>codex[name] = {...}</code> 会把老档案<strong>整个覆盖</strong>（S2 的坑放大版：这次盖掉一整只宠物）。</p>
+<h2>四、全家福：list_all（3 分钟）</h2>
+<pre><code class="language-python">def list_all(codex):
+    print(&quot;=== Pet Codex ===&quot;)
+    for name in codex:
+        pet = codex[name]
+        print(f&quot;- {name} ({pet[&#39;species&#39;]}): HP {pet[&#39;stats&#39;][&#39;hp&#39;]}&quot;)
+
+list_all(codex)
+</code></pre>
+<p>list_all = S3 遍历 + S4 下钻的复习。add_skill 同理：先 <code>not in</code> 安检，再 <code>codex[name][&quot;skills&quot;].append(skill)</code>。</p>
+<p><strong>一整周武功会师</strong>：键值对、增删改查、安检、遍历、嵌套、函数组装——能搭迷你数据库了。</p>
+<p><strong>今日口诀：</strong> 查有安检、加有防覆盖、组装靠函数。</p>
+<hr>
+<h2>✅ 今天的阅读完成自查</h2>
+<ul>
+<li><input disabled="" type="checkbox"> 我能说出 codex 三层结构：图鉴 → 宠物 → 属性/技能</li>
+<li><input disabled="" type="checkbox"> 我知道 add_pet 为什么要先 <code>in</code> 检查（防整宠覆盖）</li>
+<li><input disabled="" type="checkbox"> show / add_pet / list_all 我都能对上号</li>
+</ul>
+<p>三格全勾 → 打开作业（W10 最后一天！）</p>
+<hr>
+<blockquote>
+<p><strong>📁 作业保存规则</strong>：本课课后练习写进一个文件 <code>W13-S5-homework.py</code>（存 <code>~/sand-hollow/&lt;你的学员ID&gt;/homework/</code>），每道题开头用刚学的备注分隔：<code># --- 题 1 ---</code>、<code># --- 题 2 ---</code>……<strong>交完作业要跟你的智能体说一声</strong>才会批改，评语出现在 <code>reviews/*.review.md</code>。<strong>回报触发词：交完作业或修完坑，都回一句「修完了」</strong>——不回这句 mentor 不知道，坑会一直挂着等。</p>
+</blockquote>
+<h2>📝 今日作业（≈10 分钟）</h2>
+<p>新建 <code>W13-S5-homework.py</code>，3 道题：</p>
+<ol>
+<li><strong>建图鉴</strong>：抄第一节的 codex（两只宠物），跑通 <code>list_all</code> 打印全家福</li>
+<li><strong>扩编</strong>：用 <code>add_pet</code> 加一只自编宠物（名字物种自己定），再写 <code>add_skill</code> 给它学两个技能，重新 <code>list_all</code> 确认入册</li>
+<li><strong>防御测试</strong>：对已有宠物再 <code>add_pet</code> 同名——确认走 &quot;already exists&quot; 分支、原档案没被覆盖</li>
+</ol>
+<blockquote>
+<p>交完说「<strong>修完了</strong>」——W10 结业！字典神功到手。周末项目：<strong>宠物图鉴 v1</strong>——把图鉴加菜单循环（查 / 加 / 退出），做成真能玩的小工具 🐾</p>
+</blockquote>
+<h2>👀 C++ 认脸时刻（1 分钟 · 只看不敲）</h2>
+<p>C++ 的对应写法：</p>
+<pre><code class="language-cpp">#include &lt;iostream&gt;
+#include &lt;map&gt;
+#include &lt;vector&gt;
+int main() {
+    std::map&lt;std::string, std::vector&lt;std::string&gt;&gt; pets;
+    pets[&quot;喵&quot;] = {&quot;爬树&quot;, &quot;抓老鼠&quot;};
+    return 0;
+}
+</code></pre>
+<p>三个认脸：</p>
+<ol>
+<li>C++ 嵌套 map + vector</li>
+<li><code>pets[&quot;喵&quot;] = {...}</code> 存技能列表</li>
+<li>Python <code>pets = {&quot;喵&quot;: [&quot;爬树&quot;, &quot;抓老鼠&quot;]}</code></li>
+</ol>
+<blockquote>
+<p>AI 营笔试的编程题用 C++ 出。不用会写，<strong>认得脸</strong>就行。</p>
+</blockquote>
+</div>
+</section>
+<section class="lesson" data-lid="W13-weekend">
+<div class="lesson-head"><span class="lt">宠物图鉴 v1：完整版</span></div>
+<div class="md" data-lid="W13-weekend"><!-- slug: dict-codex-final, type: project -->
+<h2>⓪ 🤖 课前 AI 一分钟 · 第 54 颗：AI 也会&quot;完整图鉴&quot;——CRUD + 战斗（3 分钟）</h2>
+<blockquote>
+<p><strong>第 54 颗</strong></p>
+</blockquote>
+<p>AI 完整图鉴 = CRUD 字典 + 战斗系统。Python 综合项目 = <strong>CRUD + 战斗</strong>。</p>
+<p><strong>今日口诀</strong>：AI 完整图鉴 = CRUD 字典 + 战斗系统。</p>
+<p><strong>⚔️ 判一判</strong>（AI 营线上测评题型热身，先自己答再看答案）：</p>
+<blockquote>
+<ol>
+<li>宠物图鉴 + 战斗是综合</li>
+<li>AI 完整应用 = 多模块</li>
+</ol>
+</blockquote>
+<details><summary>答案</summary>
+
+<p><strong>1.</strong> ✓ pets + battles + save<br><strong>2.</strong> ✓ 模块化应用</p>
+</details>
+
+<hr>
+<h1>W13-weekend · 宠物图鉴 v1：完整版</h1>
+<blockquote>
+<p>用时：60-90 分钟 · 难度：⭐⭐⭐ · 前置：W10 三课</p>
+</blockquote>
+<hr>
+<h2>一、本周武功盘点（3 分钟）</h2>
+<ul>
+<li>W10-L01：字典基础（增删改查 + 遍历）</li>
+<li>W10-L02：嵌套（字典套字典 / 字典套列表）</li>
+<li>W10-L03：实战宠物图鉴（4 个核心函数）</li>
+</ul>
+<p>今天把宠物图鉴升级到「<strong>完整版</strong>」——能搜索、能加技能、能战斗、保存到文件。</p>
+<h2>二、项目：完整版图鉴（60 分钟）</h2>
+<blockquote>
+<p>📁 项目存 <code>~/sand-hollow/&lt;你的学员ID&gt;/homework/</code>，新建 <code>pet_codex_v1.py</code>。</p>
+</blockquote>
+<h3>完整代码</h3>
+<pre><code class="language-python">import json
+import os
+
+CODE_FILE = &quot;pet_codex.json&quot;
+
+def load_codex():
+    if os.path.exists(CODE_FILE):
+        with open(CODE_FILE) as f:
+            return json.load(f)
+    return {}
+
+def save_codex(codex):
+    with open(CODE_FILE, &quot;w&quot;) as f:
+        json.dump(codex, f, indent=2)
+    print(&quot;Saved!&quot;)
+
+def show_pet(codex, name):
+    if name not in codex:
+        print(f&quot;{name} not in codex&quot;)
+        return
+    pet = codex[name]
+    print(f&quot;\n=== {name} ===&quot;)
+    print(f&quot;Species: {pet[&#39;species&#39;]}&quot;)
+    stats = pet[&quot;stats&quot;]
+    print(f&quot;HP: {stats[&#39;hp&#39;]}  ATK: {stats[&#39;attack&#39;]}  DEF: {stats[&#39;defense&#39;]}&quot;)
+    print(f&quot;Skills: {&#39;, &#39;.join(pet[&#39;skills&#39;]) if pet[&#39;skills&#39;] else &#39;(none)&#39;}&quot;)
+
+def add_pet(codex, name, species, hp, attack, defense):
+    if name in codex:
+        print(f&quot;{name} already exists&quot;)
+        return
+    codex[name] = {
+        &quot;species&quot;: species,
+        &quot;stats&quot;: {&quot;hp&quot;: hp, &quot;attack&quot;: attack, &quot;defense&quot;: defense},
+        &quot;skills&quot;: [],
+    }
+    print(f&quot;Added {name}!&quot;)
+
+def add_skill(codex, name, skill):
+    if name not in codex:
+        print(f&quot;{name} not in codex&quot;)
+        return
+    if skill in codex[name][&quot;skills&quot;]:
+        print(f&quot;{name} already knows {skill}&quot;)
+        return
+    codex[name][&quot;skills&quot;].append(skill)
+    print(f&quot;{name} learned {skill}!&quot;)
+
+def search_by_species(codex, species):
+    print(f&quot;\n=== {species}s ===&quot;)
+    found = False
+    for name in codex:
+        if codex[name][&quot;species&quot;] == species:
+            print(f&quot;- {name}&quot;)
+            found = True
+    if not found:
+        print(&quot;(none)&quot;)
+
+def list_all(codex):
+    print(&quot;\n=== All Pets ===&quot;)
+    for name in codex:
+        pet = codex[name]
+        print(f&quot;- {name} ({pet[&#39;species&#39;]}): HP {pet[&#39;stats&#39;][&#39;hp&#39;]}&quot;)
+
+def main():
+    codex = load_codex()
+
+    while True:
+        print(&quot;\n(show/add/skill/search/list/save/quit)&quot;)
+        action = input(&quot;&gt; &quot;).strip().lower()
+
+        if action == &quot;show&quot;:
+            name = input(&quot;Pet name: &quot;)
+            show_pet(codex, name)
+        elif action == &quot;add&quot;:
+            name = input(&quot;Name: &quot;)
+            species = input(&quot;Species: &quot;)
+            hp = int(input(&quot;HP: &quot;))
+            atk = int(input(&quot;Attack: &quot;))
+            df = int(input(&quot;Defense: &quot;))
+            add_pet(codex, name, species, hp, atk, df)
+        elif action == &quot;skill&quot;:
+            name = input(&quot;Pet name: &quot;)
+            skill = input(&quot;Skill: &quot;)
+            add_skill(codex, name, skill)
+        elif action == &quot;search&quot;:
+            species = input(&quot;Species to search: &quot;)
+            search_by_species(codex, species)
+        elif action == &quot;list&quot;:
+            list_all(codex)
+        elif action == &quot;save&quot;:
+            save_codex(codex)
+        elif action == &quot;quit&quot;:
+            save_codex(codex)
+            break
+        else:
+            print(&quot;Unknown action&quot;)
+
+main()
+</code></pre>
+<h2>三、验收标准（自助验收）</h2>
+<ul>
+<li><input disabled="" type="checkbox"> 完整代码跑通，能加宠物 / 加技能 / 搜索 / 列出</li>
+<li><input disabled="" type="checkbox"> 重启程序后数据还在（save + load）</li>
+<li><input disabled="" type="checkbox"> 至少加 3 只宠物 + 给它们分别加 2 个技能</li>
+<li><input disabled="" type="checkbox"> 给家人 / 朋友演示一遍</li>
+</ul>
+<h2>四、W10 全周自查</h2>
+<ul>
+<li><input disabled="" type="checkbox"> L01：字典基础（增删改查）</li>
+<li><input disabled="" type="checkbox"> L02：嵌套（字典套字典 / 列表）</li>
+<li><input disabled="" type="checkbox"> L03：实战图鉴</li>
+<li><input disabled="" type="checkbox"> 周末：完整版图鉴能加能查能存</li>
+<li><input disabled="" type="checkbox"> 我能给家人解释「字典 = 名字找东西」</li>
+</ul>
+<p>W10 毕业 📚 → 进入 W11「随机与游戏」。W03-weekend 已经借过 <code>random.randint</code>，W11 正式学 random 模块 + 实战石头剪刀布 + 文字 RPG 战斗。</p>
+<h2>👀 C++ 认脸时刻（1 分钟 · 只看不敲）</h2>
+<p>C++ 的对应写法：</p>
+<pre><code class="language-cpp">#include &lt;iostream&gt;
+#include &lt;map&gt;
+#include &lt;vector&gt;
+int main() {
+    std::map&lt;std::string, int&gt; pets = {{&quot;喵&quot;, 100}, {&quot;汪&quot;, 80}};
+    for (auto&amp; [name, hp] : pets) {
+        std::cout &lt;&lt; name &lt;&lt; &quot; HP=&quot; &lt;&lt; hp &lt;&lt; std::endl;
+    }
+    return 0;
+}
+</code></pre>
+<p>三个认脸：</p>
+<ol>
+<li>多宠物数据</li>
+<li>遍历图鉴</li>
+<li>Python 一样：pets = {&quot;喵&quot;: 100, &quot;汪&quot;: 80}</li>
+</ol>
+<blockquote>
+<p>AI 营笔试的编程题用 C++ 出。不用会写，<strong>认得脸</strong>就行。</p>
+</blockquote>
+</div>
+</section>
+</div>
+</div>
+</body>
+</html>
