@@ -1,6 +1,7 @@
-// 🏖️ 沙坑训练场 Service Worker v3 — 网络优先，离线兜底（外壳）
-const CACHE = 'sandy-hollow-v3';
-const SHELL = ['./', './index.html', './vendor/marked.min.js', './assets/favicon.svg', './assets/icon-192.png', './assets/icon-512.png'];
+// 🏖️ 沙坑训练场 Service Worker v4 — 网络优先，离线兜底（外壳）
+// v4（2026-10-28 P3 静态化）：移除 marked（运行时不再渲染）；SHELL 预缓存 course/index.json（首屏秒开）
+const CACHE = 'sandy-hollow-v4';
+const SHELL = ['./', './index.html', './course-dom.js', './course/index.json', './assets/favicon.svg', './assets/icon-192.png', './assets/icon-512.png'];
 
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(SHELL)).then(() => self.skipWaiting()));

@@ -1,0 +1,197 @@
+// P3 · 前端切静态 —— 静态课程 DOM 提取器 + 前端接线断言
+// 运行：node --test mentors-den/tests/frontend-static-course.test.js
+//
+// 设计约束（勿改）：
+//   · 仓里无 node_modules，且 Node 26.10 无内置 DOMParser → 提取器必须是**纯函数**（正则/字符串），
+//     不能依赖 DOM。全文件无外部依赖。
+//   · 提取器放 docs/course-dom.js，UMD 双可用：node require + 浏览器 window.CourseDom。
+const test = require('node:test');
+const assert = require('node:assert');
+const fs = require('node:fs');
+const path = require('node:path');
+
+const REPO = path.resolve(__dirname, '..', '..');
+const DOCS = path.join(REPO, 'docs');
+const COURSE = path.join(REPO, 'mentors-den', 'course');
+
+const dom = require(path.join(DOCS, 'course-dom.js'));
+
+const readIndex = () => JSON.parse(fs.readFileSync(path.join(DOCS, 'course', 'index.json'), 'utf8'));
+const index = readIndex();
+const indexHtml = fs.readFileSync(path.join(DOCS, 'index.html'), 'utf8');
+const swJs = fs.readFileSync(path.join(DOCS, 'sw.js'), 'utf8');
+
+// ─────────────────────────────────────────────────────────────
+// 1. 提取器基本契约
+// ─────────────────────────────────────────────────────────────
+test('extractLessons: 真实周页提取出的课时数 == index.json 的 lesson_count', () => {
+  for (const w of index.weeks) {
+    const html = fs.readFileSync(path.join(DOCS, 'course', `${w.id}.html`), 'utf8');
+    const lessons = dom.extractLessons(html);
+    assert.strictEqual(
+      lessons.length,
+      w.lesson_count,
+      `${w.id} 提取课时数 ${lessons.length} != index.json ${w.lesson_count}`
+    );
+  }
+});
+
+test('extractLessons: 提取出的 data-lid 与源 md 文件名一一对应', () => {
+  for (const w of index.weeks) {
+    const html = fs.readFileSync(path.join(DOCS, 'course', `${w.id}.html`), 'utf8');
+    const lessons = dom.extractLessons(html);
+    for (const L of lessons) {
+      assert.ok(L.lid, `${w.id} 有一课缺 data-lid`);
+      const md = path.join(COURSE, `${L.lid}.md`);
+      assert.ok(fs.existsSync(md), `${L.lid}.md 在 mentors-den/course/ 里不存在`);
+    }
+  }
+});
+
+test('extractLessons: 全部 97 课覆盖，且不重不漏', () => {
+  const seen = [];
+  for (const w of index.weeks) {
+    const html = fs.readFileSync(path.join(DOCS, 'course', `${w.id}.html`), 'utf8');
+    seen.push(...dom.extractLessons(html).map((L) => L.lid));
+  }
+  assert.strictEqual(seen.length, 97, `总课时数 ${seen.length} != 97`);
+  assert.strictEqual(new Set(seen).size, 97, '存在重复 lid');
+  // 课时文件名有三种形态：-L01（字母课）、-S01（数字课）、-weekend（周末课）
+  const mdFiles = fs.readdirSync(COURSE).filter((f) => /^W\d\d-(L\d+|S\d+|weekend)\.md$/.test(f)).map((f) => f.replace(/\.md$/, ''));
+  assert.strictEqual(mdFiles.length, 97, `源 md 课时数 ${mdFiles.length} != 97`);
+  assert.deepStrictEqual(seen.slice().sort(), mdFiles.slice().sort());
+});
+
+// ─────────────────────────────────────────────────────────────
+// 2. 内容保真：静态产物没丢课文
+// ─────────────────────────────────────────────────────────────
+test('extractLessons: .md innerHTML 含源 md 渲染后的关键片段（内容没丢）', () => {
+  const marked = require(path.join(DOCS, 'vendor', 'marked.min.js'));
+  const html = fs.readFileSync(path.join(DOCS, 'course', 'W01.html'), 'utf8');
+  const lessons = dom.extractLessons(html);
+  assert.ok(lessons.length > 0);
+  for (const L of lessons) {
+    const md = fs.readFileSync(path.join(COURSE, `${L.lid}.md`), 'utf8');
+    const rendered = marked.parse(md);
+    // 取渲染结果的实质文本片段（去标签）作为不变量
+    const plain = rendered.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+    const head = plain.slice(0, 60);
+    const inHtml = L.html.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+    assert.ok(
+      inHtml.includes(head),
+      `${L.lid} 静态产物丢了课文开头片段: ${JSON.stringify(head)}`
+    );
+  }
+});
+
+test('extractLessons: 每课都有标题（lesson-head .lt 非空）', () => {
+  for (const w of index.weeks) {
+    const html = fs.readFileSync(path.join(DOCS, 'course', `${w.id}.html`), 'utf8');
+    for (const L of dom.extractLessons(html)) {
+      assert.ok(L.title && L.title.trim(), `${L.lid} 缺课时标题`);
+    }
+  }
+});
+
+// ─────────────────────────────────────────────────────────────
+// 3. 坏输入兜底（前端不能白屏）
+// ─────────────────────────────────────────────────────────────
+test('extractLessons: 坏输入返回空数组，不抛异常', () => {
+  for (const bad of ['', '   ', '<html></html>', 'not html at all', null, undefined]) {
+    assert.deepStrictEqual(dom.extractLessons(bad), [], `坏输入 ${JSON.stringify(bad)} 未兜底`);
+  }
+});
+
+test('extractSyllabus: 坏输入返回空字符串，不抛异常', () => {
+  for (const bad of ['', '<html></html>', null, undefined]) {
+    assert.strictEqual(dom.extractSyllabus(bad), '', `坏输入 ${JSON.stringify(bad)} 未兜底`);
+  }
+});
+
+test('extractSyllabus: 真实 syllabus.html 能提取出正文且非空', () => {
+  const html = fs.readFileSync(path.join(DOCS, 'course', 'syllabus.html'), 'utf8');
+  const out = dom.extractSyllabus(html);
+  assert.ok(out.length > 100, `syllabus 正文过短 (${out.length})`);
+  assert.ok(out.includes('<'), 'syllabus 正文应含 HTML 标记');
+});
+
+// ─────────────────────────────────────────────────────────────
+// 4. 确定性
+// ─────────────────────────────────────────────────────────────
+test('提取器是确定性的：同输入两次结果完全相同', () => {
+  const html = fs.readFileSync(path.join(DOCS, 'course', 'W09.html'), 'utf8');
+  assert.deepStrictEqual(dom.extractLessons(html), dom.extractLessons(html));
+  const syl = fs.readFileSync(path.join(DOCS, 'course', 'syllabus.html'), 'utf8');
+  assert.strictEqual(dom.extractSyllabus(syl), dom.extractSyllabus(syl));
+});
+
+// ─────────────────────────────────────────────────────────────
+// 5. 前端接线断言（防回归）
+// ─────────────────────────────────────────────────────────────
+test('前端：index.html 不再引用 marked.min.js', () => {
+  assert.ok(!/marked\.min\.js/.test(indexHtml), 'index.html 仍引用 marked.min.js');
+});
+
+test('前端：index.html 不再调用三个课程 GET 路由', () => {
+  assert.ok(!/raceJSON\(\s*['"]\/learning\/weeks/.test(indexHtml), '仍调 /learning/weeks');
+  assert.ok(!/raceJSON\(\s*['"]\/learning\/syllabus/.test(indexHtml), '仍调 /learning/syllabus');
+  assert.ok(!/raceJSON\(\s*['"]\/learning\/week\//.test(indexHtml), '仍调 /learning/week/:id');
+});
+
+test('前端：index.html 引用同源静态课程路径', () => {
+  assert.ok(/course\/index\.json/.test(indexHtml), '未引用 course/index.json');
+  assert.ok(/course-dom\.js/.test(indexHtml), '未引用 course-dom.js');
+});
+
+test('前端：localStorage 缓存键已升版 learning-c: → learning-d:', () => {
+  // 只扫**代码**，忽略注释（注释里提旧键名是正常的历史说明）
+  const code = indexHtml
+    .split('\n')
+    .filter((l) => !/^\s*(\/\/|\*|\/\*)/.test(l))
+    .join('\n');
+  assert.ok(!/learning-c:/.test(code), 'index.html 代码里仍用 learning-c: 前缀');
+  assert.ok(/learning-d:/.test(code), 'index.html 代码里未用 learning-d: 前缀');
+});
+
+test('前端：learning-pos 值带版本号，旧值作废', () => {
+  assert.ok(/v\s*[:=]\s*2/.test(indexHtml), 'learning-pos 未见 v:2 版本标记');
+});
+
+test('sw.js：CACHE 版本已 bump 到 v4 且 SHELL 移除 marked', () => {
+  assert.ok(/sandy-hollow-v4/.test(swJs), 'CACHE 版本未 bump 到 v4');
+  assert.ok(!/marked\.min\.js/.test(swJs), 'sw.js SHELL 仍含 marked.min.js');
+  assert.ok(/course\/index\.json/.test(swJs), 'sw.js SHELL 未含 course/index.json');
+});
+
+test('sw.js：SHELL 里每个文件都真实存在（否则 install 时 addAll 全 reject）', () => {
+  const m = swJs.match(/const SHELL = \[([\s\S]*?)\];/);
+  assert.ok(m, 'sw.js 未找到 SHELL 数组');
+  const files = m[1]
+    .split(',')
+    .map((s) => s.trim().replace(/^['"]|['"]$/g, ''))
+    .filter(Boolean);
+  for (const f of files) {
+    const p = path.join(DOCS, f.replace(/^\.\//, ''));
+    assert.ok(fs.existsSync(p), `sw.js SHELL 里的 ${f} 在 docs/ 下不存在 → addAll 会 reject，install 失败`);
+  }
+});
+
+// ─────────────────────────────────────────────────────────────
+// 6. 产物结构断言
+// ─────────────────────────────────────────────────────────────
+test('产物：每个周页都含 week-body + section.lesson[data-lid] + .md[data-lid]', () => {
+  for (const w of index.weeks) {
+    const html = fs.readFileSync(path.join(DOCS, 'course', `${w.id}.html`), 'utf8');
+    assert.ok(/class="week-body"/.test(html), `${w.id}.html 缺 .week-body`);
+    assert.ok(/<section class="lesson" data-lid="/.test(html), `${w.id}.html 缺 section.lesson[data-lid]`);
+    assert.ok(/<div class="md" data-lid="/.test(html), `${w.id}.html 缺 .md[data-lid]`);
+  }
+});
+
+test('产物：周页标题与 index.json 的 title 一致', () => {
+  for (const w of index.weeks) {
+    const html = fs.readFileSync(path.join(DOCS, 'course', `${w.id}.html`), 'utf8');
+    const t = dom.extractTitle(html);
+    assert.strictEqual(t, w.title, `${w.id} 标题不一致`);
+  }
+});

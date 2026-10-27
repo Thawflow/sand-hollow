@@ -174,7 +174,7 @@ footer{text-align:center;color:var(--text2);font-size:.75rem;margin-top:30px}
     <div class="lg-hint">已有游戏 ID 就直接用那个号登录 —— 游戏进度不会丢。<br>没号就注册一个，注册后这个号就是你在沙坑和游戏小窝的唯一身份。</div>
   </div>
 </div>
-<script src="vendor/marked.min.js"></script>
+<script src="course-dom.js"></script>
 <script src="track.js?v=5" defer></script>
 <script>
 // 📊 学习互动埋点 v1（2026-08-30 Tree 设计）：点击 = 正在学习的信号，上报 click:* 事件供沙坑融合统计
@@ -212,11 +212,18 @@ async function fetchJSON(url,timeout){
 }
 // —— 治转圈三件套（2026-09-02 连夜修）：本地缓存秒开 + 双域名竞速 + 后台静默刷新 ——
 // 根因：数据层零缓存 + 串行双域名各 10s 超时；慢域名+兜底也慢 = 每次打开必转圈 5-20s
-function lsGet(k){try{return JSON.parse(localStorage.getItem('learning-c:'+k))}catch(e){return null}}
-function lsSet(k,v){try{localStorage.setItem('learning-c:'+k,JSON.stringify(v))}catch(e){}}
+// ⚠️ P3 发现的老 bug（2026-10-28，顺手修）：本文件原有两套 function lsGet/lsSet（学习区带前缀 /
+//   登录区无前缀），**JS 函数提升 = 后声明者覆盖前者** → 学习区一直在调登录区的裸键版本！
+//   后果：lsSet('weeks', array) 实际执行 localStorage.setItem('weeks', String(array))，
+//   写出 "[object Object],…" 垃圾；lsGet 读回字符串 JSON.parse 必抛 → 缓存永远 miss，
+//   「缓存秒开」自上线起就没真正生效过。修法：学习区独立命名 learnLsGet/learnLsSet，
+//   **不再声明同名 lsGet/lsSet**（function+const 同名重复声明 = SyntaxError，整页 JS 会死）。
+function learnLsGet(k){try{return JSON.parse(localStorage.getItem('learning-d:'+k))}catch(e){return null}}
+function learnLsSet(k,v){try{localStorage.setItem('learning-d:'+k,JSON.stringify(v))}catch(e){}}
 // 记录学员上次停的章节（2026-09-08 Tree 提需求、小马 v1.8 实现）：默认页 localStorage key；intersection observer 50% 可见即写。
-function posGet(){try{return JSON.parse(localStorage.getItem('learning-pos'))}catch(e){return null}}
-function posSet(p){try{localStorage.setItem('learning-pos',JSON.stringify({...p,ts:Date.now()}))}catch(e){}}
+// P3 静态化（2026-10-28）：值加 v:2 版本字段，读到旧值（无 v 或 v!==2）一律作废返回 null。
+function posGet(){try{const p=JSON.parse(localStorage.getItem('learning-pos'));return (p&&p.v===2)?p:null}catch(e){return null}}
+function posSet(p){try{localStorage.setItem('learning-pos',JSON.stringify({...p,v:2,ts:Date.now()}))}catch(e){}}
 function posResolve(){const p=posGet();if(!p||!weeksData.length)return null;const w=weeksData.find(x=>(x.week_id||x.id)===p.weekId);if(!w)return null;return {week:w,lessonId:p.lessonId||null}}
 // 滚到上次停留的课（lesson 级恢复）：复用侧边栏 lesson-link 同款 scrollIntoView 模式，元素不存在时 no-op
 function _scrollToLesson(lid){setTimeout(()=>{const t=document.querySelector('#content .md[data-lid="'+lid+'"]');if(t)t.scrollIntoView({behavior:'smooth',block:'start'})},80)}
@@ -241,9 +248,32 @@ function raceJSON(path,timeout){
   };
   return attempt().catch(()=>new Promise(r=>setTimeout(r,1500)).then(attempt));
 }
+// ══════════════════════════════════════════════════════════
+// P3 静态化（2026-10-28）：课程内容改为同源静态文件
+//   course/index.json     → 周列表元数据
+//   course/W##.html       → 单周正文（构建期已渲染好，运行时不碰 marked）
+//   course/syllabus.html  → 课程总大纲
+// 好处：不再打 Worker（冷启动 3-35s 的老毛病没了），弱网/离线也能开课。
+// ══════════════════════════════════════════════════════════
+const COURSE_BASE='course/';
+const STATIC_TIMEOUT_MS=15000;
+// 取同源静态文件：超时/失败抛错，调用方走错误 UI（不用 raceJSON —— 静态资源不走 CF 双域）
+async function fetchStaticCourse(name){
+  const ctl=new AbortController();
+  const timer=setTimeout(()=>ctl.abort(),STATIC_TIMEOUT_MS);
+  try{
+    const r=await fetch(COURSE_BASE+name,{signal:ctl.signal,cache:'no-cache'});
+    if(!r.ok)throw new Error('http '+r.status);
+    return await r.text();
+  }finally{clearTimeout(timer);}
+}
+function staticErr(msg){
+  return '<div class="empty"><div class="big">📡</div>'+msg+
+    '<br><br><button onclick="loadIndex()" style="margin-top:12px;padding:8px 22px;border-radius:9px;border:1px solid var(--accent);background:var(--card2);color:var(--accent);cursor:pointer">🔄 重试</button></div>';
+}
 async function loadIndex(){
-  // 缓存优先：本地秒开 → 后台竞速刷新（网络挂了也照常用旧数据）
-  const cached=lsGet('weeks');
+  // 缓存优先：本地秒开 → 后台静默刷新（网络挂了也照常用旧数据）
+  const cached=learnLsGet('weeks');
   // 进入页默认跳到「上次停留的章节」（2026-09-08 Tree 提需求）：pos 优先 > current 周 > 最新周
   function _pickStartWeek(){
     const pos=posResolve();
@@ -258,10 +288,10 @@ async function loadIndex(){
     if(s0.week)loadWeek(s0.week.id,s0.lessonId||null);
   }
   try{
-    const j=await raceJSON('/learning/weeks');
-    const wks=(j.index&&j.index.weeks)||[];
+    const txt=await fetchStaticCourse('index.json');
+    const wks=(JSON.parse(txt).weeks)||[];
     if(wks.length){
-      lsSet('weeks',wks);weeksData=wks;renderWeeks();
+      learnLsSet('weeks',wks);weeksData=wks;renderWeeks();
       if(!cached||!cached.length){
         const s=_pickStartWeek();
         if(s.week)loadWeek(s.week.id,s.lessonId||null);
@@ -273,12 +303,12 @@ async function loadIndex(){
     }
   }catch(e){
     if(!cached||!cached.length){
-      $('#content').innerHTML='<div class="empty"><div class="big">📡</div><b>课程加载失败</b><br><br>网络不通或太慢（手机流量下常见）。<br><button onclick="loadIndex()" style="margin-top:12px;padding:8px 22px;border-radius:9px;border:1px solid var(--accent);background:var(--card2);color:var(--accent);cursor:pointer">🔄 重试</button></div>';
+      $('#content').innerHTML=staticErr('课程加载失败<br><br>静态课程资源不可达（网络不通或太慢，手机流量下常见）。');
       return;
     }
   }
   if(!weeksData.length){
-    $('#content').innerHTML='<div class="empty"><div class="big">🌱</div><b>第一周课程还在路上</b><br><br>如意正在上传 W01 内容（今晚就绪）。<br>先去把 VS Code 打开热热身——你的第一个程序 clan.py 还等着跑第 6 次呢 🐾</div>';
+    $('#content').innerHTML='<div class="empty"><div class="big">🌱</div><b>第一周课程还在路上</b><br><br>先去把 VS Code 打开热热身——你的第一个程序 clan.py 还等着跑第 6 次呢 🐾</div>';
     return;
   }
 }
@@ -314,52 +344,73 @@ function weekDone(id){
 async function loadSyllabus(){
   curWeek=null;renderWeeks();
   const sl=$('#syll-link');if(sl)sl.classList.add('active');
-  const c=lsGet('syll');
+  const c=learnLsGet('syll');
   if(c)renderSyll(c);
   else $('#content').innerHTML='<div class="spin"></div>';
   try{
-    const j=await raceJSON('/learning/syllabus');
-    if(j&&j.syllabus){
-      lsSet('syll',j.syllabus);
-      if(curWeek===null&&j.syllabus!==c)renderSyll(j.syllabus);
+    // P3 静态化：同源 course/syllabus.html（构建期已渲染好，运行时不碰 marked）
+    const txt=await fetchStaticCourse('syllabus.html');
+    const body=(window.CourseDom?CourseDom.extractSyllabus(txt):'')||txt;
+    if(body){
+      learnLsSet('syll',body);
+      if(curWeek===null&&body!==c)renderSyll(body);
     }
   }catch(e){
-    if(!c)$('#content').innerHTML='<div class="empty"><div class="big">📑</div><b>大纲还在路上</b><br><br>课程总大纲还没发布到线上。<br><button onclick="loadSyllabus()" style="margin-top:12px;padding:8px 22px;border-radius:9px;border:1px solid var(--accent);background:var(--card2);color:var(--accent);cursor:pointer">🔄 重试</button></div>';
+    if(!c)$('#content').innerHTML=staticErr('大纲还在路上<br><br>课程总大纲的静态文件暂时取不到。');
   }
 }
 function renderSyll(md){
-  $('#content').innerHTML='<div class="wk-title">📑 课程总大纲</div><div class="wk-meta">17 周 · 一套材料，两位学员</div><div class="md">'+(window.marked?marked.parse(md):md)+'</div>';
+  // md 参数现在是**已渲染好的 HTML 片段**（P3 静态化），直接注入
+  $('#content').innerHTML='<div class="wk-title">📑 课程总大纲</div><div class="wk-meta">17 周 · 一套材料，两位学员</div><div class="md">'+md+'</div>';
 }
 async function loadWeek(id,scrollToLid){
   curWeek=id;
   const sl=$('#syll-link');if(sl)sl.classList.remove('active');
-  // 缓存优先：localStorage 秒开，后台竞速刷新（内容有变才重渲染，防滚动位置被打断）
-  const c=lsGet('wk:'+id);
+  // 缓存优先：localStorage 秒开，后台静默刷新（内容有变才重渲染，防滚动位置被打断）
+  const c=learnLsGet('wk:'+id);
   if(c){renderWeeks();renderWeek(c);if(scrollToLid)_scrollToLesson(scrollToLid);}
   else{$('#content').innerHTML='<div class="spin"></div>';renderWeeks();}
   try{
-    const j=await raceJSON('/learning/week/'+encodeURIComponent(id));
-    if(j&&j.week){
-      lsSet('wk:'+id,j.week);lessonCacheAdd(j.week);
-      if(curWeek===id&&JSON.stringify(j.week)!==JSON.stringify(c))renderWeek(j.week);
+    // P3 静态化：同源 course/W##.html（构建期已渲染好，运行时不碰 marked）
+    const txt=await fetchStaticCourse(id+'.html');
+    const week=staticWeekFromHtml(id,txt);
+    if(week){
+      learnLsSet('wk:'+id,week);lessonCacheAdd(week);
+      if(curWeek===id&&JSON.stringify(week)!==JSON.stringify(c))renderWeek(week);
       // 无缓存首次渲染后补滚（缓存路径已在上面滚过；内容相同不重渲染也不重复拉滚，防打扰学员已滚走的位置）
       if(curWeek===id&&!c&&scrollToLid)_scrollToLesson(scrollToLid);
       renderWeeks();
     }
   }catch(e){
-    if(!c)$('#content').innerHTML='<div class="empty"><div class="big">📡</div>拉取 '+id+' 失败（两个域名都超时/不通，手机流量下常见）<br><br><button onclick="loadWeek(\''+id+'\')" style="margin-top:12px;padding:8px 20px;border-radius:10px;border:1px solid var(--accent);background:var(--card2);color:var(--accent);cursor:pointer">重试</button></div>';
+    if(!c)$('#content').innerHTML=staticErr('拉取 '+id+' 失败（静态课程文件不可达，网络不通或太慢时常见）');
   }
 }
+// P3 静态化：把 course/W##.html 的文本解析成 renderWeek 需要的 week 形状
+//   {id, title, meta, lessons:[{id,title,html}]} —— lessons[i].html 已是渲染好的 HTML
+// 运行时不再有 marked；解析失败/空产物返回 null（调用方保留缓存或走错误 UI）
+function staticWeekFromHtml(id,txt){
+  if(!window.CourseDom)return null;
+  const lessons=CourseDom.extractLessons(txt);
+  if(!lessons.length)return null;
+  return {
+    id:id,
+    title:CourseDom.extractTitle(txt)||id,
+    meta:CourseDom.extractMeta(txt)||'',
+    lessons:lessons.map(L=>({id:L.lid,title:L.title,html:L.html}))
+  };
+}
 function renderWeek(w){
-  // 归一化周标识（week 详情 {week_id,...} / 旧缓存 {id,...} 都可能出现）
+  // P3 静态化：w.lessons[i].html 已是渲染好的 HTML（构建期 marked 产物），直接注入；
+  // 兼容旧缓存形状（markdown 字段）的兜底保留一轮，读到旧形状时原样转义展示（下一版缓存自然覆盖）
   const wid=w.week_id||w.id||'';
   const lessons=w.lessons||[];
-  let html='<div class="wk-title">'+(w.title||wid||'课程')+'</div><div class="wk-meta">发布：'+(w.published_at?String(w.published_at).slice(0,10):'—')+' · '+lessons.length+' 课</div>';
+  let html='<div class="wk-title">'+(w.title||wid||'课程')+'</div><div class="wk-meta">'+(w.meta||('发布：— · '+lessons.length+' 课'))+'</div>';
   for(const L of lessons){
     const lid=L.id||'';
+    const body=L.html!=null?L.html:'<pre>'+String(L.markdown||'内容待补').replace(/</g,'&lt;')+'</pre>';
     html+='<div class="lesson">'
       +'<div class="lesson-head"><span class="lt">'+(L.title||lid)+'</span></div>'
-      +'<div class="md" data-lid="'+lid+'">'+(window.marked?marked.parse(L.markdown||'内容待补'):'<pre>'+String(L.markdown||'内容待补').replace(/</g,'&lt;')+'</pre>')+'</div>'
+      +'<div class="md" data-lid="'+lid+'">'+body+'</div>'
       +'<div class="hw-upload" data-lid="'+lid+'">'
       +'<h4>📝 交作业</h4>'
       +'<textarea class="hw-code" placeholder="粘贴代码，或点「选 .py 文件」自动填入"></textarea>'
