@@ -9,7 +9,7 @@
 
 ---
 
-> **📂 课前准备 · 随堂练习文件**: 先在 Thonny `文件 → 新建`, 立刻 `文件 → 另存为...` 存为 `~/sand-hollow/<你的学员ID>/homework/W16-weekend-practice.py`.周末代码都写在这里.
+> **📂 课前准备 · 随堂练习文件**: 先在 Thonny `文件 → 新建`, 立刻 `文件 → 另存为...` 存为 `~/sand-hollow/<你的学员ID>/homework/W14-weekend-practice.py`.周末代码都写在这里.
 
 ## ⓪ 🤖 课前 AI 一分钟 · 第 39 颗: 递归 = 清晰, 迭代 = 性能(3 分钟)
 
@@ -171,7 +171,7 @@ def fib_iterative_buggy(n):
 
 ## 九、提交(5 分钟)
 
-存到 `W16-weekend-practice.py`.跟 mentor 说"**修完了**".
+存到 `W14-weekend-practice.py`.跟 mentor 说"**修完了**".
 
 ## 十、反思(5 分钟)
 
@@ -186,7 +186,7 @@ def fib_iterative_buggy(n):
 - [ ] 写好 4 对函数(递归/迭代各 4)
 - [ ] 跑过 5 组测试, 看到差距
 - [ ] 找到并修了 2 个 bug
-- [ ] 存到 `W16-weekend-practice.py`
+- [ ] 存到 `W14-weekend-practice.py`
 
 四格全勾 → 周末完成.W14 加餐④ 收官!
 

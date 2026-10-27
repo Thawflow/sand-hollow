@@ -9,7 +9,7 @@
 
 ---
 
-> **📂 课前准备**：存为 `~/sand-hollow/<你的学员ID>/homework/W16-weekend-practice.py`。
+> **📂 课前准备**：存为 `~/sand-hollow/<你的学员ID>/homework/W12-weekend-practice.py`。
 
 ## ⓪ 🤖 课前 AI 一分钟 · 第 36 颗：自己造轮子 vs 用标准库（3 分钟）
 
@@ -128,7 +128,7 @@ def selection_sort_buggy(arr):
 
 ## 八、提交（5 分钟）
 
-存到 `W16-weekend-practice.py`。跟 mentor 说"**修完了**"。
+存到 `W12-weekend-practice.py`。跟 mentor 说"**修完了**"。
 
 ## 九、反思（5 分钟）
 
@@ -143,7 +143,7 @@ def selection_sort_buggy(arr):
 - [ ] 写好两个排序函数
 - [ ] 跑过 5 组测试
 - [ ] 找到并修了 2 个 bug
-- [ ] 存到 `W16-weekend-practice.py`
+- [ ] 存到 `W12-weekend-practice.py`
 
 ---
 
