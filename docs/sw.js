@@ -5,7 +5,9 @@
 // v6（2026-10-29 微服务拆分）：index.html 注释更新（Worker 真源路径 + 去掉会腐化的源码行号引用）→ 升版。
 // v7（2026-10-29 学员端加载修复）：index.html 的 fetchStaticCourse 改了
 //     （超时 15s→45s + 读路径重试 + 空体校验）→ 升版，老学员才能拿到修好的 JS。
-const CACHE = 'sandy-hollow-v7';
+// v8（2026-10-29 移除网页交作业模块）：index.html 删除「📝 交作业」卡片 + 接线 JS
+//     （改走本地目录 ~/sand-hollow/<学员ID>/homework/ + 跟智能体说「修完了」）→ 升版。
+const CACHE = 'sandy-hollow-v8';
 const SHELL = ['./', './index.html', './course-dom.js', './course/index.json', './assets/favicon.svg', './assets/icon-192.png', './assets/icon-512.png'];
 
 self.addEventListener('install', e => {

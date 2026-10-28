@@ -235,3 +235,61 @@ test('静态资源路径：syllabus 走 course/ 前缀（线上实测路径 = /c
   assert.ok(/fetchStaticCourse\(\s*['"]syllabus\.html['"]\s*\)/.test(indexHtml),
     '未发现 syllabus.html 的静态取用点');
 });
+
+// ─────────────────────────────────────────────────────────────
+// 8. 网页交作业模块已移除（2026-10-29 · 家族立「沙坑不再考虑没有 AI agent 的用户」）
+//    背景：10-18 家族已立该约定，10-13 提议的「学员网页直交作业」
+//    （POST /learning/homework/submit）当时只做了归档，**前端卡片与 Worker 端点残留至今**。
+//    现役流程：作业写进 ~/sand-hollow/<学员ID>/homework/ → 跟智能体说「修完了」
+//    → AI agent 批改 → 评语写进 <学员ID>/reviews/。
+//    本组断言的作用是**防止模块被加回来**（删除是不可逆意图，必须有回归防护）。
+// ─────────────────────────────────────────────────────────────
+test('网页交作业：前端不得有上传入口（卡片 / 选择文件 / 提交按钮 / CSS）', () => {
+  for (const bad of [
+    ['hw-upload', '交作业卡片容器 class'],
+    ['hw-file-btn', '选 .py 文件按钮'],
+    ['hw-send-btn', '提交作业按钮'],
+    ['hw-code', '代码粘贴 textarea'],
+    ['hw-file', '文件选择 input'],
+    ['ok-msg', '提交结果提示'],
+  ]) {
+    assert.ok(!indexHtml.includes(bad[0]),
+      `index.html 仍含 ${bad[1]}（${bad[0]}）—— 网页交作业模块应已移除`);
+  }
+});
+
+test('网页交作业：不得再调用 /learning/homework/submit', () => {
+  assert.ok(!/cfPost\(\s*['"]\/learning\/homework\/submit/.test(indexHtml),
+    'index.html 仍在调用 /learning/homework/submit');
+  assert.ok(!/learning\/homework\/submit['"]\s*,/.test(indexHtml),
+    'index.html 仍有 homework/submit 端点字面量（可能是漏删的调用）');
+});
+
+test('网页交作业：幂等白名单不得含 /learning/homework/submit（它是真写接口）', () => {
+  const m = indexHtml.match(/IDEMPOTENT_POSTS\s*=\s*new Set\(\s*\[([^\]]*)\]/);
+  assert.ok(m, 'index.html 未找到 IDEMPOTENT_POSTS 定义');
+  assert.ok(!/learning\/homework\/submit/.test(m[1]),
+    'IDEMPOTENT_POSTS 含 /learning/homework/submit —— 它是**真写**接口，回落备域会双写');
+});
+
+test('作业提交流程：站点必须指向本地目录 + 跟智能体说一声', () => {
+  assert.ok(/homework/.test(indexHtml), 'index.html 未提到 homework 目录');
+  assert.ok(/修完了|交完了|作业完成/.test(indexHtml),
+    'index.html 未提示学员「写完跟智能体说一声」');
+  assert.ok(/reviews/.test(indexHtml), 'index.html 未提到 reviews/ 评语目录');
+});
+
+test('课程真值：作业保存规则指向本地 <学员ID>/homework/ 目录（非网页上传）', () => {
+  const mdDir = path.join(COURSE);
+  const files = fs.readdirSync(mdDir).filter(f => f.endsWith('.md'));
+  let checked = 0;
+  for (const f of files) {
+    const md = fs.readFileSync(path.join(mdDir, f), 'utf8');
+    if (!/作业保存规则/.test(md)) continue;
+    checked++;
+    assert.ok(/homework\//.test(md), `${f} 的作业保存规则未指向 homework/ 目录`);
+    assert.ok(!/homework\/submit|网页提交|上传作业/.test(md),
+      `${f} 的作业保存规则仍指向网页上传`);
+  }
+  assert.ok(checked > 0, '未找到任何含「作业保存规则」的课程 md');
+});

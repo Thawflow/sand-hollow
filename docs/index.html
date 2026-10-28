@@ -95,15 +95,6 @@ h1{font-size:1.6rem}
 .id-badge{font-size:.76rem;padding:3px 11px;border-radius:12px;border:1px solid var(--border);color:var(--text2);cursor:pointer;white-space:nowrap;background:transparent;font-family:inherit}
 .id-badge:hover{border-color:var(--accent);color:var(--accent)}
 .id-badge.ok{border-color:rgba(62,207,142,.4);color:var(--ok)}
-/* 作业提交卡片 */
-.hw-upload{background:var(--card2);border:1px dashed var(--border);border-radius:12px;padding:14px;margin:14px 0 4px}
-.hw-upload h4{font-size:.9rem;margin-bottom:8px}
-.hw-upload .row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px}
-.hw-upload textarea{width:100%;min-height:130px;padding:10px 12px;border-radius:9px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-family:ui-monospace,Menlo,monospace;font-size:.8rem;resize:vertical}
-.hw-upload .btn{padding:8px 18px;border-radius:9px;border:none;background:var(--accent);color:#fff;font-size:.85rem;cursor:pointer;font-family:inherit}
-.hw-upload .btn:disabled{opacity:.5;cursor:wait}
-.hw-upload .note{font-size:.75rem;color:var(--text2);margin-top:6px}
-.hw-upload .ok-msg{color:var(--ok);font-size:.82rem;margin-top:8px;display:none}
 .empty{text-align:center;padding:60px 20px;color:var(--text2)}
 .empty .big{font-size:3rem;margin-bottom:12px}
 .spin{display:inline-block;width:22px;height:22px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:r 0.8s linear infinite;margin:40px auto}
@@ -131,7 +122,7 @@ footer{text-align:center;color:var(--text2);font-size:.75rem;margin-top:30px}
     <b>📚 想看完整介绍？</b>沙坑 = 三大块：<b>🐍 Python 编程（17 周）</b> + <b>🤖 AI 通识</b> + <b>👀 C++ 认脸</b>。详细参与者 / 目录 / 工具链 / 技术栈见 <a href="https://github.com/Thawflow/sand-hollow/blob/main/README.md" target="_blank"><b>完整版 README（GitHub 链接）</b></a>。<br>
     <b>开始前（只做一次）：</b>课程仓库地址是 <code>https://github.com/Thawflow/sand-hollow</code>（沙坑学习站 + 课程仓库）。让智能体（Agent）克隆到你的 home 目录，<b>以后所有作业都写在这一个固定位置</b>。<b>macOS 用户</b>：别放桌面——桌面有 macOS 隐私门卫（TCC）会拦 Thonny，还有 iCloud 同步捣乱。Windows / Linux 用户不受此影响。<br>
     <b>克隆后告诉智能体（Agent）三件事：</b>①仓库地址是 <code>https://github.com/Thawflow/sand-hollow</code>；②读 <code>mentors-den/mentors-rules.md</code> 上岗手册（智能体（Agent）能自动 review 你的作业）；③帮你创建学员目录（<code>&lt;你的学员ID&gt;/homework/</code>，ID 就是你注册沙坑用的 8 位数字）并把这个路径记到它的 MEMORY/USER，以后作业统一放这里。<br>
-    <b>怎么用：</b>每周左边选周 → 逐课阅读 → 学完勾选（进度自动保存在你的账号里）→ 作业交到 <b>&lt;你的学员ID&gt;/homework/</b> 目录，批改回复会出现在 <b>&lt;你的学员ID&gt;/reviews/</b>（作业和评语分开放，更清楚）。<br>
+    <b>怎么用：</b>每周左边选周 → 逐课阅读 → 学完勾选（进度自动保存在你的账号里）→ 作业写进 <b>&lt;你的学员ID&gt;/homework/</b> 目录，写完跟你的智能体说一声「修完了」，它就会批改，评语出现在 <b>&lt;你的学员ID&gt;/reviews/</b>（作业和评语分开放，更清楚）。<br>
     每周日晚发布下周内容。卡住随时跟你自己的智能体说一声 ❄️✨
   </div>
   <div class="layout">
@@ -514,15 +505,9 @@ function renderWeek(w){
     html+='<div class="lesson">'
       +'<div class="lesson-head"><span class="lt">'+(L.title||lid)+'</span></div>'
       +'<div class="md" data-lid="'+lid+'">'+body+'</div>'
-      +'<div class="hw-upload" data-lid="'+lid+'">'
-      +'<h4>📝 交作业</h4>'
-      +'<textarea class="hw-code" placeholder="粘贴代码，或点「选 .py 文件」自动填入"></textarea>'
-      +'<div class="row" style="margin-top:8px"><button class="btn hw-file-btn">📄 选 .py 文件</button><button class="btn hw-send-btn">🚀 提交作业</button></div>'
-      +'<input type="file" class="hw-file" accept=".py,.txt" style="display:none">'
-      +'<div class="ok-msg" style="display:none"></div>'
-      +'</div></div>';
+      +'</div>';
   }
-  html+='<div class="hw">🐾 <b>怎么交</b>：读完这周的课，在上面的「📝 交作业」里贴代码提交就行。提交完 mentor 会批改，评语会直接发给你 💌<br>文件名建议 <code>'+(wid||'WXX')+'-SXX-homework.py</code>（跟你的智能体说一声「修完了」它才会去取）。</div>';
+  html+='<div class="hw">🐾 <b>怎么交</b>：课后练习写进 <code>'+(wid||'WXX')+'-SXX-homework.py</code>，存到 <code>~/sand-hollow/&lt;你的学员ID&gt;/homework/</code>（目录没有就新建）。写完跟你的智能体说一声「修完了」，AI agent 就会批改，评语出现在 <code>&lt;你的学员ID&gt;/reviews/</code>。</div>';
   $('#content').innerHTML=html;
   // 课文内自查清单 checkbox：激活 marked 默认 disabled + 本机持久化（2026-08-30 Tree 反馈）
   // 注：本段必须活在 renderWeek 内——每次渲染后重新激活，放函数外只在首载空跑一次（本次修复的根因）
@@ -554,51 +539,10 @@ function renderWeek(w){
     renderWeeks();
   }
   syncDone();
-  // ── 交作业卡片接线（提交到 tpg-hq Worker，mentor 侧拉取批改）──
-  $('#content').querySelectorAll('.hw-upload').forEach(box=>{
-    const lid=box.dataset.lid;
-    const codeT=box.querySelector('.hw-code'),fileI=box.querySelector('.hw-file'),
-          sendB=box.querySelector('.hw-send-btn'),okM=box.querySelector('.ok-msg');
-    box.querySelector('.hw-file-btn').onclick=()=>fileI.click();
-    fileI.onchange=()=>{
-      const f=fileI.files[0];if(!f)return;
-      const r=new FileReader();
-      r.onload=()=>{codeT.value=String(r.result).slice(0,32*1024);codeT.placeholder=f.name};
-      r.readAsText(f);
-    };
-    sendB.onclick=async()=>{
-      const id=getActiveId();
-      if(!id){$('#login-gate').classList.remove('hidden');okM.style.display='block';okM.style.color='#ff8fa3';okM.textContent='先登录（右上角 🔑）';return}
-      const code=codeT.value.trim();
-      if(!code){okM.style.display='block';okM.style.color='#ff8fa3';okM.textContent='代码还空着～';return}
-      const weekId=(curWeek||'').toString();
-      const players=getPlayers();
-      const learner=(players[id]&&players[id].nickname)||id;
-      sendB.disabled=true;sendB.textContent='提交中…';
-      try{
-        const j=await cfPost('/learning/homework/submit',{
-          code:code, learner:learner, week:weekId, lesson:lid, filename:lid+'-homework.py'
-        });
-        okM.style.display='block';
-        if(j.ok){
-          okM.style.color='var(--ok)';
-          okM.textContent='✅ 作业已收到！mentor 会批改，评语会发给你 💌';
-          codeT.value='';
-        }else{
-          okM.style.color='#ff8fa3';
-          okM.textContent='❌ '+(j.error||'提交失败，稍后再试');
-        }
-      }catch(e){
-        okM.style.display='block';okM.style.color='#ff8fa3';
-        // 2026-10-22 冰爪补（认龙井 11:02 review ②）：写超时 ≠ 没送达 —— 请求可能已落库、
-        // 只是回得慢。此时若统一显示「网络不通…稍后再试」= **诱导用户重复提交** → 双写风险
-        // 从这扇门回来。cfPost 在超时时抛的 message 已含「可能已送达」的提示 → 直接透传，
-        // 让用户先刷新确认是否已记录，没有记录再手动重试。
-        okM.textContent=(e&&/可能已送达/.test(e.message||''))?e.message:'网络不通 —— 保存好代码稍后再试';
-      }
-      sendB.disabled=false;sendB.textContent='🚀 提交作业';
-    };
-  });
+  // ── 作业提交走本地目录（2026-10-29：删除网页交作业模块）──
+  // 流程：学员把作业写进 ~/sand-hollow/<学员ID>/homework/ → 跟自己的智能体说「修完了」
+  //       → AI agent 读文件批改 → 评语写进 ~/sand-hollow/<学员ID>/reviews/
+  // 本站不再提供网页上传入口，也不再有 /learning/homework/submit 调用。
   // 记录「学员停在的章节」（2026-09-08 v1.8）：intersection observer 50% 可见即写入 learning-pos；scroll position 也写
   try{
     if(typeof IntersectionObserver!=='undefined'){
@@ -670,6 +614,8 @@ function fillRandomId(){$('#rg-id').value=randId();}
 // 的两个域名**（CF_BASES = tpg-hq.thawflow.com / tpg-hq.icepaw.workers.dev），
 // 也就是说健康状态下**两个 POST 会同时打到同一个后端**：
 //   · /learning/homework/submit → 同一次作业被记录两遍（mentor 批改看到重复条目）
+//     ⚠️ 2026-10-29 该端点已随「网页交作业模块」一并从 Worker 移除（改走本地目录 + AI agent 批改）。
+//        此处保留为**历史 bug 记录**，说明写路径为何必须串行——同类写接口将来再加同样适用。
 //   · /register → 同号重复写入
 // 这不是坏域才触发，是**平时每次提交都双写**。
 // 修法：**写操作回到串行**，但把单域超时从 40s 压到 8s —— 保留 ④ 要的
@@ -705,15 +651,20 @@ function slowHint(on){
 // 实测（10-26）：主域 /verify 首字节 4.2-13.9s，6 次里 2 次超 8s + 1 次握手超时；
 // 备域 6/6 全 200（1.1-2.7s）。旧逻辑主域一超时就直接抛「提交超时」，
 // 学员明明有号有正确昵称却登不进来（学员端实测报障）。
-// ⚠️ 白名单**只放只读 POST**：/register /friends/add /learning/homework/submit /track
+// ⚠️ 白名单**只放只读 POST**：/register /track /friends/add /learning/progress/save
 // 等真写路径仍保持「超时即抛、不回落、不重试」（防双写，14ff6ce 的初衷不变）。
 //
 // 2026-10-26 起：白名单收紧 —— **只留当前真实调用到的只读 POST**。
 // 原白名单含 '/load'，但**本站全站 cfPost 只有 /verify /register /track /friends/add /
-// learning/homework/submit**（逐点 grep 核对）→ '/load' 是死条目，本站永不调用。
-// 留着它有隐患：将来若把 '/load' 接成「存读档」写接口，白名单就等于给双写开了口子。
+// learning/progress/save /learning/progress/load**（逐点 grep 核对）→ '/load' 是死条目，
+// 本站永不调用。留着它有隐患：将来若把 '/load' 接成「存读档」写接口，白名单就等于给双写开了口子。
 // 故本版**移除 /load**，并在下面留注释写明条件：若将来真的接了 /load，
 // 必须先确认它是**只读**语义，一旦变成写接口，必须把它移出白名单。
+//
+// 2026-10-29：网页交作业模块移除，/learning/homework/submit 端点与调用点一并消失。
+// 本注释原先把 /learning/homework/submit 列为「只读 POST」是**过时且错误**的——
+// 它是**真写**接口（每次调用都新落一条 learning:hw:* 键）。实际白名单代码
+// （见下方 IDEMPOTENT_POSTS）从未包含它，仅此注释写错。
 //
 // ⚠️ '/verify' 的零写入依据**已实测补证**（Worker 源码，第三方可核）：
 //   真源 = skyclan 私仓 `projects/cf-worker/worker/index.js` 的
