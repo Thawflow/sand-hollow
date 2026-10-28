@@ -335,16 +335,40 @@ function raceJSON(path,timeout){
 // 好处：不再打 Worker（冷启动 3-35s 的老毛病没了），弱网/离线也能开课。
 // ══════════════════════════════════════════════════════════
 const COURSE_BASE='course/';
-const STATIC_TIMEOUT_MS=15000;
+// ★ 超时预算：15s → 45s（2026-10-29 实测修正）
+//   本机对 learning.thawflow.com 的完整下载 total 分布 = 1.4 / 1.75 / 2.6 / 7.5 / 8.1 /
+//   25.8 / 37.2 / 53.6 / 90+ / 120+ s（TTFB 只要 1.4-8s）⇒ 瓶颈在**传输**不在握手。
+//   15s 预算下学员看到「📡 课程加载失败（静态课程资源不可达）」——那个「网络不通」是**误报**：
+//   静态资源同源、无 Worker hop，文件就在那儿，是自己的超时太短。
+const STATIC_TIMEOUT_MS=45000;
+// 读路径重试次数（读无副作用，重试免费）。只对**网络类**失败重试（超时/连接错），
+// HTTP 4xx/5xx 不重试（重试也不会变好，反而拖慢首屏）。
+const STATIC_RETRY=1;
 // 取同源静态文件：超时/失败抛错，调用方走错误 UI（不用 raceJSON —— 静态资源不走 CF 双域）
 async function fetchStaticCourse(name){
-  const ctl=new AbortController();
-  const timer=setTimeout(()=>ctl.abort(),STATIC_TIMEOUT_MS);
-  try{
-    const r=await fetch(COURSE_BASE+name,{signal:ctl.signal,cache:'no-cache'});
-    if(!r.ok)throw new Error('http '+r.status);
-    return await r.text();
-  }finally{clearTimeout(timer);}
+  let lastErr=null;
+  for(let attempt=0;attempt<=STATIC_RETRY;attempt++){
+    const ctl=new AbortController();
+    const timer=setTimeout(()=>ctl.abort(),STATIC_TIMEOUT_MS);
+    try{
+      const r=await fetch(COURSE_BASE+name,{signal:ctl.signal,cache:'no-cache'});
+      if(!r.ok){
+        const e=new Error('http '+r.status);
+        e.httpStatus=r.status;
+        throw e;                       // ← HTTP 类失败不重试
+      }
+      const txt=await r.text();
+      // ★ 空体校验：HTTP 200 但 body 为空/只有空白 = 上游把传输掐断了，
+      //   当成功返回会让页面渲染成空白且**无任何错误提示**（比报错更难查）。
+      if(!txt||!txt.trim())throw new Error('empty body');
+      return txt;
+    }catch(e){
+      lastErr=e;
+      if(e.httpStatus)throw e;          // ← HTTP 错误直接抛，不重试
+      if(attempt<STATIC_RETRY)await new Promise(r=>setTimeout(r,1200)); // 短暂退避再试
+    }finally{clearTimeout(timer);}
+  }
+  throw lastErr||new Error('fetch failed');
 }
 function staticErr(msg){
   return '<div class="empty"><div class="big">📡</div>'+msg+

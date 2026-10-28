@@ -199,3 +199,39 @@ test('产物：周页标题与 index.json 的 title 一致', () => {
     assert.strictEqual(t, w.title, `${w.id} 标题不一致`);
   }
 });
+
+// ─────────────────────────────────────────────────────────────
+// 7. 学员端加载可靠性（2026-10-29）
+//    背景：本机实测 learning.thawflow.com 的完整下载 total 长尾到 120s+，
+//    而 STATIC_TIMEOUT_MS 只有 15s ⇒ 学员看到「课程加载失败（静态资源不可达）」，
+//    那个「网络不通」是**误报**（文件就在那儿，是自己的超时太短）。
+// ─────────────────────────────────────────────────────────────
+test('fetchStaticCourse：超时预算 ≥45s（15s 会被长尾传输误杀）', () => {
+  const m = indexHtml.match(/STATIC_TIMEOUT_MS\s*=\s*(\d+)/);
+  assert.ok(m, 'index.html 未找到 STATIC_TIMEOUT_MS');
+  const ms = Number(m[1]);
+  assert.ok(ms >= 45000, `STATIC_TIMEOUT_MS 应 ≥45000（实测长尾 >120s），实际 ${ms}`);
+});
+
+test('fetchStaticCourse：读路径有重试（读无副作用，重试免费）', () => {
+  assert.ok(/STATIC_RETRY\s*=\s*[1-9]/.test(indexHtml), 'index.html 未设置 STATIC_RETRY ≥1');
+  assert.ok(/for\s*\(\s*let attempt\s*=/.test(indexHtml), 'fetchStaticCourse 未实现重试循环');
+});
+
+test('fetchStaticCourse：空体校验存在（HTTP 200 + 空 body 不算成功）', () => {
+  assert.ok(/if\s*\(\s*!\s*txt\s*\|\|\s*!\s*txt\.trim\(\)\s*\)/.test(indexHtml),
+    'index.html 缺少空体校验（!txt || !txt.trim()）');
+});
+
+test('fetchStaticCourse：HTTP 错误不重试（重试也不会变好，只拖慢首屏）', () => {
+  assert.ok(/httpStatus/.test(indexHtml), 'index.html 未区分 HTTP 类失败');
+  assert.ok(/if\s*\(\s*e\.httpStatus\s*\)\s*throw\s+e/.test(indexHtml),
+    'HTTP 类失败未直接抛出（不应重试）');
+});
+
+test('静态资源路径：syllabus 走 course/ 前缀（线上实测路径 = /course/syllabus.html）', () => {
+  assert.ok(/COURSE_BASE\s*=\s*['"]course\/['"]/.test(indexHtml),
+    "COURSE_BASE 应为 'course/'");
+  assert.ok(/fetchStaticCourse\(\s*['"]syllabus\.html['"]\s*\)/.test(indexHtml),
+    '未发现 syllabus.html 的静态取用点');
+});
