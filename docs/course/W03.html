@@ -1,0 +1,850 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>W03 · 让程序做决定</title>
+<style>
+:root{--bg:#0f1420;--card:#171e2e;--card2:#1e2740;--border:#2a3550;--text:#e8ecf4;--text2:#8b96ad;--accent:#5b9dff;--ok:#3ecf8e}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+.wrap{max-width:900px;margin:0 auto;padding:28px 20px 60px}
+h1{font-size:1.5rem}
+.wk-meta{color:var(--text2);font-size:.85rem;margin:4px 0 20px}
+.lesson{border:1px solid var(--border);border-radius:12px;padding:16px 18px;margin-bottom:14px;background:var(--card2)}
+.lesson-head{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.lesson-head .lt{font-weight:700;font-size:1rem;flex:1}
+.md{font-size:.92rem;line-height:1.8;color:var(--text);overflow-wrap:break-word}
+.md h1,.md h2,.md h3{margin:14px 0 8px;font-size:1.05rem}
+.md p{margin:8px 0}
+.md code{background:rgba(91,157,255,.12);border-radius:5px;padding:2px 6px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.85em;color:#a8c8ff}
+.md pre{background:#0b0f18;border:1px solid var(--border);border-radius:10px;padding:12px 14px;overflow-x:auto;margin:10px 0}
+.md pre code{background:none;padding:0;color:#c9d7f0}
+.md ul,.md ol{margin:8px 0 8px 22px}
+.md blockquote{border-left:3px solid var(--accent);padding:4px 12px;color:var(--text2);margin:10px 0}
+.md a{color:var(--accent)}
+.md table{border-collapse:collapse;margin:10px 0;font-size:.85rem}
+.md td,.md th{border:1px solid var(--border);padding:6px 10px}
+.md input[type=checkbox]{width:15px;height:15px;accent-color:var(--ok);cursor:pointer;margin-right:6px;vertical-align:-2px}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+<h1 class="wk-title">让程序做决定</h1>
+<div class="wk-meta">W03 · 6 课</div>
+</header>
+<div class="week-body" data-week="W03">
+<section class="lesson" data-lid="W03-S1">
+<div class="lesson-head"><span class="lt">if 初登场：程序会看情况</span></div>
+<div class="md" data-lid="W03-S1"><!-- slug: if-intro, type: base -->
+<h2>⓪ 🤖 课前 AI 一分钟 · 第 N 颗：AI 也会&quot;判一判&quot;（3 分钟）</h2>
+<blockquote>
+<p><strong>第 N 颗</strong>（N = 当前颗数）</p>
+</blockquote>
+<p>AI 不是猜，是<strong>按规则判断</strong>。你给它条件，它给真假——跟 <code>if</code> 一样。</p>
+<ul>
+<li><strong>AI 怎么判断</strong>：你问&quot;这张图是猫吗？&quot; → AI 内部跑几千个 <code>if</code> 检查（耳朵形状？眼睛？尾巴？）→ 输出&quot;是&quot;或&quot;不是&quot;</li>
+<li><strong>判一判题型</strong>：清华附 AI 营线上测评 = 给你一个陈述 → 你判断对/错 → 这就是 <code>if</code> 的本质</li>
+</ul>
+<p><strong>今日口诀</strong>：<code>if</code> = 给程序一个判断能力，让它<strong>按情况办事</strong>。</p>
+<p><strong>⚔️ 判一判</strong>（AI 营线上测评题型热身，先自己答再看答案）：</p>
+<blockquote>
+<ol>
+<li>AI 输出的答案它自己未必知道是错的</li>
+<li>AI 大模型的知识，来自它训练时&quot;读&quot;过的数据</li>
+</ol>
+</blockquote>
+<details><summary>答案</summary>
+
+<p><strong>1.</strong> ✓ 这叫幻觉<br><strong>2.</strong> ✓ 喂什么长什么</p>
+</details>
+
+<hr>
+<h1>W03-S1 · if 初登场：程序会看情况</h1>
+<blockquote>
+<p><strong>每日节奏（v1.9）：</strong> 本篇纯阅读 ≈10 分钟，读完做当天作业 ≈10 分钟，总共 ≤25 分钟
+<strong>不需要 Thonny</strong>——正文一个字都不用敲，作业时间才开编辑器
+难度：⭐⭐ · 本篇是原 W03-L01 的前半（概念 + if 的样子）</p>
+</blockquote>
+<hr>
+<h2>一、概念：程序终于会「看情况」了（3 分钟）</h2>
+<p>前两周的程序都是&quot;直线剧本&quot;：从第一行演到最后一行，不管不顾。真实世界不是这样——</p>
+<ul>
+<li>分数到了 60，才能及格</li>
+<li>猫粮剩得不多，就该提醒囤货</li>
+<li>边境出现入侵者，族长才下令出击</li>
+</ul>
+<p><strong>if</strong> 就是让程序学会&quot;看情况&quot;。玩过 Scratch 的同学：「如果……那么……」积木，一模一样的思想。</p>
+<h2>二、if 的样子（4 分钟）</h2>
+<p>看这段代码（今天只看不敲）：</p>
+<pre><code class="language-python">score = int(input(&quot;What score did you get? &quot;))
+
+if score &gt;= 60:
+    print(&quot;Passed!&quot;)
+    print(&quot;You can play Scratch for 30 minutes&quot;)
+</code></pre>
+<p>运行两次会发生什么？</p>
+<ul>
+<li>输入 <strong>80</strong> → 两行都打印</li>
+<li>输入 <strong>59</strong> → 一片安静——条件不满足，if 手下的活儿<strong>全部跳过</strong></li>
+</ul>
+<p>一片安静不是程序死了，是 if 在&quot;看情况&quot;。</p>
+<h2>三、逐字拆解：if 四件套（3 分钟）</h2>
+<table>
+<thead>
+<tr>
+<th>部件</th>
+<th>作用</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>if</code></td>
+<td>「如果」这个词</td>
+</tr>
+<tr>
+<td><code>score &gt;= 60</code></td>
+<td>条件：结果非真即假</td>
+</tr>
+<tr>
+<td><code>:</code></td>
+<td>冒号 =「那么」，下面缩进的行归它管</td>
+</tr>
+<tr>
+<td>缩进 4 格</td>
+<td>手下名单：哪些行听 if 的</td>
+</tr>
+</tbody></table>
+<p><strong>关键：</strong> 归 if 管的是<strong>缩进的那几行</strong>。条件不满足，这几行整段跳过；条件满足，这几行全部执行。</p>
+<p><strong>今日口诀：</strong> if、条件、冒号、缩进——四件套齐了，程序就会看情况。</p>
+<hr>
+<h2>✅ 今天的阅读完成自查</h2>
+<ul>
+<li><input disabled="" type="checkbox"> 我能说出 if 四件套：if、条件、冒号、缩进</li>
+<li><input disabled="" type="checkbox"> 我知道条件不满足时，缩进里的行全部跳过</li>
+<li><input disabled="" type="checkbox"> 我知道 <code>int(input(...))</code> 是先拿文字再转数字（W02 老朋友）</li>
+</ul>
+<p>三格全勾 → 打开 Thonny，做今天的作业 <code>W03-S1-homework.py</code></p>
+<hr>
+<blockquote>
+<p><strong>📁 作业保存规则</strong>：本课课后练习写进一个文件 <code>W03-S1-homework.py</code>（存 <code>~/sand-hollow/&lt;你的学员ID&gt;/homework/</code>），每道题开头用刚学的备注分隔：<code># --- 题 1 ---</code>、<code># --- 题 2 ---</code>……<strong>交完作业要跟你的智能体说一声</strong>才会批改，评语出现在 <code>reviews/*.review.md</code>。<strong>回报触发词：交完作业或修完坑，都回一句「修完了」</strong>——不回这句 mentor 不知道，坑会一直挂着等。</p>
+</blockquote>
+<h2>📝 今日作业（≈10 分钟）</h2>
+<p>新建文件 <code>W03-S1-homework.py</code>（存 <code>~/sand-hollow/&lt;你的学员ID&gt;/homework/</code>），3 道题：</p>
+<ol>
+<li><strong>及格判断器</strong>：把正文例子亲手敲一遍，运行两次（输入 80 和 59），在注释里写下两次分别看到什么</li>
+<li><strong>电影院闸机</strong>：input 问观众年龄，满 18 打印 &quot;Enjoy the show!&quot;，不满 18 什么都不打印（安静是正常的——下节课补全）</li>
+<li><strong>猫粮告急检测器</strong>：变量 <code>cat_food = 2</code>，若 <code>&lt;= 3</code> 打印 &quot;Cat food is running low - time to stock up&quot;</li>
+</ol>
+<blockquote>
+<p>交完作业跟你的智能体说一声（回报触发词「<strong>修完了</strong>」），评语出现在 <code>reviews/*.review.md</code>。
+额度用完就收工——明天 S2 讲比较运算符六兄弟 + 缩进即语法 🐾</p>
+</blockquote>
+<h2>👀 C++ 认脸时刻（1 分钟 · 只看不敲）</h2>
+<p>C++ 里的 <code>if</code> 长这样：</p>
+<pre><code class="language-cpp">#include &lt;iostream&gt;
+int main() {
+    int score = 85;
+    if (score &gt;= 60) {
+        std::cout &lt;&lt; &quot;pass&quot; &lt;&lt; std::endl;
+    }
+    return 0;
+}
+</code></pre>
+<p>三个认脸：</p>
+<ol>
+<li><code>#include &lt;iostream&gt;</code> 第一行领工具箱（Python 不用）</li>
+<li><code>int score = 85;</code> 声明变量（C++ 必须声明类型，Python 不用）</li>
+<li><code>if (score &gt;= 60)</code> 条件必须用括号包（Python 直接 <code>if score &gt;= 60:</code>）</li>
+</ol>
+<blockquote>
+<p>AI 营笔试的编程题用 C++ 出。不用会写，<strong>认得脸</strong>就行。</p>
+</blockquote>
+</div>
+</section>
+<section class="lesson" data-lid="W03-S2">
+<div class="lesson-head"><span class="lt">比较六兄弟与缩进魔法</span></div>
+<div class="md" data-lid="W03-S2"><!-- slug: if-compare, type: base -->
+<h2>⓪ 🤖 课前 AI 一分钟 · 第 2 颗：AI 怎么&quot;比大小&quot;（3 分钟）</h2>
+<blockquote>
+<p><strong>第 2 颗</strong></p>
+</blockquote>
+<p>AI 内部跑的就是比较：分数够不够格？年龄超没超？跟 <code>if</code> 一样，<strong>靠&quot;比&quot;决定真假</strong>。</p>
+<p><strong>今日口诀</strong>：AI 内部跑的就是比较：分数够不够格？年龄超没超？跟 <code>if</code> 一样，<strong>靠&quot;比&quot;决定真假</strong>。</p>
+<p><strong>⚔️ 判一判</strong>（AI 营线上测评题型热身，先自己答再看答案）：</p>
+<blockquote>
+<ol>
+<li>AI 内部判断靠&quot;比较&quot;运算（&gt;=, &lt;, ==）</li>
+<li>所有编程语言都有 if 判断</li>
+</ol>
+</blockquote>
+<details><summary>答案</summary>
+
+<p><strong>1.</strong> ✓ 内部就是数值比较<br><strong>2.</strong> ✓ Java / C++ / Python 都有 if</p>
+</details>
+
+<hr>
+<h1>W03-S2 · 比较六兄弟与缩进魔法</h1>
+<blockquote>
+<p><strong>每日节奏（v1.9）：</strong> 本篇纯阅读 ≈11 分钟，读完做当天作业 ≈10 分钟，总共 ≤25 分钟
+<strong>不需要 Thonny</strong>（正文）——作业时间才开编辑器
+难度：⭐⭐ · 本篇是原 W03-L01 的中段（比较运算符 + 缩进即语法）</p>
+</blockquote>
+<hr>
+<h2>一、比较运算符六兄弟（5 分钟）</h2>
+<p>if 的&quot;条件&quot;靠它们写出来：</p>
+<table>
+<thead>
+<tr>
+<th>写法</th>
+<th>读作</th>
+<th>例子</th>
+<th>结果</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>==</code></td>
+<td>等于</td>
+<td><code>10 == 10</code></td>
+<td>True</td>
+</tr>
+<tr>
+<td><code>!=</code></td>
+<td>不等于</td>
+<td><code>&quot;猫&quot; != &quot;狗&quot;</code></td>
+<td>True</td>
+</tr>
+<tr>
+<td><code>&gt;</code></td>
+<td>大于</td>
+<td><code>3 &gt; 5</code></td>
+<td>False</td>
+</tr>
+<tr>
+<td><code>&lt;</code></td>
+<td>小于</td>
+<td><code>3 &lt; 5</code></td>
+<td>True</td>
+</tr>
+<tr>
+<td><code>&gt;=</code></td>
+<td>大于等于</td>
+<td><code>60 &gt;= 60</code></td>
+<td>True</td>
+</tr>
+<tr>
+<td><code>&lt;=</code></td>
+<td>小于等于</td>
+<td><code>59 &gt;= 60</code></td>
+<td>False</td>
+</tr>
+</tbody></table>
+<p>比较的结果是 <strong>True / False</strong>（真 / 假），这类值叫<strong>布尔值</strong>——今天混个脸熟，后面天天见。</p>
+<p><strong>透视镜时刻（W02 的知识回来了）：</strong></p>
+<pre><code class="language-python">print(&quot;10&quot; == 10)   # False！
+</code></pre>
+<p>字符串 <code>&quot;10&quot;</code> 和数字 <code>10</code> 类型不同，Python 眼里<strong>永不相等</strong>。引号是种族标志，忘了的回 W02-S1 翻口诀。</p>
+<h2>二、缩进即语法（5 分钟）</h2>
+<p>别的语言用花括号 <code>{}</code> 圈地盘，Python 用<strong>缩进</strong>。看这段：</p>
+<pre><code class="language-python">score = 59
+if score &gt;= 60:
+    print(&quot;Passed!&quot;)
+print(&quot;Done!&quot;)
+</code></pre>
+<p>最后一行<strong>没缩进</strong>——它不属于 if，不管及不及格都会打印。</p>
+<ul>
+<li>运行：if 内部跳过，但 &quot;Done!&quot; 照样出现</li>
+<li>缩进与否，改变每一行的归属</li>
+</ul>
+<p>这就是「<strong>缩进即语法</strong>」：缩进不是美观，是规则本身。</p>
+<h2>三、Thonny 缩进小贴士（1 分钟）</h2>
+<p>写完 <code>if ...:</code> 按回车，光标自动缩进；想退出缩进，按一次删除键。Thonny 在帮你守规矩。</p>
+<p><strong>今日口诀：</strong> 六兄弟比出真假，缩进决定谁听谁的。</p>
+<hr>
+<h2>✅ 今天的阅读完成自查</h2>
+<ul>
+<li><input disabled="" type="checkbox"> 六个比较运算符我都会读，知道结果是 True / False</li>
+<li><input disabled="" type="checkbox"> 我知道 <code>&quot;10&quot; == 10</code> 是 False，为什么</li>
+<li><input disabled="" type="checkbox"> 我能说出「缩进即语法」：缩进改变行的归属</li>
+</ul>
+<p>三格全勾 → 打开作业</p>
+<hr>
+<blockquote>
+<p><strong>📁 作业保存规则</strong>：本课课后练习写进一个文件 <code>W03-S2-homework.py</code>（存 <code>~/sand-hollow/&lt;你的学员ID&gt;/homework/</code>），每道题开头用刚学的备注分隔：<code># --- 题 1 ---</code>、<code># --- 题 2 ---</code>……<strong>交完作业要跟你的智能体说一声</strong>才会批改，评语出现在 <code>reviews/*.review.md</code>。<strong>回报触发词：交完作业或修完坑，都回一句「修完了」</strong>——不回这句 mentor 不知道，坑会一直挂着等。</p>
+</blockquote>
+<h2>📝 今日作业（≈10 分钟）</h2>
+<p>新建 <code>W03-S2-homework.py</code>，3 道题：</p>
+<ol>
+<li><strong>先猜再跑</strong>：<code>print(10 == 10)</code>、<code>print(&quot;10&quot; == 10)</code>、<code>print(4 != 5)</code>——每行先在注释里笔猜结果，再运行对答案</li>
+<li><strong>布尔侦探</strong>：笔猜再跑——<code>print(3 &gt; 5)</code>、<code>print(&quot;cat&quot; &gt; &quot;dog&quot;)</code>（字符串比大小的答案可能吓你一跳，注释里写下你的反应）</li>
+<li><strong>缩进实验</strong>：把正文 §二 的代码敲进文件运行一次；然后把 <code>print(&quot;Done!&quot;)</code> 也缩进 4 格再运行——两次输出有什么区别？注释里写一句话结论</li>
+</ol>
+<blockquote>
+<p>交完说「<strong>修完了</strong>」。明天 S3 是坑专场——三个新手坑挨个拆 🐾</p>
+</blockquote>
+<h2>👀 C++ 认脸时刻（1 分钟 · 只看不敲）</h2>
+<p>C++ 的对应写法：</p>
+<pre><code class="language-cpp">#include &lt;iostream&gt;
+int main() {
+    int score = 85;
+    if (score &gt;= 60) {
+        std::cout &lt;&lt; &quot;pass&quot; &lt;&lt; std::endl;
+    }
+    return 0;
+}
+</code></pre>
+<p>三个认脸：</p>
+<ol>
+<li><code>score &gt;= 60</code> 比较运算（&gt;=, &lt;, ==）</li>
+<li><code>std::cout</code> 输出（Python 的 print）</li>
+<li><code>if (...)</code> 条件用括号包（Python 不用）</li>
+</ol>
+<blockquote>
+<p>AI 营笔试的编程题用 C++ 出。不用会写，<strong>认得脸</strong>就行。</p>
+</blockquote>
+</div>
+</section>
+<section class="lesson" data-lid="W03-S3">
+<div class="lesson-head"><span class="lt">新手坑专场：三大坑各踩一遍</span></div>
+<div class="md" data-lid="W03-S3"><!-- slug: if-pitfalls, type: base -->
+<h2>⓪ 🤖 课前 AI 一分钟 · 第 3 颗：AI 也会踩&quot;坑&quot;（3 分钟）</h2>
+<blockquote>
+<p><strong>第 3 颗</strong></p>
+</blockquote>
+<p>新学员写 <code>if</code> 常踩 3 个坑：忘了 <code>:</code>、缩进错、用了 <code>=</code> 而不是 <code>==</code>——<strong>AI 写代码也会犯</strong>。</p>
+<p><strong>今日口诀</strong>：新学员写 <code>if</code> 常踩 3 个坑：忘了 <code>:</code>、缩进错、用了 <code>=</code> 而不是 <code>==</code>——<strong>AI 写代码也会犯</strong>。</p>
+<p><strong>⚔️ 判一判</strong>（AI 营线上测评题型热身，先自己答再看答案）：</p>
+<blockquote>
+<ol>
+<li>Python 的 if 语句末尾需要冒号 :</li>
+<li>Python 判断相等用单个 =</li>
+</ol>
+</blockquote>
+<details><summary>答案</summary>
+
+<p><strong>1.</strong> ✓ if x &gt; 0:  末尾必须有 :<br><strong>2.</strong> ✗ 相等用 ==  一个 = 是赋值</p>
+</details>
+
+<hr>
+<h1>W03-S3 · 新手坑专场：三大坑各踩一遍</h1>
+<blockquote>
+<p><strong>每日节奏（v1.9）：</strong> 本篇纯阅读 ≈9 分钟，读完做当天作业 ≈12 分钟，总共 ≤25 分钟
+<strong>今天作业就是踩坑</strong>——正文看清症状，作业里亲手踩、亲手修
+难度：⭐⭐ · 本篇是原 W03-L01 的后段（新手三大坑）</p>
+</blockquote>
+<hr>
+<blockquote>
+<p><strong>📂 课前准备</strong>：先在 Thonny <code>文件 → 新建</code>，立刻 <code>文件 → 另存为...</code> 存为 <code>~/sand-hollow/&lt;你的学员ID&gt;/homework/W03-S3-practice.py</code>（ID 就是你注册沙坑用的 8 位数字）。本课所有亲手敲的代码都写进这个文件；课后作业写进同目录的 <code>W03-S3-homework.py</code>，两个文件严格分开，别混。</p>
+</blockquote>
+<h2>一、坑①：<code>=</code> 与 <code>==</code> 混淆（3 分钟）</h2>
+<p>想写「如果年龄是 18」，手滑写成：</p>
+<pre><code class="language-text">age = 18
+if age = 18:      # ❌ 错！
+    print(&quot;18!&quot;)
+</code></pre>
+<p><strong>报错：</strong> <code>SyntaxError: invalid syntax</code>（Python 直接拦下，一行都不跑）</p>
+<p><strong>记牢一对：</strong></p>
+<table>
+<thead>
+<tr>
+<th>符号</th>
+<th>名字</th>
+<th>意思</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>=</code></td>
+<td>一个等号</td>
+<td><strong>装进去</strong>（赋值）：把右边装进左边</td>
+</tr>
+<tr>
+<td><code>==</code></td>
+<td>两个等号</td>
+<td><strong>比一比</strong>（比较）：两边相等吗？</td>
+</tr>
+</tbody></table>
+<p>Python 把关把得好——这种错它替你拦下，感恩。</p>
+<h2>二、坑②：漏冒号（3 分钟）</h2>
+<pre><code class="language-text">if score &gt;= 60    # ❌ 行尾少了 :
+    print(&quot;Passed!&quot;)
+</code></pre>
+<p><strong>报错：</strong> <code>SyntaxError: expected &#39;:&#39;</code>——报错就在告诉你缺什么。if 行尾的冒号，一个不能少（else / elif / 以后的 for 全都一样）。</p>
+<h2>三、坑③：缩进忽长忽短（3 分钟）</h2>
+<pre><code class="language-text">if score &gt;= 60:
+    print(&quot;Passed!&quot;)
+   print(&quot;Nice!&quot;)    # ❌ 这行只缩了 3 格
+</code></pre>
+<p><strong>报错：</strong> <code>IndentationError: unexpected indent</code>（或 unindent does not match）。</p>
+<p>规矩：<strong>统一 4 个空格，全文件一致</strong>。Thonny 的 Tab 键就是按 4 格设计的，别手滑多敲一个空格。</p>
+<h2>踩坑三连的套路（今天作业的说明书）</h2>
+<ol>
+<li>故意把错误代码敲进去</li>
+<li>运行，读<strong>报错的最后一行</strong></li>
+<li>在注释里抄下这行报错</li>
+<li>修好，再跑一遍确认通过</li>
+</ol>
+<p><strong>为什么值得踩：</strong> 报错不是骂你，是程序在跟你说话。踩过一次、认得它的脸，下次它出现你就知道哪根线接错了。</p>
+<hr>
+<h2>✅ 今天的阅读完成自查</h2>
+<ul>
+<li><input disabled="" type="checkbox"> 我知道 <code>=</code> 是装进去、<code>==</code> 是比一比</li>
+<li><input disabled="" type="checkbox"> 我知道漏冒号的报错长什么样（expected &#39;:&#39;）</li>
+<li><input disabled="" type="checkbox"> 我知道缩进必须统一 4 空格，报错叫 IndentationError</li>
+</ul>
+<p>三格全勾 → 今天的作业就是踩坑三连</p>
+<hr>
+<blockquote>
+<p><strong>📁 作业保存规则</strong>：本课课后练习写进一个文件 <code>W03-S3-homework.py</code>（存 <code>~/sand-hollow/&lt;你的学员ID&gt;/homework/</code>），每道题开头用刚学的备注分隔：<code># --- 题 1 ---</code>、<code># --- 题 2 ---</code>……<strong>交完作业要跟你的智能体说一声</strong>才会批改，评语出现在 <code>reviews/*.review.md</code>。<strong>回报触发词：交完作业或修完坑，都回一句「修完了」</strong>——不回这句 mentor 不知道，坑会一直挂着等。</p>
+</blockquote>
+<h2>📝 今日作业（≈12 分钟）</h2>
+<p>新建 <code>W03-S3-homework.py</code>，3 道题（每题都是：踩 → 抄报错 → 修好）：</p>
+<ol>
+<li><strong>踩坑①</strong>：敲 <code>age = 18</code> 然后 <code>if age = 18:</code>（故意用单等号），运行，把报错最后一行抄进注释；改成 <code>==</code> 修好，再跑通</li>
+<li><strong>踩坑②</strong>：写一个 if 忘了行尾冒号，运行，抄报错；补上冒号跑通</li>
+<li><strong>踩坑③</strong>：if 里写两行 print，第二行故意只缩 3 格，运行，抄报错；改成 4 格跑通</li>
+</ol>
+<blockquote>
+<p>三坑修完说「<strong>修完了</strong>」。明天 S4 讲 else / elif——程序学会 B 计划 🐾</p>
+</blockquote>
+<h2>👀 C++ 认脸时刻（1 分钟 · 只看不敲）</h2>
+<p>C++ 的对应写法：</p>
+<pre><code class="language-cpp">#include &lt;iostream&gt;
+int main() {
+    int x = 5;
+    if (x = 10) {  // Bug! 应是 x == 10
+        std::cout &lt;&lt; &quot;ten&quot; &lt;&lt; std::endl;
+    }
+    return 0;
+}
+</code></pre>
+<p>三个认脸：</p>
+<ol>
+<li>C++ 也用 <code>==</code> 比较（不是 <code>=</code>）</li>
+<li><code>x = 10</code> 是赋值（x 变成 10）</li>
+<li>Python 同样：<code>x = 10</code> 是赋值，<code>x == 10</code> 才是判断</li>
+</ol>
+<blockquote>
+<p>AI 营笔试的编程题用 C++ 出。不用会写，<strong>认得脸</strong>就行。</p>
+</blockquote>
+</div>
+</section>
+<section class="lesson" data-lid="W03-S4">
+<div class="lesson-head"><span class="lt">else 与 elif：B 计划和多岔路口</span></div>
+<div class="md" data-lid="W03-S4"><!-- slug: if-elif, type: base -->
+<h2>⓪ 🤖 课前 AI 一分钟 · 第 4 颗：AI 也会&quot;备胎&quot;——多分支（3 分钟）</h2>
+<blockquote>
+<p><strong>第 4 颗</strong></p>
+</blockquote>
+<p>AI 答题有&quot;主答 + 备胎&quot;：首选 → 备选 → 默认。<code>elif</code> 和 <code>else</code> 就是 if 的备胎。</p>
+<p><strong>今日口诀</strong>：AI 答题有&quot;主答 + 备胎&quot;：首选 → 备选 → 默认。</p>
+<p><strong>⚔️ 判一判</strong>（AI 营线上测评题型热身，先自己答再看答案）：</p>
+<blockquote>
+<ol>
+<li>else 是&quot;其他情况&quot;的兜底</li>
+<li>elif 可以有任意多个</li>
+</ol>
+</blockquote>
+<details><summary>答案</summary>
+
+<p><strong>1.</strong> ✓ 所有 if 都不满足时走 else<br><strong>2.</strong> ✓ elif = else if，可以链 10+ 个</p>
+</details>
+
+<hr>
+<h1>W03-S4 · else 与 elif：B 计划和多岔路口</h1>
+<blockquote>
+<p><strong>每日节奏（v1.9）：</strong> 本篇纯阅读 ≈12 分钟，读完做当天作业 ≈10 分钟，总共 ≤25 分钟
+<strong>不需要 Thonny</strong>（正文）——作业时间才开编辑器
+难度：⭐⭐ · 本篇是原 W03-L02 的精华（else / elif / 命中即止 / 顺序陷阱）</p>
+</blockquote>
+<hr>
+<h2>一、概念：if 只管晴天（3 分钟）</h2>
+<p>上次的年龄闸机有个尴尬：条件不满足时，屏幕一片安静，用户以为程序死了。真实世界要有 B 计划：</p>
+<ul>
+<li>满了 18 → 欢迎入座</li>
+<li>不满 18 → 「再等等，先去看猫武士」</li>
+</ul>
+<p>今天两位新成员：<strong>else</strong>（否则）和 <strong>elif</strong>（否则如果）。</p>
+<h2>二、else：B 计划（4 分钟）</h2>
+<pre><code class="language-python">n = int(input(&quot;Give me a whole number: &quot;))
+
+if n % 2 == 0:
+    print(n, &quot;is even&quot;)
+else:
+    print(n, &quot;is odd&quot;)
+</code></pre>
+<p>输入 8 → 偶数；输入 7 → 奇数。<strong>必有其一，只走其一。</strong></p>
+<p>else 语法三件事：</p>
+<ul>
+<li>行尾也要冒号</li>
+<li>下面的行也要缩进 4 格</li>
+<li><strong>else 后面不接条件</strong>——if 已经问过了，剩下的全归它</li>
+</ul>
+<p>（还记得 <code>%</code> 吗？W02 说的&quot;判断奇偶天天用&quot;，今天兑现了。）</p>
+<h2>三、elif：多岔路口（5 分钟）</h2>
+<p>只有两条路不够用？<strong>elif</strong> = else + if 合体：</p>
+<pre><code class="language-python">height = int(input(&quot;Your height in cm? &quot;))
+
+if height &gt;= 140:
+    print(&quot;Any roller coaster you like!&quot;)
+elif height &gt;= 120:
+    print(&quot;You can ride the small coaster&quot;)
+else:
+    print(&quot;Try the carousel first, build some courage&quot;)
+</code></pre>
+<p>身高 150 → 大过山车；125 → 小过山车；100 → 旋转木马。</p>
+<h2>四、命中即止：elif 链的灵魂（3 分钟）</h2>
+<p>Python 的走法：<strong>从上往下扫描，命中一条，其余全部跳过。</strong></p>
+<p>用 150 验证：150 &gt;= 140 成立，150 &gt;= 120 其实也成立——但只打印大过山车。命中第一条后，整串直接跳过，绝不回头。</p>
+<table>
+<thead>
+<tr>
+<th>身高</th>
+<th>&gt;= 140？</th>
+<th>&gt;= 120？</th>
+<th>实际输出</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>150</td>
+<td>真（命中）</td>
+<td>不再看</td>
+<td>大过山车</td>
+</tr>
+<tr>
+<td>125</td>
+<td>假</td>
+<td>真（命中）</td>
+<td>小过山车</td>
+</tr>
+<tr>
+<td>100</td>
+<td>假</td>
+<td>假</td>
+<td>落入 else：旋转木马</td>
+</tr>
+</tbody></table>
+<h2>五、顺序陷阱（1 分钟）</h2>
+<p>把 <code>&gt;= 120</code> 放在 <code>&gt;= 140</code> <strong>前面</strong>会怎样？150 一进门就命中 120，永远坐不上大过山车。</p>
+<p><strong>规矩：门槛从高到低排</strong>（大的条件放前面）。</p>
+<p><strong>今日口诀：</strong> 从上往下，命中即止；门槛高的，站在前排。</p>
+<hr>
+<h2>✅ 今天的阅读完成自查</h2>
+<ul>
+<li><input disabled="" type="checkbox"> 我会用 else 接住「剩下的全部」，知道它不接条件</li>
+<li><input disabled="" type="checkbox"> 我能说出「从上往下、命中即止」</li>
+<li><input disabled="" type="checkbox"> 我知道顺序陷阱：门槛从高到低排</li>
+</ul>
+<p>三格全勾 → 打开作业</p>
+<hr>
+<blockquote>
+<p><strong>📁 作业保存规则</strong>：本课课后练习写进一个文件 <code>W03-S4-homework.py</code>（存 <code>~/sand-hollow/&lt;你的学员ID&gt;/homework/</code>），每道题开头用刚学的备注分隔：<code># --- 题 1 ---</code>、<code># --- 题 2 ---</code>……<strong>交完作业要跟你的智能体说一声</strong>才会批改，评语出现在 <code>reviews/*.review.md</code>。<strong>回报触发词：交完作业或修完坑，都回一句「修完了」</strong>——不回这句 mentor 不知道，坑会一直挂着等。</p>
+</blockquote>
+<h2>📝 今日作业（≈10 分钟）</h2>
+<p>新建 <code>W03-S4-homework.py</code>，3 道题：</p>
+<ol>
+<li><strong>水温报告</strong>：输入水温，<code>&gt;= 100</code> 打 &quot;Boiling hot&quot; / <code>&gt;= 40</code> 打 &quot;Warm&quot; / 其余打 &quot;Cool&quot;</li>
+<li><strong>快递费计算器</strong>：重量 <code>&lt;= 1</code> 公斤 8 元 / <code>&lt;= 5</code> 公斤 15 元 / 其余 25 元——input 问重量，打印运费</li>
+<li><strong>猫武士职位表</strong>：输入猫的月龄，<code>&lt;= 6</code> 幼崽（Kitten）/ <code>&lt;= 12</code> 学徒（Apprentice）/ <code>&lt; 144</code> 战士（Warrior）/ 其余长老（Elder）。用族长火星的月龄（比如 120）测一测</li>
+</ol>
+<blockquote>
+<p>交完说「<strong>修完了</strong>」。明天 S5 讲 and / or / not——条件组队 🐾</p>
+</blockquote>
+<h2>👀 C++ 认脸时刻（1 分钟 · 只看不敲）</h2>
+<p>C++ 的对应写法：</p>
+<pre><code class="language-cpp">#include &lt;iostream&gt;
+int main() {
+    int score = 75;
+    if (score &gt;= 90) {
+        std::cout &lt;&lt; &quot;A&quot; &lt;&lt; std::endl;
+    } else if (score &gt;= 60) {
+        std::cout &lt;&lt; &quot;pass&quot; &lt;&lt; std::endl;
+    } else {
+        std::cout &lt;&lt; &quot;fail&quot; &lt;&lt; std::endl;
+    }
+    return 0;
+}
+</code></pre>
+<p>三个认脸：</p>
+<ol>
+<li>C++ 用 <code>else if</code>（Python 用 <code>elif</code>）</li>
+<li>大括号 <code>{}</code> 包代码块（Python 用缩进）</li>
+<li>多分支从上到下匹配，命中即停</li>
+</ol>
+<blockquote>
+<p>AI 营笔试的编程题用 C++ 出。不用会写，<strong>认得脸</strong>就行。</p>
+</blockquote>
+</div>
+</section>
+<section class="lesson" data-lid="W03-S5">
+<div class="lesson-head"><span class="lt">and / or / not：条件组队</span></div>
+<div class="md" data-lid="W03-S5"><!-- slug: if-and-or, type: base -->
+<h2>⓪ 🤖 课前 AI 一分钟 · 第 5 颗：AI 也会&quot;组合判断&quot;（3 分钟）</h2>
+<blockquote>
+<p><strong>第 5 颗</strong></p>
+</blockquote>
+<p>AI 判断&quot;既是猫又是橘色&quot;——用 <code>and</code>（<code>&amp;&amp;</code>）/ <code>or</code>（<code>||</code>）<strong>组合条件</strong>。</p>
+<p><strong>今日口诀</strong>：AI 判断&quot;既是猫又是橘色&quot;——用 <code>and</code>（<code>&amp;&amp;</code>）/ <code>or</code>（<code>||</code>）<strong>组合条件</strong>。</p>
+<p><strong>⚔️ 判一判</strong>（AI 营线上测评题型热身，先自己答再看答案）：</p>
+<blockquote>
+<ol>
+<li>Python 的 and / or / not 是逻辑运算</li>
+<li>and 表示&quot;两个都真才真&quot;</li>
+</ol>
+</blockquote>
+<details><summary>答案</summary>
+
+<p><strong>1.</strong> ✓ 跟数学的 ∧ ∨ ¬ 一样<br><strong>2.</strong> ✓ and = 全真才真</p>
+</details>
+
+<hr>
+<h1>W03-S5 · and / or / not：条件组队</h1>
+<blockquote>
+<p><strong>每日节奏（v1.9）：</strong> 本篇纯阅读 ≈12 分钟，读完做当天作业 ≈10 分钟，总共 ≤25 分钟
+<strong>不需要 Thonny</strong>（正文）——作业时间才开编辑器
+难度：⭐⭐⭐ · 本篇是原 W03-L03 的精华（三个连接词 + 评定器）</p>
+</blockquote>
+<hr>
+<h2>一、概念：复杂世界需要组合条件（3 分钟）</h2>
+<p>单一条件不够用了：</p>
+<ul>
+<li>当上战士：要「满 12 个月<strong>且</strong>训练完成」——缺一不可</li>
+<li>周末：是「周六<strong>或</strong>周日」——满足其一</li>
+<li>不饿：<strong>not</strong> 饿</li>
+</ul>
+<p>三个连接词：<strong>and（且）、or（或）、not（非）</strong>。</p>
+<h2>二、and：两个都要真（3 分钟）</h2>
+<pre><code class="language-python">if age &gt;= 12 and trained == &quot;yes&quot;:
+    print(&quot;Warrior name granted!&quot;)
+</code></pre>
+<p>13 岁 + 训练完 → 授予；13 岁 + 没训完 → 安静；5 岁 + 训练完 → 安静。</p>
+<p><strong>口算规则：and 左右都真，整体才真——一假全假。</strong></p>
+<h2>三、or：一个真就真（3 分钟）</h2>
+<pre><code class="language-python">if day == &quot;Saturday&quot; or day == &quot;Sunday&quot;:
+    print(&quot;Family coding time!&quot;)
+</code></pre>
+<p>周六 ✅，周日 ✅，周一 ❌。</p>
+<p><strong>口算规则：or 左右至少一个真，整体就真——全假才假。</strong></p>
+<h2>四、not 与小括号大法（2 分钟）</h2>
+<pre><code class="language-python">hungry = True
+print(not hungry)    # False —— 真假对调
+</code></pre>
+<p>新手期大法：<strong>给组合条件套小括号</strong>——<code>(age &gt;= 12) and (trained == &quot;yes&quot;)</code>，谁先谁后一目了然。</p>
+<h2>五、实战阅读：成绩等级评定器（4 分钟）</h2>
+<p>看懂这段就出师了（只读不敲）：</p>
+<pre><code class="language-python">score = int(input(&quot;Test score (0-100): &quot;))
+attend = int(input(&quot;Attendance (0-20): &quot;))
+
+if score &gt;= 90 and attend &gt;= 16:
+    grade = &quot;A+&quot;
+elif score &gt;= 80 and attend &gt;= 14:
+    grade = &quot;A&quot;
+elif score &gt;= 60 and attend &gt;= 10:
+    grade = &quot;B&quot;
+else:
+    grade = &quot;C&quot;
+
+print(f&quot;Result: {grade}&quot;)
+</code></pre>
+<p>看点两个：elif 链「命中即止」（S4 的灵魂）；每个条件都是 and 组出两个维度——<strong>分数再高，翘课多了照样掉级</strong>。</p>
+<h2>六、一个必看的坑（1 分钟）</h2>
+<pre><code class="language-text">if score &gt; 60 or score &lt; 90:   # ❌ 永远为真！
+</code></pre>
+<p>任何数都至少满足一头，这条件谁进来都过。<strong>夹在中间要用 and</strong>：<code>score &gt; 60 and score &lt; 90</code>。</p>
+<p><strong>今日口诀：</strong> and 全真才真，or 一真即真，not 真假对调。</p>
+<hr>
+<h2>✅ 今天的阅读完成自查</h2>
+<ul>
+<li><input disabled="" type="checkbox"> and / or / not 我能口算</li>
+<li><input disabled="" type="checkbox"> 我知道「中间范围」要用 and 不是 or</li>
+<li><input disabled="" type="checkbox"> 评定器我能看懂每一行在干嘛</li>
+</ul>
+<p>三格全勾 → 打开作业（W03 最后一天！）</p>
+<hr>
+<blockquote>
+<p><strong>📁 作业保存规则</strong>：本课课后练习写进一个文件 <code>W03-S5-homework.py</code>（存 <code>~/sand-hollow/&lt;你的学员ID&gt;/homework/</code>），每道题开头用刚学的备注分隔：<code># --- 题 1 ---</code>、<code># --- 题 2 ---</code>……<strong>交完作业要跟你的智能体说一声</strong>才会批改，评语出现在 <code>reviews/*.review.md</code>。<strong>回报触发词：交完作业或修完坑，都回一句「修完了」</strong>——不回这句 mentor 不知道，坑会一直挂着等。</p>
+</blockquote>
+<h2>📝 今日作业（≈10 分钟）</h2>
+<p>新建 <code>W03-S5-homework.py</code>，3 道题：</p>
+<ol>
+<li><strong>双人儿童票</strong>：问两个人年龄，<strong>都</strong> <code>&lt;= 12</code> 才打印 &quot;You can buy the kids&#39; duo ticket&quot;</li>
+<li><strong>电影半价票</strong>：年龄 <code>&lt;= 12</code> <strong>或</strong> <code>&gt;= 65</code> 打印 &quot;Half price: 20 yuan&quot;，否则 &quot;Full price: 40 yuan&quot;</li>
+<li><strong>先猜再跑</strong>：<code>print(True and False)</code>、<code>print(True or False)</code>、<code>print(not True)</code>——先笔猜再运行</li>
+</ol>
+<blockquote>
+<p>交完说「<strong>修完了</strong>」。W03 结业——周末项目「猜大小游戏 v1」等你 🐾</p>
+</blockquote>
+<h2>👀 C++ 认脸时刻（1 分钟 · 只看不敲）</h2>
+<p>C++ 的对应写法：</p>
+<pre><code class="language-cpp">#include &lt;iostream&gt;
+int main() {
+    int age = 11;
+    bool has_ticket = true;
+    if (age &gt;= 6 &amp;&amp; has_ticket) {
+        std::cout &lt;&lt; &quot;可以进&quot; &lt;&lt; std::endl;
+    }
+    return 0;
+}
+</code></pre>
+<p>三个认脸：</p>
+<ol>
+<li><code>&amp;&amp;</code> 是 C++ 的 and（Python 是 <code>and</code>）</li>
+<li><code>||</code> 是 C++ 的 or（Python 是 <code>or</code>）</li>
+<li><code>!</code> 是 C++ 的 not（Python 是 <code>not</code>）</li>
+</ol>
+<blockquote>
+<p>AI 营笔试的编程题用 C++ 出。不用会写，<strong>认得脸</strong>就行。</p>
+</blockquote>
+</div>
+</section>
+<section class="lesson" data-lid="W03-weekend">
+<div class="lesson-head"><span class="lt">猜大小游戏 v1</span></div>
+<div class="md" data-lid="W03-weekend"><!-- slug: guess-size, type: project -->
+<h2>⓪ 🤖 课前 AI 一分钟 · 第 6 颗：AI 怎么&quot;猜&quot;——随机性（3 分钟）</h2>
+<blockquote>
+<p><strong>第 6 颗</strong></p>
+</blockquote>
+<p>猜大小游戏的本质 = <strong>随机</strong>。AI 用 <code>random.randint</code> 也是&quot;从 1-100 选一个数&quot;——跟人类猜的随机性一样。</p>
+<p><strong>今日口诀</strong>：猜大小游戏的本质 = <strong>随机</strong>。</p>
+<p><strong>⚔️ 判一判</strong>（AI 营线上测评题型热身，先自己答再看答案）：</p>
+<blockquote>
+<ol>
+<li>AI 内部用 <code>random</code> 模块生成随机数</li>
+<li>电脑生成的随机数是真随机</li>
+</ol>
+</blockquote>
+<details><summary>答案</summary>
+
+<p><strong>1.</strong> ✓ import random; random.randint(1, 100)<br><strong>2.</strong> ✗ 是伪随机（伪随机序列）</p>
+</details>
+
+<hr>
+<h1>W03-weekend · 猜大小游戏 v1</h1>
+<blockquote>
+<p>用时：40-60 分钟 · 难度：⭐⭐⭐ · 前置：W03 三课</p>
+</blockquote>
+<hr>
+<h2>一、本周武功盘点（3 分钟）</h2>
+<ul>
+<li>if / elif / else：程序会看情况办事，从上往下、命中即止</li>
+<li>比较运算符六兄弟 + and / or / not</li>
+<li>缩进即语法，= 与 == 分家</li>
+</ul>
+<p>今天把它们组装成第一个<strong>真正的游戏</strong>。</p>
+<h2>二、提前借一件法宝：random.randint（7 分钟）</h2>
+<p>游戏要有悬念，得让<strong>电脑自己想一个数</strong>，每次还不一样。这需要 random（随机）法宝：</p>
+<pre><code class="language-python">import random
+
+secret = random.randint(1, 100)
+print(secret)
+</code></pre>
+<h3>逐字拆解 <code>random.randint(1, 100)</code></h3>
+<table>
+<thead>
+<tr>
+<th>部件</th>
+<th>作用</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>import random</code></td>
+<td>放在第一行：把法宝盒搬进来（Python 自带，零安装）</td>
+</tr>
+<tr>
+<td><code>random.randint</code></td>
+<td>法宝全名：随机整数</td>
+</tr>
+<tr>
+<td><code>(1, 100)</code></td>
+<td>范围：1 到 100，两头都包含</td>
+</tr>
+</tbody></table>
+<p>多 Run 几次：每次的数都不一样，这就是随机。也可以在 Shell 区直接试 <code>&gt;&gt;&gt; random.randint(1, 6)</code>，每回车一次扔一次骰子。</p>
+<p>两件事说清楚：</p>
+<ol>
+<li><strong>random 是 Python 标准库</strong>——装 Python 就送，import 一下就能用，什么都不用装</li>
+<li>今天只当<strong>黑盒法宝</strong>用。它还有一堆玩法（骰子、抽签、洗牌），<strong>第 11 周「随机与游戏」正式开课</strong>，本周只借这一招</li>
+</ol>
+<h2>三、搭游戏（20 分钟）</h2>
+<blockquote>
+<p>📁 项目存 <code>~/sand-hollow/&lt;你的学员ID&gt;/homework/</code>（与平日练习同目录，平铺不建周子目录）。</p>
+</blockquote>
+<p>新建 <code>guess_game.py</code>，亲手敲：</p>
+<pre><code class="language-python">import random
+
+print(&quot;=== High-Low Guess v1 ===&quot;)
+
+secret = random.randint(1, 100)
+print(&quot;(debug mode: the answer is&quot;, secret, &quot;)&quot;)
+
+guess = int(input(&quot;I picked a number 1-100. Your guess? &quot;))
+
+if guess &gt; secret:
+    print(&quot;Too high! It was&quot;, secret)
+elif guess &lt; secret:
+    print(&quot;Too low! It was&quot;, secret)
+else:
+    print(&quot;First try! You have leader material&quot;)
+</code></pre>
+<p>运行几局，体会结构：</p>
+<ul>
+<li><code>secret</code>：电脑心里的数，藏好</li>
+<li>调试模式那行是<strong>诚实模式</strong>——先打印答案方便测试，游戏正式发布时删掉它</li>
+<li>三个分支覆盖所有可能：大了 / 小了 / 猜中，必有其一、只走其一</li>
+</ul>
+<p><strong>常见翻车点：</strong></p>
+<ul>
+<li>import random 忘写或没放第一行 → <code>NameError: name &#39;random&#39; is not defined</code></li>
+<li>输入的不是数字（手滑敲了字母）→ <code>ValueError</code>——W02-L01 的老坑，正常，重新 Run</li>
+<li>改范围时只改了一个 100 忘了另一个 → 谜题范围和提示语对不上</li>
+</ul>
+<p><strong>改造练习（自己动手）：</strong></p>
+<ol>
+<li>把三处揭底 <code>print(&quot;...&quot;, secret)</code> 改成 f-string 版：<code>print(f&quot;Too high! The answer is {secret}&quot;)</code></li>
+<li>缩小战场：范围改成 1-10，猜中概率大增，找家人对战</li>
+</ol>
+<h2>四、升级玩法（15 分钟）</h2>
+<p><strong>皮肤一：猫武士版</strong>——提示语全换成森林用语（「猎物的气味比你猜的更淡」「猎物就在更近的地方」），范围改成 1-20 当「猎物数量」。</p>
+<p><strong>皮肤二：商店版</strong>——呼应 ThawPaw 的贪吃蛇商店：程序随机想一个价格（1-50 元），你来猜，大了小了照旧提示。</p>
+<p><strong>立个 flag：</strong> 现在只能猜一次就揭底，不过瘾对吧？因为我们还不会「重复」。W04 学循环、W05 学 while 之后，这个游戏会进化成「猜到为止 + 限 5 次 + 计分 + 再来一局」的完整版。好课程埋伏笔，W05 见。</p>
+<h2>五、验收标准（自助验收）</h2>
+<ul>
+<li>三位家人各玩一局（你当主持人，记录谁最接近）</li>
+<li>调试模式开着能对答案；删掉调试行后正常运行不报错</li>
+<li>你能指着代码说清：哪个变量是答案、哪个分支管「大了」、为什么必有其一</li>
+<li>f-string 改造完成，三处揭底都换了新写法</li>
+<li>至少换过一版皮肤 ✅</li>
+</ul>
+<h2>六、W03 全周自查</h2>
+<ul>
+<li><input disabled="" type="checkbox"> L01：if 四件套（if / 条件 / 冒号 / 缩进）张口就来</li>
+<li><input disabled="" type="checkbox"> L02：elif 链会排顺序，趟过顺序陷阱</li>
+<li><input disabled="" type="checkbox"> L03：and / or / not 口算真假，评定器跑通</li>
+<li><input disabled="" type="checkbox"> 周末：猜大小 v1 完成，给家人玩过，换过皮肤</li>
+<li><input disabled="" type="checkbox"> 随机法宝 random.randint 会借会用，知道第 11 周正式学</li>
+</ul>
+<p>W03 毕业 🎓 → 进入 W04「让程序重复干活」。程序学会重复，才是真正的干将：画 100 层楼梯、九九乘法表，都不在话下。</p>
+<h2>👀 C++ 认脸时刻（1 分钟 · 只看不敲）</h2>
+<p>C++ 的对应写法：</p>
+<pre><code class="language-cpp">#include &lt;iostream&gt;
+#include &lt;cstdlib&gt;
+int main() {
+    int n = rand() % 100 + 1;  // 1-100
+    std::cout &lt;&lt; n &lt;&lt; std::endl;
+    return 0;
+}
+</code></pre>
+<p>三个认脸：</p>
+<ol>
+<li><code>#include &lt;cstdlib&gt;</code> 领随机数工具箱</li>
+<li><code>rand() % 100 + 1</code> 取 1-100 随机数</li>
+<li>C++ 随机也需要 <code>srand(time(0))</code> 设种子</li>
+</ol>
+<blockquote>
+<p>AI 营笔试的编程题用 C++ 出。不用会写，<strong>认得脸</strong>就行。</p>
+</blockquote>
+</div>
+</section>
+</div>
+</div>
+</body>
+</html>

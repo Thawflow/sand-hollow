@@ -1,0 +1,785 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>W07 · 列表：一串数据（前置 W06 加餐①）</title>
+<style>
+:root{--bg:#0f1420;--card:#171e2e;--card2:#1e2740;--border:#2a3550;--text:#e8ecf4;--text2:#8b96ad;--accent:#5b9dff;--ok:#3ecf8e}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+.wrap{max-width:900px;margin:0 auto;padding:28px 20px 60px}
+h1{font-size:1.5rem}
+.wk-meta{color:var(--text2);font-size:.85rem;margin:4px 0 20px}
+.lesson{border:1px solid var(--border);border-radius:12px;padding:16px 18px;margin-bottom:14px;background:var(--card2)}
+.lesson-head{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.lesson-head .lt{font-weight:700;font-size:1rem;flex:1}
+.md{font-size:.92rem;line-height:1.8;color:var(--text);overflow-wrap:break-word}
+.md h1,.md h2,.md h3{margin:14px 0 8px;font-size:1.05rem}
+.md p{margin:8px 0}
+.md code{background:rgba(91,157,255,.12);border-radius:5px;padding:2px 6px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.85em;color:#a8c8ff}
+.md pre{background:#0b0f18;border:1px solid var(--border);border-radius:10px;padding:12px 14px;overflow-x:auto;margin:10px 0}
+.md pre code{background:none;padding:0;color:#c9d7f0}
+.md ul,.md ol{margin:8px 0 8px 22px}
+.md blockquote{border-left:3px solid var(--accent);padding:4px 12px;color:var(--text2);margin:10px 0}
+.md a{color:var(--accent)}
+.md table{border-collapse:collapse;margin:10px 0;font-size:.85rem}
+.md td,.md th{border:1px solid var(--border);padding:6px 10px}
+.md input[type=checkbox]{width:15px;height:15px;accent-color:var(--ok);cursor:pointer;margin-right:6px;vertical-align:-2px}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+<h1 class="wk-title">列表：一串数据（前置 W06 加餐①）</h1>
+<div class="wk-meta">W07 · 6 课</div>
+</header>
+<div class="week-body" data-week="W07">
+<section class="lesson" data-lid="W07-S1">
+<div class="lesson-head"><span class="lt">列表是什么：一个变量装一批</span></div>
+<div class="md" data-lid="W07-S1"><!-- slug: list-intro, type: base -->
+<h2>⓪ 🤖 课前 AI 一分钟 · 第 19 颗：AI 也会&quot;装一批&quot;——列表（3 分钟）</h2>
+<blockquote>
+<p><strong>第 19 颗</strong></p>
+</blockquote>
+<p>AI 处理一个句子 = 装成&quot;词列表&quot;（tokens）。Python 的 <code>list</code> = <strong>装一批数据</strong>。</p>
+<p><strong>今日口诀</strong>：AI 处理一个句子 = 装成&quot;词列表&quot;（tokens）。</p>
+<p><strong>⚔️ 判一判</strong>（AI 营线上测评题型热身，先自己答再看答案）：</p>
+<blockquote>
+<ol>
+<li>AI 处理文字 = 拆成 token 列表</li>
+<li>Python list 可以装任意类型</li>
+</ol>
+</blockquote>
+<details><summary>答案</summary>
+
+<p><strong>1.</strong> ✓ [&quot;我&quot;, &quot;爱&quot;, &quot;Python&quot;] = 3 个 token<br><strong>2.</strong> ✓ [1, &quot;hello&quot;, True] 都可以</p>
+</details>
+
+<hr>
+<h1>W07-S1 · 列表是什么：一个变量装一批</h1>
+<blockquote>
+<p><strong>每日节奏（v1.9）：</strong> 本篇纯阅读 ≈10 分钟，读完做当天作业 ≈10 分钟，总共 ≤25 分钟
+<strong>不需要 Thonny</strong>——正文零打码，作业时间才开编辑器
+难度：⭐⭐ · 本篇是原 W06-L01 的前半（概念 + 创建 + 索引）</p>
+</blockquote>
+<hr>
+<h2>一、一个名字管一堆东西（4 分钟）</h2>
+<p>到目前为止，一个变量只能管一个东西：</p>
+<pre><code class="language-python">name = &quot;Kitty&quot;
+score = 95
+</code></pre>
+<p>但现实经常是「一堆」：班级 30 个学生、购物车 10 件商品、玩家背包 100 个道具——难道写 100 个变量？</p>
+<p><strong>列表（list）= 一个变量管一堆数据。</strong> 方括号包住、逗号隔开：</p>
+<pre><code class="language-python">nums = [3, 1, 4, 1, 5, 9, 2, 6]
+fruits = [&quot;apple&quot;, &quot;banana&quot;, &quot;cherry&quot;]
+print(len(nums))
+</code></pre>
+<p><code>len(nums)</code> 是 8——列表长度，有几个元素。</p>
+<h2>二、索引：从 0 开始数（4 分钟）</h2>
+<p>想拿列表里的某一个，用方括号 + 编号（<strong>索引</strong>）：</p>
+<pre><code class="language-python">fruits = [&quot;apple&quot;, &quot;banana&quot;, &quot;cherry&quot;]
+print(fruits[0])
+print(fruits[1])
+print(fruits[-1])
+</code></pre>
+<p>打印 apple / banana / cherry。规矩两条：</p>
+<ul>
+<li><strong><code>[0]</code> 是第 1 个</strong>——Python 从 0 开始数，新手最容易懵的地方</li>
+<li><strong>负数从尾巴数</strong>——<code>[-1]</code> 是最后一个，<code>[-2]</code> 倒数第二</li>
+</ul>
+<h2>三、越界会怎样（2 分钟）</h2>
+<p>列表只有 3 个水果，却写：</p>
+<pre><code class="language-text">print(fruits[10])   # ❌ IndexError: list index out of range
+</code></pre>
+<p><strong>报错：</strong> <code>IndexError: list index out of range</code>——门牌号不存在。3 个元素的合法门牌是 0、1、2，别越界敲门。</p>
+<p><strong>今日口诀：</strong> 方括号包一堆，从 0 开始数门牌；-1 是压尾，越界 IndexError。</p>
+<hr>
+<h2>✅ 今天的阅读完成自查</h2>
+<ul>
+<li><input disabled="" type="checkbox"> 我知道列表 = 一个变量管一堆，方括号 + 逗号</li>
+<li><input disabled="" type="checkbox"> 我知道 <code>fruits[0]</code> 是第 1 个、<code>fruits[-1]</code> 是最后一个</li>
+<li><input disabled="" type="checkbox"> 我认识 IndexError：门牌号超了</li>
+</ul>
+<p>三格全勾 → 打开 Thonny，做今天的作业</p>
+<hr>
+<blockquote>
+<p><strong>📁 作业保存规则</strong>：本课课后练习写进一个文件 <code>W07-S1-homework.py</code>（存 <code>~/sand-hollow/&lt;你的学员ID&gt;/homework/</code>），每道题开头用刚学的备注分隔：<code># --- 题 1 ---</code>、<code># --- 题 2 ---</code>……<strong>交完作业要跟你的智能体说一声</strong>才会批改，评语出现在 <code>reviews/*.review.md</code>。<strong>回报触发词：交完作业或修完坑，都回一句「修完了」</strong>——不回这句 mentor 不知道，坑会一直挂着等。</p>
+</blockquote>
+<h2>📝 今日作业（≈10 分钟）</h2>
+<p>新建文件 <code>W07-S1-homework.py</code>，3 道题：</p>
+<ol>
+<li><strong>水果篮</strong>：<code>fruits = [&quot;apple&quot;, &quot;banana&quot;, &quot;cherry&quot;, &quot;durian&quot;, &quot;elderberry&quot;]</code>——打印长度、第 3 个水果（想想索引是几）、最后一个（用负索引）</li>
+<li><strong>数字拼图</strong>：<code>nums = [12, 45, 7, 23, 56]</code>——打印第 1 个和第 3 个，再打印它俩的和（应该是 19）</li>
+<li><strong>踩坑体验</strong>：故意 <code>print(fruits[10])</code>，把报错最后一行抄进注释，然后删掉这行</li>
+</ol>
+<blockquote>
+<p>交完作业说一声「<strong>修完了</strong>」。明天 S2 讲往列表里放东西 🐾</p>
+</blockquote>
+<h2>👀 C++ 认脸时刻（1 分钟 · 只看不敲）</h2>
+<p>C++ 的对应写法：</p>
+<pre><code class="language-cpp">#include &lt;iostream&gt;
+#include &lt;vector&gt;
+int main() {
+    std::vector&lt;int&gt; nums = {1, 2, 3};
+    nums.push_back(4);
+    std::cout &lt;&lt; nums.size() &lt;&lt; std::endl;
+    return 0;
+}
+</code></pre>
+<p>三个认脸：</p>
+<ol>
+<li><code>std::vector&lt;int&gt;</code> 类似 Python list</li>
+<li><code>push_back(4)</code> 类似 append</li>
+<li><code>nums.size()</code> 类似 len(nums)</li>
+</ol>
+<blockquote>
+<p>AI 营笔试的编程题用 C++ 出。不用会写，<strong>认得脸</strong>就行。</p>
+</blockquote>
+</div>
+</section>
+<section class="lesson" data-lid="W07-S2">
+<div class="lesson-head"><span class="lt">增：append 与 insert</span></div>
+<div class="md" data-lid="W07-S2"><!-- slug: list-ops, type: base -->
+<h2>⓪ 🤖 课前 AI 一分钟 · 第 20 颗：AI 也会&quot;增删改&quot;——CRUD（3 分钟）</h2>
+<blockquote>
+<p><strong>第 20 颗</strong></p>
+</blockquote>
+<p>AI 微调数据 = 增删改（add/remove/edit）训练样本。Python list 增删改 = <strong>CRUD</strong>。</p>
+<p><strong>今日口诀</strong>：AI 微调数据 = 增删改（add/remove/edit）训练样本。</p>
+<p><strong>⚔️ 判一判</strong>（AI 营线上测评题型热身，先自己答再看答案）：</p>
+<blockquote>
+<ol>
+<li>append 是 list 末尾加</li>
+<li>remove 是删第一个匹配项</li>
+</ol>
+</blockquote>
+<details><summary>答案</summary>
+
+<p><strong>1.</strong> ✓ nums.append(4)<br><strong>2.</strong> ✓ nums.remove(2) 删第一个 2</p>
+</details>
+
+<hr>
+<h1>W07-S2 · 增：append 与 insert</h1>
+<blockquote>
+<p><strong>每日节奏（v1.9）：</strong> 本篇纯阅读 ≈9 分钟，读完做当天作业 ≈10 分钟，总共 ≤25 分钟
+<strong>不需要 Thonny</strong>——正文零打码，作业时间才开编辑器
+难度：⭐⭐ · 本篇是原 W06-L02 的前半（增删改查口诀 + append / insert）</p>
+</blockquote>
+<hr>
+<h2>一、列表的日常四件事（2 分钟）</h2>
+<p>列表创建之后，99% 的时间在做四件事——<strong>增删改查</strong>：</p>
+<ul>
+<li><strong>增</strong>：往里加（今天的主角 append / insert）</li>
+<li><strong>删</strong>：拿出来（明天讲）</li>
+<li><strong>改</strong>：换掉（明天讲）</li>
+<li><strong>查</strong>：找一找（后天讲）</li>
+</ul>
+<p>这是所有数据结构的通用口诀，先混个脸熟。</p>
+<h2>二、append：排队加尾巴（4 分钟）</h2>
+<pre><code class="language-python">pets = [&quot;cat&quot;, &quot;dog&quot;]
+print(&quot;Start:&quot;, pets)
+
+pets.append(&quot;rabbit&quot;)
+print(&quot;After append:&quot;, pets)
+
+pets.append(&quot;hamster&quot;)
+print(&quot;After append 2:&quot;, pets)
+</code></pre>
+<p>运行：</p>
+<pre><code class="language-text">Start: [&#39;cat&#39;, &#39;dog&#39;]
+After append: [&#39;cat&#39;, &#39;dog&#39;, &#39;rabbit&#39;]
+After append 2: [&#39;cat&#39;, &#39;dog&#39;, &#39;rabbit&#39;, &#39;hamster&#39;]
+</code></pre>
+<p><strong>append(x) 把 x 加到末尾</strong>——像排队，新来的站最后。</p>
+<h2>三、insert：插队（3 分钟）</h2>
+<pre><code class="language-python">pets.insert(1, &quot;fish&quot;)
+print(&quot;After insert at 1:&quot;, pets)
+# [&#39;cat&#39;, &#39;fish&#39;, &#39;dog&#39;, &#39;rabbit&#39;, &#39;hamster&#39;]
+</code></pre>
+<p><strong>insert(i, x) 把 x 插到第 i 个位置</strong>，原来的元素往后挤一位——fish 插队站到 1 号位，dog 它们全体后移。</p>
+<p>记忆：<strong>append 排尾巴，insert 会插队</strong>。</p>
+<p><strong>注意：</strong> <code>append()</code> 括号里必须传东西，忘了传会加进去一个空空如也的 None——列表看着没事，其实埋雷。</p>
+<hr>
+<h2>✅ 今天的阅读完成自查</h2>
+<ul>
+<li><input disabled="" type="checkbox"> 我能说出增删改查四件套</li>
+<li><input disabled="" type="checkbox"> 我知道 append 加尾巴、insert(i, x) 插到 i 号位</li>
+<li><input disabled="" type="checkbox"> 我知道 append 括号里必须传值</li>
+</ul>
+<p>三格全勾 → 打开作业</p>
+<hr>
+<blockquote>
+<p><strong>📁 作业保存规则</strong>：本课课后练习写进一个文件 <code>W07-S2-homework.py</code>（存 <code>~/sand-hollow/&lt;你的学员ID&gt;/homework/</code>），每道题开头用刚学的备注分隔：<code># --- 题 1 ---</code>、<code># --- 题 2 ---</code>……<strong>交完作业要跟你的智能体说一声</strong>才会批改，评语出现在 <code>reviews/*.review.md</code>。<strong>回报触发词：交完作业或修完坑，都回一句「修完了」</strong>——不回这句 mentor 不知道，坑会一直挂着等。</p>
+</blockquote>
+<h2>📝 今日作业（≈10 分钟）</h2>
+<p>新建 <code>W07-S2-homework.py</code>，3 道题：</p>
+<ol>
+<li><strong>空篮子起步</strong>：<code>basket = []</code> 起步，用 append 加 4 种水果，每加一个就打印一次篮子，看它长大</li>
+<li><strong>插队实验</strong>：<code>cats = [&quot;lion&quot;, &quot;tiger&quot;]</code>，insert 把 &quot;leopard&quot; 插到 0 号位，打印；再插一个 &quot;cheetah&quot; 到 1 号位，打印</li>
+<li><strong>好朋友名单</strong>：循环 5 次 input 问朋友名字，每次 append 进列表，最后循环打印 <code>- 名字</code></li>
+</ol>
+<blockquote>
+<p>交完说「<strong>修完了</strong>」。明天 S3 讲删与改——列表随你搓圆捏扁 🐾</p>
+</blockquote>
+<h2>👀 C++ 认脸时刻（1 分钟 · 只看不敲）</h2>
+<p>C++ 的对应写法：</p>
+<pre><code class="language-cpp">#include &lt;iostream&gt;
+#include &lt;vector&gt;
+int main() {
+    std::vector&lt;int&gt; nums = {1, 2, 3};
+    nums.push_back(4);    // 增
+    nums.erase(nums.begin() + 1);  // 删
+    nums[0] = 99;         // 改
+    return 0;
+}
+</code></pre>
+<p>三个认脸：</p>
+<ol>
+<li><code>push_back</code> 增（Python <code>append</code>）</li>
+<li><code>erase(begin+1)</code> 删索引 1</li>
+<li><code>nums[0] = 99</code> 改（跟 Python list 一致）</li>
+</ol>
+<blockquote>
+<p>AI 营笔试的编程题用 C++ 出。不用会写，<strong>认得脸</strong>就行。</p>
+</blockquote>
+</div>
+</section>
+<section class="lesson" data-lid="W07-S3">
+<div class="lesson-head"><span class="lt">删与改：remove 与改值</span></div>
+<div class="md" data-lid="W07-S3"><!-- slug: list-iterate, type: base -->
+<h2>⓪ 🤖 课前 AI 一分钟 · 第 21 颗：AI 也会&quot;遍历&quot;——迭代（3 分钟）</h2>
+<blockquote>
+<p><strong>第 21 颗</strong></p>
+</blockquote>
+<p>AI 训练 = 遍历数据集中的每张图。Python <code>for x in list:</code> = <strong>遍历列表</strong>。</p>
+<p><strong>今日口诀</strong>：AI 训练 = 遍历数据集中的每张图。</p>
+<p><strong>⚔️ 判一判</strong>（AI 营线上测评题型热身，先自己答再看答案）：</p>
+<blockquote>
+<ol>
+<li>遍历 list 用 for</li>
+<li>enumerate 同时拿索引和元素</li>
+</ol>
+</blockquote>
+<details><summary>答案</summary>
+
+<p><strong>1.</strong> ✓ for x in nums: print(x)<br><strong>2.</strong> ✓ for i, x in enumerate(nums):</p>
+</details>
+
+<hr>
+<h1>W07-S3 · 删与改：remove 与改值</h1>
+<blockquote>
+<p><strong>每日节奏（v1.9）：</strong> 本篇纯阅读 ≈11 分钟，读完做当天作业 ≈10 分钟，总共 ≤25 分钟
+<strong>不需要 Thonny</strong>——正文零打码，作业时间才开编辑器
+难度：⭐⭐ · 本篇是原 W06-L02 的后半（remove / pop / clear + 索引改值）</p>
+</blockquote>
+<hr>
+<h2>一、remove：按值删第一个（4 分钟）</h2>
+<pre><code class="language-python">todos = [&quot;homework&quot;, &quot;gaming&quot;, &quot;homework&quot;, &quot;sleep&quot;]
+todos.remove(&quot;homework&quot;)
+print(todos)     # [&#39;gaming&#39;, &#39;homework&#39;, &#39;sleep&#39;]
+</code></pre>
+<p><code>remove(x)</code> 删掉<strong>第一个</strong>等于 x 的元素——后面还有个 homework？它只删一个，剩下的不动。</p>
+<p><strong>大坑：</strong> 删一个不存在的值：</p>
+<pre><code class="language-text">todos.remove(&quot;unicorn&quot;)   # ❌ ValueError: list.remove(x): x not in list
+</code></pre>
+<p><strong>报错：</strong> ValueError。防御姿势——<strong>先 in 检查再删</strong>（if &quot;x&quot; in list 才 remove）。</p>
+<h2>二、pop 与 clear：按位置删、一锅端（4 分钟）</h2>
+<pre><code class="language-python">snacks = [&quot;chip&quot;, &quot;candy&quot;, &quot;cookie&quot;, &quot;juice&quot;]
+done = snacks.pop(1)
+print(done, snacks)     # candy [&#39;chip&#39;, &#39;cookie&#39;, &#39;juice&#39;]
+snacks.pop()
+print(snacks)           # [&#39;chip&#39;, &#39;cookie&#39;]
+</code></pre>
+<ul>
+<li><strong>pop(i)</strong>：删第 i 个，而且<strong>把它交还给你</strong>（可以接住用）</li>
+<li><strong>pop()</strong>：不写 i，删最后一个</li>
+<li><strong>clear()</strong>：全部清空，变 <code>[]</code></li>
+</ul>
+<p>记忆：<strong>remove 按值删第一个，pop 按位置删还退货，clear 一锅端</strong>。</p>
+<h2>三、改：索引赋值（3 分钟）</h2>
+<pre><code class="language-python">scores = [85, 92, 78]
+scores[1] = 95
+print(scores)    # [85, 95, 78]
+</code></pre>
+<p><strong>改 = 选中位置 = 赋值</strong>，一行搞定。老规矩：门牌号不能越界，改 <code>[10]</code> 照样 IndexError。</p>
+<p><strong>今日口诀：</strong> remove 认值，pop 认位置还退货；改值最简单，门牌号加等号。</p>
+<hr>
+<h2>✅ 今天的阅读完成自查</h2>
+<ul>
+<li><input disabled="" type="checkbox"> 我知道 remove 只删第一个匹配，删不存在的会 ValueError</li>
+<li><input disabled="" type="checkbox"> 我知道 pop(i) 删位置还退货、pop() 删最后、clear 清空</li>
+<li><input disabled="" type="checkbox"> 我会用 <code>lst[i] = 新值</code> 改元素</li>
+</ul>
+<p>三格全勾 → 打开作业</p>
+<hr>
+<blockquote>
+<p><strong>📁 作业保存规则</strong>：本课课后练习写进一个文件 <code>W07-S3-homework.py</code>（存 <code>~/sand-hollow/&lt;你的学员ID&gt;/homework/</code>），每道题开头用刚学的备注分隔：<code># --- 题 1 ---</code>、<code># --- 题 2 ---</code>……<strong>交完作业要跟你的智能体说一声</strong>才会批改，评语出现在 <code>reviews/*.review.md</code>。<strong>回报触发词：交完作业或修完坑，都回一句「修完了」</strong>——不回这句 mentor 不知道，坑会一直挂着等。</p>
+</blockquote>
+<h2>📝 今日作业（≈10 分钟）</h2>
+<p>新建 <code>W07-S3-homework.py</code>，3 道题：</p>
+<ol>
+<li><strong>查找并删除</strong>：<code>fruits = [&quot;apple&quot;, &quot;banana&quot;, &quot;cherry&quot;]</code>，input 问一个水果：在列表里就 remove 并打印 &quot;removed&quot;，不在就打印 &quot;not found&quot;（先 in 检查，别硬删）</li>
+<li><strong>踩坑抄报错</strong>：故意 remove 一个不在列表里的值，把报错最后一行抄进注释，再用 in 检查的方式修好</li>
+<li><strong>改成绩</strong>：<code>scores = [85, 92, 78]</code>，把第 2 个改成 95 打印；再用 pop() 删掉最后一个，打印剩下两个</li>
+</ol>
+<blockquote>
+<p>交完说「<strong>修完了</strong>」。明天 S4 讲遍历——for 见了列表像老朋友 🐾</p>
+</blockquote>
+<h2>👀 C++ 认脸时刻（1 分钟 · 只看不敲）</h2>
+<p>C++ 的对应写法：</p>
+<pre><code class="language-cpp">#include &lt;iostream&gt;
+#include &lt;vector&gt;
+int main() {
+    std::vector&lt;int&gt; nums = {10, 20, 30};
+    for (int i = 0; i &lt; nums.size(); i++) {
+        std::cout &lt;&lt; i &lt;&lt; &quot;:&quot; &lt;&lt; nums[i] &lt;&lt; std::endl;
+    }
+    return 0;
+}
+</code></pre>
+<p>三个认脸：</p>
+<ol>
+<li>C++ 用索引 <code>nums[i]</code></li>
+<li>range-based for：<code>for (int x : nums) cout &lt;&lt; x;</code></li>
+<li>Python <code>for x in nums:</code> 更简洁</li>
+</ol>
+<blockquote>
+<p>AI 营笔试的编程题用 C++ 出。不用会写，<strong>认得脸</strong>就行。</p>
+</blockquote>
+</div>
+</section>
+<section class="lesson" data-lid="W07-S4">
+<div class="lesson-head"><span class="lt">遍历：for 的老朋友新用法</span></div>
+<div class="md" data-lid="W07-S4"><!-- slug: list-slice, type: base -->
+<h2>⓪ 🤖 课前 AI 一分钟 · 第 22 颗：AI 也会&quot;切片&quot;——分块（3 分钟）</h2>
+<blockquote>
+<p><strong>第 22 颗</strong></p>
+</blockquote>
+<p>AI 训练长文本 = 切成 chunks（每 512 token 一块）。Python 切片 = <strong>取列表的子集</strong>。</p>
+<p><strong>今日口诀</strong>：AI 训练长文本 = 切成 chunks（每 512 token 一块）。</p>
+<p><strong>⚔️ 判一判</strong>（AI 营线上测评题型热身，先自己答再看答案）：</p>
+<blockquote>
+<ol>
+<li>list 切片 nums[1:3] 取索引 1-2</li>
+<li>切片含头不含尾</li>
+</ol>
+</blockquote>
+<details><summary>答案</summary>
+
+<p><strong>1.</strong> ✓ [1,2,3,4][1:3] = [2, 3]<br><strong>2.</strong> ✓ [1,2,3,4][0:4] = [1,2,3,4] 含头不含尾</p>
+</details>
+
+<hr>
+<h1>W07-S4 · 遍历：for 的老朋友新用法</h1>
+<blockquote>
+<p><strong>每日节奏（v1.9）：</strong> 本篇纯阅读 ≈11 分钟，读完做当天作业 ≈10 分钟，总共 ≤25 分钟
+<strong>不需要 Thonny</strong>——正文零打码，作业时间才开编辑器
+难度：⭐⭐ · 本篇是原 W06-L01 的后半（for 遍历列表 + enumerate）</p>
+</blockquote>
+<hr>
+<h2>一、for 直接拿元素（4 分钟）</h2>
+<p>W04 的 for 循环，最常见用法就是「把列表每个元素过一遍」（<strong>遍历</strong>）：</p>
+<pre><code class="language-python">fruits = [&quot;apple&quot;, &quot;banana&quot;, &quot;cherry&quot;]
+for fruit in fruits:
+    print(&quot;I like&quot;, fruit)
+</code></pre>
+<p>运行：I like apple / banana / cherry 各一行。</p>
+<p>跟老写法对比——<code>for i in range(3):</code> 拿的是索引 0/1/2，还得再 <code>fruits[i]</code> 取货；<code>for fruit in fruits:</code> <strong>直接拿元素</strong>，省一步，更地道。</p>
+<p><strong>起名小课：</strong> 循环变量叫 <code>fruit</code> 比 <code>i</code> 清楚十倍——名字即注释。</p>
+<h2>二、遍历做点有用的（4 分钟）</h2>
+<pre><code class="language-python">classmates = [&quot;Alice&quot;, &quot;Bob&quot;, &quot;Charlie&quot;, &quot;Diana&quot;]
+print(&quot;Class size:&quot;, len(classmates))
+for name in classmates:
+    print(f&quot;- {name}&quot;)
+</code></pre>
+<p>len 数人数，for 打名单——这两招合起来就是「花名册打印器」。上周的 while 也能遍历，但 for 天生干这个，能 for 就 for。</p>
+<h2>三、enumerate：顺手带上门牌号（3 分钟）</h2>
+<p>想打印「Day 1: xxx」这种带编号的？<strong>enumerate</strong> 把门牌号和元素一起给你：</p>
+<pre><code class="language-python">plans = [&quot;drawing&quot;, &quot;sports&quot;, &quot;coding&quot;]
+for i, plan in enumerate(plans):
+    print(f&quot;Day {i+1}: {plan}&quot;)
+</code></pre>
+<p>i 是 0/1/2，加 1 变成 Day 1/2/3。两个变量用逗号接——i 接门牌，plan 接货。</p>
+<p><strong>今日口诀：</strong> for x in 列表，元素直接拿；要编号，找 enumerate。</p>
+<hr>
+<h2>✅ 今天的阅读完成自查</h2>
+<ul>
+<li><input disabled="" type="checkbox"> 我知道 <code>for x in lst:</code> 直接拿元素，比 range + 索引省一步</li>
+<li><input disabled="" type="checkbox"> 我会给循环变量起有意义的名字</li>
+<li><input disabled="" type="checkbox"> 我会用 enumerate 同时拿门牌号和元素</li>
+</ul>
+<p>三格全勾 → 打开作业</p>
+<hr>
+<blockquote>
+<p><strong>📁 作业保存规则</strong>：本课课后练习写进一个文件 <code>W07-S4-homework.py</code>（存 <code>~/sand-hollow/&lt;你的学员ID&gt;/homework/</code>），每道题开头用刚学的备注分隔：<code># --- 题 1 ---</code>、<code># --- 题 2 ---</code>……<strong>交完作业要跟你的智能体说一声</strong>才会批改，评语出现在 <code>reviews/*.review.md</code>。<strong>回报触发词：交完作业或修完坑，都回一句「修完了」</strong>——不回这句 mentor 不知道，坑会一直挂着等。</p>
+</blockquote>
+<h2>📝 今日作业（≈10 分钟）</h2>
+<p>新建 <code>W07-S4-homework.py</code>，3 道题：</p>
+<ol>
+<li><strong>打招呼</strong>：<code>names = [&quot;Alice&quot;, &quot;Bob&quot;, &quot;Charlie&quot;, &quot;Diana&quot;, &quot;Eve&quot;]</code>，循环打印 &quot;Hi,&quot; + 名字</li>
+<li><strong>周末计划</strong>：列表存你周末想做的 5 件事，用 enumerate 打印 Day 1 到 Day 5</li>
+<li><strong>换种遍历</strong>：同一个水果列表，先用 <code>for fruit in fruits</code> 打一遍，再用 <code>for i in range(len(fruits))</code> + <code>fruits[i]</code> 打一遍——注释里写一句话：哪版更舒服，为什么</li>
+</ol>
+<blockquote>
+<p>交完说「<strong>修完了</strong>」。明天 S5 统计收官：max/min/sum/平均 🐾</p>
+</blockquote>
+<h2>👀 C++ 认脸时刻（1 分钟 · 只看不敲）</h2>
+<p>C++ 的对应写法：</p>
+<pre><code class="language-cpp">#include &lt;iostream&gt;
+#include &lt;vector&gt;
+int main() {
+    std::vector&lt;int&gt; nums = {1, 2, 3, 4, 5};
+    auto sub = std::vector&lt;int&gt;(nums.begin() + 1, nums.begin() + 3);
+    for (int x : sub) std::cout &lt;&lt; x &lt;&lt; &quot; &quot;;
+    return 0;
+}
+</code></pre>
+<p>三个认脸：</p>
+<ol>
+<li>C++ 没有直接 slice，要用迭代器构造</li>
+<li><code>(begin+1, begin+3)</code> 跟 Python <code>nums[1:3]</code> 对应</li>
+<li>Python 切片比 C++ 简洁 10 倍</li>
+</ol>
+<blockquote>
+<p>AI 营笔试的编程题用 C++ 出。不用会写，<strong>认得脸</strong>就行。</p>
+</blockquote>
+</div>
+</section>
+<section class="lesson" data-lid="W07-S5">
+<div class="lesson-head"><span class="lt">统计四件套：max / min / sum / 平均</span></div>
+<div class="md" data-lid="W07-S5"><!-- slug: list-summary, type: base -->
+<h2>⓪ 🤖 课前 AI 一分钟 · 第 23 颗：AI 也会&quot;统计&quot;——max/min/sum/平均（3 分钟）</h2>
+<blockquote>
+<p><strong>第 23 颗</strong></p>
+</blockquote>
+<p>AI 算平均 loss = sum/数量。Python <code>max/min/sum</code> = <strong>统计函数</strong>。</p>
+<p><strong>今日口诀</strong>：AI 算平均 loss = sum/数量。</p>
+<p><strong>⚔️ 判一判</strong>（AI 营线上测评题型热身，先自己答再看答案）：</p>
+<blockquote>
+<ol>
+<li>max(nums) 找最大</li>
+<li>sum(nums) / len(nums) 算平均</li>
+</ol>
+</blockquote>
+<details><summary>答案</summary>
+
+<p><strong>1.</strong> ✓ max([1, 3, 2]) = 3<br><strong>2.</strong> ✓ sum([1, 2, 3]) / 3 = 2.0</p>
+</details>
+
+<hr>
+<h1>W07-S5 · 统计四件套：max / min / sum / 平均</h1>
+<blockquote>
+<p><strong>每日节奏（v1.9）：</strong> 本篇纯阅读 ≈11 分钟，读完做当天作业 ≈10 分钟，总共 ≤25 分钟
+<strong>不需要 Thonny</strong>——正文零打码，作业时间才开编辑器
+难度：⭐⭐⭐ · 本篇是原 W06-L03 的精华（统计 built-in + 过滤两板斧）</p>
+</blockquote>
+<hr>
+<h2>一、累加器复习：求和 + 平均（3 分钟）</h2>
+<p>W04 学的累加器，套上列表就是日常 80% 的数据处理：</p>
+<pre><code class="language-python">scores = [85, 92, 78, 95, 88]
+total = 0
+for s in scores:
+    total += s
+print(f&quot;Total: {total}, Average: {total / len(scores):.1f}&quot;)
+</code></pre>
+<h2>二、built-in 三兄弟：直接抄近道（4 分钟）</h2>
+<p>上面的循环是教学版——实战直接用 Python 自带的（不用 import）：</p>
+<pre><code class="language-python">nums = [12, 45, 7, 23, 56, 89, 34]
+print(max(nums))
+print(min(nums))
+print(sum(nums))
+</code></pre>
+<p>89 / 7 / 266。<strong>max 最大、min 最小、sum 求和</strong>；平均没有自带，<code>sum(nums) / len(nums)</code> 一行拼出来。</p>
+<p><strong>两个雷：</strong> <code>sum</code> 只对数字列表——<code>sum([&quot;1&quot;, &quot;2&quot;])</code> 直接 TypeError；空列表问 <code>max</code> 报 ValueError。</p>
+<h2>三、过滤两板斧：计数 + 存新列表（4 分钟）</h2>
+<p><strong>板斧一：数有几个达标的</strong>（循环 + if + 计数器）：</p>
+<pre><code class="language-python">scores = [85, 92, 78, 95, 88, 90, 76, 91, 84, 89]
+excellent = 0
+for s in scores:
+    if s &gt;= 90:
+        excellent += 1
+print(f&quot;Excellent: {excellent}&quot;)
+</code></pre>
+<p><strong>板斧二：把达标的捞进新列表</strong>（循环 + if + append）：</p>
+<pre><code class="language-python">excellent = []
+for s in scores:
+    if s &gt;= 90:
+        excellent.append(s)
+print(excellent)
+</code></pre>
+<p>进阶预告：<code>[s for s in scores if s &gt;= 90]</code> 一行也能干这事（列表推导式），新手期先写循环版，周末项目再尝鲜。</p>
+<p><strong>今日口诀：</strong> max/min/sum 抄近道；过滤两板斧，计数或捞人。</p>
+<hr>
+<h2>✅ 今天的阅读完成自查</h2>
+<ul>
+<li><input disabled="" type="checkbox"> 我会用 max / min / sum，平均 = sum / len</li>
+<li><input disabled="" type="checkbox"> 我知道 sum 只吃数字，空列表 max 会报错</li>
+<li><input disabled="" type="checkbox"> 「过滤 + 计数」和「过滤 + append」两板斧我都能写</li>
+</ul>
+<p>三格全勾 → 打开作业（W06 最后一天！）</p>
+<hr>
+<blockquote>
+<p><strong>📁 作业保存规则</strong>：本课课后练习写进一个文件 <code>W07-S5-homework.py</code>（存 <code>~/sand-hollow/&lt;你的学员ID&gt;/homework/</code>），每道题开头用刚学的备注分隔：<code># --- 题 1 ---</code>、<code># --- 题 2 ---</code>……<strong>交完作业要跟你的智能体说一声</strong>才会批改，评语出现在 <code>reviews/*.review.md</code>。<strong>回报触发词：交完作业或修完坑，都回一句「修完了」</strong>——不回这句 mentor 不知道，坑会一直挂着等。</p>
+</blockquote>
+<h2>📝 今日作业（≈10 分钟）</h2>
+<p>新建 <code>W07-S5-homework.py</code>，3 道题：</p>
+<ol>
+<li><strong>班级报告</strong>：<code>scores = [85, 92, 78, 95, 88]</code>，用 sum / len / max / min 打印平均（留 1 位小数）、最高、最低</li>
+<li><strong>过滤两板斧</strong>：<code>scores = [85, 92, 78, 95, 88, 90, 76, 91, 84, 89]</code>，数出 &gt;= 80 有几个；再把 &gt;= 80 的分数捞进新列表 <code>high</code>，打印它和它的长度</li>
+<li><strong>踩坑抄报错</strong>：故意 <code>sum([&quot;1&quot;, &quot;2&quot;])</code>，把报错最后一行抄进注释，注释里用一句话说清为什么错，再修好</li>
+</ol>
+<blockquote>
+<p>交完说「<strong>修完了</strong>」——W06 结业！增删改查 + 遍历 + 统计全套到手，周末项目「电子购物清单」见 🏆🐾</p>
+</blockquote>
+<h2>👀 C++ 认脸时刻（1 分钟 · 只看不敲）</h2>
+<p>C++ 的对应写法：</p>
+<pre><code class="language-cpp">#include &lt;iostream&gt;
+#include &lt;vector&gt;
+#include &lt;algorithm&gt;
+int main() {
+    std::vector&lt;int&gt; nums = {3, 1, 4, 1, 5};
+    int sum = 0, mx = nums[0];
+    for (int x : nums) {
+        sum += x;
+        if (x &gt; mx) mx = x;
+    }
+    std::cout &lt;&lt; &quot;sum=&quot; &lt;&lt; sum &lt;&lt; &quot; max=&quot; &lt;&lt; mx &lt;&lt; std::endl;
+    return 0;
+}
+</code></pre>
+<p>三个认脸：</p>
+<ol>
+<li>C++ 没有内置 sum/max，要手动累加</li>
+<li><code>#include &lt;algorithm&gt;</code> 有 <code>std::max_element</code></li>
+<li>Python <code>max(nums)</code> 一行解决</li>
+</ol>
+<blockquote>
+<p>AI 营笔试的编程题用 C++ 出。不用会写，<strong>认得脸</strong>就行。</p>
+</blockquote>
+</div>
+</section>
+<section class="lesson" data-lid="W07-weekend">
+<div class="lesson-head"><span class="lt">电子购物清单</span></div>
+<div class="md" data-lid="W07-weekend"><!-- slug: list-shopping-cart, type: project -->
+<h2>⓪ 🤖 课前 AI 一分钟 · 第 24 颗：AI 也会&quot;购物清单&quot;——增删改查综合（3 分钟）</h2>
+<blockquote>
+<p><strong>第 24 颗</strong></p>
+</blockquote>
+<p>AI 推荐系统 = 增删改查用户偏好。购物清单项目 = <strong>完整 CRUD 项目</strong>。</p>
+<p><strong>今日口诀</strong>：AI 推荐系统 = 增删改查用户偏好。</p>
+<p><strong>⚔️ 判一判</strong>（AI 营线上测评题型热身，先自己答再看答案）：</p>
+<blockquote>
+<ol>
+<li>购物清单 = list 增删改查</li>
+<li>AI 推荐系统本质也是增删改查</li>
+</ol>
+</blockquote>
+<details><summary>答案</summary>
+
+<p><strong>1.</strong> ✓ items = []; items.append(x); items.remove(x); ...<br><strong>2.</strong> ✓ user_preferences.append(item)</p>
+</details>
+
+<hr>
+<h1>W07-weekend · 电子购物清单</h1>
+<blockquote>
+<p>用时：60-90 分钟 · 难度：⭐⭐⭐ · 前置：W06 三课</p>
+</blockquote>
+<hr>
+<h2>一、本周武功盘点（3 分钟）</h2>
+<ul>
+<li>列表：一个变量装一批数据</li>
+<li>增删改查：append / insert / remove / pop / clear / 索引赋值 / in / index / count</li>
+<li>统计：sum / max / min / len + 累加器套路</li>
+<li>过滤：循环 + if + count / 新列表</li>
+</ul>
+<p>今天把它们组装成「<strong>电子购物清单</strong>」——从游戏里的商店数据到现实的购物需求，都能用列表管起来。</p>
+<h2>二、项目 A：基础购物清单（25 分钟）</h2>
+<blockquote>
+<p>📁 项目存 <code>~/sand-hollow/&lt;你的学员ID&gt;/homework/</code>，新建 <code>shopping_list.py</code>。</p>
+</blockquote>
+<p>需求：</p>
+<ul>
+<li>空列表起步</li>
+<li>菜单循环：add / list / remove / quit</li>
+<li>add：input 物品名，append 到列表</li>
+<li>list：打印所有物品（带编号）</li>
+<li>remove：input 物品名，remove 第一个匹配</li>
+<li>quit：退出</li>
+</ul>
+<p>参考实现：</p>
+<pre><code class="language-python">print(&quot;=== Shopping List ===&quot;)
+
+items = []
+
+while True:
+    action = input(&quot;\n(add/list/remove/quit): &quot;).strip()
+
+    if action == &quot;add&quot;:
+        name = input(&quot;Item name: &quot;).strip()
+        items.append(name)
+        print(f&quot;Added &#39;{name}&#39;&quot;)
+    elif action == &quot;list&quot;:
+        if not items:
+            print(&quot;List is empty&quot;)
+        else:
+            for i, item in enumerate(items):
+                print(f&quot;{i+1}. {item}&quot;)
+    elif action == &quot;remove&quot;:
+        name = input(&quot;Item to remove: &quot;).strip()
+        if name in items:
+            items.remove(name)
+            print(f&quot;Removed &#39;{name}&#39;&quot;)
+        else:
+            print(f&quot;&#39;{name}&#39; not in list&quot;)
+    elif action == &quot;quit&quot;:
+        print(f&quot;\nFinal list ({len(items)} items):&quot;)
+        for i, item in enumerate(items):
+            print(f&quot;{i+1}. {item}&quot;)
+        break
+    else:
+        print(&quot;Unknown action, try again&quot;)
+</code></pre>
+<h3>拆解</h3>
+<ul>
+<li><strong><code>.strip()</code></strong>：去掉输入前后的空格（防止 &quot;add &quot; 输入被误判）</li>
+<li><strong><code>enumerate(items)</code></strong>：自动编号（i 从 0 开始，加 1 变 1-N）</li>
+<li><strong>三层 if / elif / else</strong>：动作分发</li>
+<li><strong><code>if not items:</code></strong>：空列表判定（空 = falsy）</li>
+</ul>
+<h2>三、项目 B：价格 + 总价（25 分钟）</h2>
+<blockquote>
+<p>📁 同目录新建 <code>shopping_with_prices.py</code>。</p>
+</blockquote>
+<p>需求：在 A 基础上，每个物品有「名字 + 价格」，最后打印总价。</p>
+<p>参考实现：</p>
+<pre><code class="language-python">print(&quot;=== Shopping List with Prices ===&quot;)
+
+items = []  # Each item: [name, price]
+
+while True:
+    action = input(&quot;\n(add/list/remove/total/quit): &quot;).strip()
+
+    if action == &quot;add&quot;:
+        name = input(&quot;Item name: &quot;).strip()
+        price = float(input(&quot;Price: &quot;))
+        items.append([name, price])
+        print(f&quot;Added &#39;{name}&#39; at {price}&quot;)
+    elif action == &quot;list&quot;:
+        if not items:
+            print(&quot;List is empty&quot;)
+        else:
+            for i, (name, price) in enumerate(items):
+                print(f&quot;{i+1}. {name} - ${price:.2f}&quot;)
+    elif action == &quot;remove&quot;:
+        idx = int(input(&quot;Item number to remove: &quot;)) - 1
+        if 0 &lt;= idx &lt; len(items):
+            removed = items.pop(idx)
+            print(f&quot;Removed &#39;{removed[0]}&#39;&quot;)
+        else:
+            print(&quot;Invalid number&quot;)
+    elif action == &quot;total&quot;:
+        total = sum(price for name, price in items)
+        print(f&quot;Total: ${total:.2f}&quot;)
+    elif action == &quot;quit&quot;:
+        break
+    else:
+        print(&quot;Unknown action&quot;)
+</code></pre>
+<h3>关键技巧</h3>
+<ul>
+<li><strong>嵌套列表</strong> <code>[[name, price], ...]</code>：每个 item 是两元素列表</li>
+<li><strong><code>for i, (name, price) in enumerate(items):</code></strong>：元组拆包，直接拿到名字和价格</li>
+<li><strong><code>sum(price for name, price in items)</code></strong>：生成器 + sum，按价格累加</li>
+<li><strong><code>float(input(&quot;Price: &quot;))</code></strong>：输入转浮点数（W02-L01 学的）</li>
+</ul>
+<h2>四、项目 C：分类清单（25 分钟）</h2>
+<blockquote>
+<p>📁 同目录新建 <code>shopping_categorized.py</code>。</p>
+</blockquote>
+<p>需求：物品分「食品 / 日用品 / 其他」三类，分类统计。</p>
+<p>参考实现：</p>
+<pre><code class="language-python">print(&quot;=== Categorized Shopping List ===&quot;)
+
+food = []
+daily = []
+other = []
+
+while True:
+    action = input(&quot;\n(add/list/total/quit): &quot;).strip()
+
+    if action == &quot;add&quot;:
+        name = input(&quot;Item name: &quot;).strip()
+        category = input(&quot;Category (food/daily/other): &quot;).strip()
+        if category == &quot;food&quot;:
+            food.append(name)
+        elif category == &quot;daily&quot;:
+            daily.append(name)
+        else:
+            other.append(name)
+        print(f&quot;Added &#39;{name}&#39; to {category}&quot;)
+    elif action == &quot;list&quot;:
+        print(&quot;\n--- Food ---&quot;)
+        for i, item in enumerate(food):
+            print(f&quot;{i+1}. {item}&quot;)
+        print(&quot;--- Daily ---&quot;)
+        for i, item in enumerate(daily):
+            print(f&quot;{i+1}. {item}&quot;)
+        print(&quot;--- Other ---&quot;)
+        for i, item in enumerate(other):
+            print(f&quot;{i+1}. {item}&quot;)
+    elif action == &quot;total&quot;:
+        print(f&quot;Food: {len(food)}, Daily: {len(daily)}, Other: {len(other)}&quot;)
+        print(f&quot;Grand total items: {len(food) + len(daily) + len(other)}&quot;)
+    elif action == &quot;quit&quot;:
+        break
+</code></pre>
+<h3>拆解</h3>
+<ul>
+<li><strong>三个列表</strong>：一个分类一个列表，简单直观</li>
+<li><strong><code>len(列表)</code></strong>：分类计数</li>
+<li><strong>未来升级</strong>：用字典 <code>{food: [], daily: [], other: []}</code> 更优雅（W10 学）</li>
+</ul>
+<h2>五、验收标准（自助验收）</h2>
+<ul>
+<li><input disabled="" type="checkbox"> 三个项目（A 基础 / B 价格 / C 分类）至少做两个</li>
+<li><input disabled="" type="checkbox"> add / list / remove / quit 都跑通</li>
+<li><input disabled="" type="checkbox"> add 一个，输入错误动作（比如 <code>xxx</code>），看到「Unknown action」分支</li>
+<li><input disabled="" type="checkbox"> 删一个不存在的物品，看到正确报错（不崩）</li>
+<li><input disabled="" type="checkbox"> 给家人用过这个清单，至少加 5 个真实物品</li>
+</ul>
+<h2>六、W06 全周自查</h2>
+<ul>
+<li><input disabled="" type="checkbox"> L01：列表创建 + 索引（从 0 开始）+ for 遍历</li>
+<li><input disabled="" type="checkbox"> L02：增删改查四件套：append / remove / pop / 索引赋值 / in / count</li>
+<li><input disabled="" type="checkbox"> L03：sum / max / min / len + filter 模式 + list comprehension 能读懂</li>
+<li><input disabled="" type="checkbox"> 周末：购物清单 A + B 至少完成，能给家人用</li>
+<li><input disabled="" type="checkbox"> 我能给家人解释「一个列表管一批数据，循环一遍处理完」</li>
+</ul>
+<p>W06 毕业 🎓 → 进入 W07「🏆 项目周：文字冒险游戏」。三天搭骨架 + 周末打磨，把 W01-W06 全部功夫串成一个完整的可玩游戏。</p>
+<h2>👀 C++ 认脸时刻（1 分钟 · 只看不敲）</h2>
+<p>C++ 的对应写法：</p>
+<pre><code class="language-cpp">#include &lt;iostream&gt;
+#include &lt;vector&gt;
+int main() {
+    std::vector&lt;std::string&gt; cart = {&quot;apple&quot;, &quot;milk&quot;};
+    cart.push_back(&quot;bread&quot;);
+    for (auto&amp; x : cart) std::cout &lt;&lt; x &lt;&lt; &quot; &quot;;
+    return 0;
+}
+</code></pre>
+<p>三个认脸：</p>
+<ol>
+<li><code>std::vector&lt;std::string&gt;</code> 字符串列表</li>
+<li><code>cart.push_back(&quot;bread&quot;)</code> 加</li>
+<li>for 循环遍历</li>
+</ol>
+<blockquote>
+<p>AI 营笔试的编程题用 C++ 出。不用会写，<strong>认得脸</strong>就行。</p>
+</blockquote>
+</div>
+</section>
+</div>
+</div>
+</body>
+</html>

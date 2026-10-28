@@ -1,0 +1,852 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>W05 · 直到……才停</title>
+<style>
+:root{--bg:#0f1420;--card:#171e2e;--card2:#1e2740;--border:#2a3550;--text:#e8ecf4;--text2:#8b96ad;--accent:#5b9dff;--ok:#3ecf8e}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+.wrap{max-width:900px;margin:0 auto;padding:28px 20px 60px}
+h1{font-size:1.5rem}
+.wk-meta{color:var(--text2);font-size:.85rem;margin:4px 0 20px}
+.lesson{border:1px solid var(--border);border-radius:12px;padding:16px 18px;margin-bottom:14px;background:var(--card2)}
+.lesson-head{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.lesson-head .lt{font-weight:700;font-size:1rem;flex:1}
+.md{font-size:.92rem;line-height:1.8;color:var(--text);overflow-wrap:break-word}
+.md h1,.md h2,.md h3{margin:14px 0 8px;font-size:1.05rem}
+.md p{margin:8px 0}
+.md code{background:rgba(91,157,255,.12);border-radius:5px;padding:2px 6px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.85em;color:#a8c8ff}
+.md pre{background:#0b0f18;border:1px solid var(--border);border-radius:10px;padding:12px 14px;overflow-x:auto;margin:10px 0}
+.md pre code{background:none;padding:0;color:#c9d7f0}
+.md ul,.md ol{margin:8px 0 8px 22px}
+.md blockquote{border-left:3px solid var(--accent);padding:4px 12px;color:var(--text2);margin:10px 0}
+.md a{color:var(--accent)}
+.md table{border-collapse:collapse;margin:10px 0;font-size:.85rem}
+.md td,.md th{border:1px solid var(--border);padding:6px 10px}
+.md input[type=checkbox]{width:15px;height:15px;accent-color:var(--ok);cursor:pointer;margin-right:6px;vertical-align:-2px}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+<h1 class="wk-title">直到……才停</h1>
+<div class="wk-meta">W05 · 6 课</div>
+</header>
+<div class="week-body" data-week="W05">
+<section class="lesson" data-lid="W05-S1">
+<div class="lesson-head"><span class="lt">while 初见：活循环与死循环</span></div>
+<div class="md" data-lid="W05-S1"><!-- slug: while-intro, type: base -->
+<h2>⓪ 🤖 课前 AI 一分钟 · 第 13 颗：AI 也会&quot;活循环&quot;（3 分钟）</h2>
+<blockquote>
+<p><strong>第 13 颗</strong></p>
+</blockquote>
+<p>AI 训练 = 一直训练到 loss 不再下降（<strong>while 条件满足</strong>）。Python 的 <code>while</code> = <strong>只要条件真就一直跑</strong>。</p>
+<p><strong>今日口诀</strong>：AI 训练 = 一直训练到 loss 不再下降（<strong>while 条件满足</strong>）。</p>
+<p><strong>⚔️ 判一判</strong>（AI 营线上测评题型热身，先自己答再看答案）：</p>
+<blockquote>
+<ol>
+<li>while 循环是&quot;条件满足就一直跑&quot;</li>
+<li>AI 训练用 while 循环直到收敛</li>
+</ol>
+</blockquote>
+<details><summary>答案</summary>
+
+<p><strong>1.</strong> ✓ while loss &gt; threshold: train()<br><strong>2.</strong> ✓ 训练循环本质是 while</p>
+</details>
+
+<hr>
+<h1>W05-S1 · while 初见：活循环与死循环</h1>
+<blockquote>
+<p><strong>每日节奏（v1.9）：</strong> 本篇纯阅读 ≈10 分钟，读完做当天作业 ≈10 分钟，总共 ≤25 分钟
+<strong>不需要 Thonny</strong>——正文零打码，作业时间才开编辑器
+难度：⭐⭐ · 本篇是原 W05-L01 的前半（for 的短板 + while 的样子）</p>
+</blockquote>
+<hr>
+<h2>一、for 的短板：不知道跑几次（3 分钟）</h2>
+<p>for 很棒，但有个前提：<strong>先知道跑几次</strong>。</p>
+<table>
+<thead>
+<tr>
+<th>场景</th>
+<th>适合 for？</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>数 1 到 10</td>
+<td>✅ <code>for i in range(1, 11)</code></td>
+</tr>
+<tr>
+<td>画 9 行星星</td>
+<td>✅ <code>for i in range(9)</code></td>
+</tr>
+<tr>
+<td>猜数字猜到猜对为止</td>
+<td>❌ 谁知道要几次！</td>
+</tr>
+</tbody></table>
+<p>第三种「不知道几次」的活儿，交给今天的主角：<strong>while 循环 =「只要条件还成立，就一直跑」</strong>。什么时候停？看条件什么时候变假。</p>
+<h2>二、while 的样子（4 分钟）</h2>
+<p>看这段代码（今天只看不敲）：</p>
+<pre><code class="language-python">n = 1
+while n &lt;= 5:
+    print(n)
+    n = n + 1
+print(&quot;Done!&quot;)
+</code></pre>
+<p>运行打印 1 2 3 4 5，最后来一句 Done!。</p>
+<table>
+<thead>
+<tr>
+<th>部件</th>
+<th>作用</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>n = 1</code></td>
+<td>起手值</td>
+</tr>
+<tr>
+<td><code>while n &lt;= 5:</code></td>
+<td>条件：成立就继续转</td>
+</tr>
+<tr>
+<td><code>print(n)</code></td>
+<td>手下活儿</td>
+</tr>
+<tr>
+<td><code>n = n + 1</code></td>
+<td><strong>关键</strong>：让 n 长大，条件才会变假</td>
+</tr>
+<tr>
+<td><code>print(&quot;Done!&quot;)</code></td>
+<td>循环结束后才轮到它</td>
+</tr>
+</tbody></table>
+<p>跟 if 对比一下：if 问一次就完，while 问完<strong>接着再问</strong>，问到条件变假才放行后面的代码。</p>
+<h2>三、初见死循环（3 分钟）</h2>
+<p>把 <code>n = n + 1</code> 那行删掉会怎样？n 永远是 1，<code>n &lt;= 5</code> 永远成立——程序永远打印 1，停不下来。这叫<strong>死循环</strong>。</p>
+<p>死循环不可怕（明天教你三件套防它 + Ctrl + C 急停），今天先记住灵魂点：<strong>循环体里必须有让条件慢慢变假的动作</strong>。</p>
+<p><strong>今日口诀：</strong> while 看条件，条件假了才撒手；想让它撒手，就得喂它一个会变的条件。</p>
+<hr>
+<h2>✅ 今天的阅读完成自查</h2>
+<ul>
+<li><input disabled="" type="checkbox"> 我能说出 while 和 for 的区别：for 看次数，while 看条件</li>
+<li><input disabled="" type="checkbox"> 我知道 <code>n = n + 1</code> 是让条件变假的关键，删了它就死循环</li>
+<li><input disabled="" type="checkbox"> 我能说出 while 四件套：起手值、条件、手下活儿、更新</li>
+</ul>
+<p>三格全勾 → 打开 Thonny，做今天的作业</p>
+<hr>
+<blockquote>
+<p><strong>📁 作业保存规则</strong>：本课课后练习写进一个文件 <code>W05-S1-homework.py</code>（存 <code>~/sand-hollow/&lt;你的学员ID&gt;/homework/</code>），每道题开头用刚学的备注分隔：<code># --- 题 1 ---</code>、<code># --- 题 2 ---</code>……<strong>交完作业要跟你的智能体说一声</strong>才会批改，评语出现在 <code>reviews/*.review.md</code>。<strong>回报触发词：交完作业或修完坑，都回一句「修完了」</strong>——不回这句 mentor 不知道，坑会一直挂着等。</p>
+</blockquote>
+<h2>📝 今日作业（≈10 分钟）</h2>
+<p>新建文件 <code>W05-S1-homework.py</code>，3 道题：</p>
+<ol>
+<li><strong>数到 50</strong>：用 while 打印 1 到 50（起手 <code>n = 1</code>，条件 <code>n &lt;= 50</code>）</li>
+<li><strong>倒计时发射</strong>：while 打印 10, 9, ..., 1，最后打 &quot;Liftoff!&quot;（起手 10，条件 <code>n &gt;= 1</code>，每轮 <code>n -= 1</code>）</li>
+<li><strong>复读机</strong>：input 问用户说点啥，原样打印回来，直到用户输入 <code>quit</code> 才停（提示：起手先问一次，条件 <code>msg != &quot;quit&quot;</code>，循环里再问一次）</li>
+</ol>
+<blockquote>
+<p>交完作业说一声「<strong>修完了</strong>」。明天 S2 拆解死循环 + 循环的坑 🐾</p>
+</blockquote>
+<h2>👀 C++ 认脸时刻（1 分钟 · 只看不敲）</h2>
+<p>C++ 的对应写法：</p>
+<pre><code class="language-cpp">#include &lt;iostream&gt;
+int main() {
+    int i = 1;
+    while (i &lt;= 5) {
+        std::cout &lt;&lt; i &lt;&lt; std::endl;
+        i++;
+    }
+    return 0;
+}
+</code></pre>
+<p>三个认脸：</p>
+<ol>
+<li><code>while (i &lt;= 5)</code> 条件括号（跟 if 一样）</li>
+<li><code>i++</code> 改条件（不然死循环）</li>
+<li>Python <code>while i &lt;= 5:</code> 不用括号</li>
+</ol>
+<blockquote>
+<p>AI 营笔试的编程题用 C++ 出。不用会写，<strong>认得脸</strong>就行。</p>
+</blockquote>
+</div>
+</section>
+<section class="lesson" data-lid="W05-S2">
+<div class="lesson-head"><span class="lt">条件更新：最常见的坑</span></div>
+<div class="md" data-lid="W05-S2"><!-- slug: while-condition-update, type: base -->
+<h2>⓪ 🤖 课前 AI 一分钟 · 第 14 颗：AI 也会&quot;忘记更新&quot;——死循环（3 分钟）</h2>
+<blockquote>
+<p><strong>第 14 颗</strong></p>
+</blockquote>
+<p>AI 训练如果 <code>loss</code> 没更新 = 死循环。Python while 循环忘了改条件 = <strong>死循环</strong>——AI 也会这样。</p>
+<p><strong>今日口诀</strong>：AI 训练如果 <code>loss</code> 没更新 = 死循环。</p>
+<p><strong>⚔️ 判一判</strong>（AI 营线上测评题型热身，先自己答再看答案）：</p>
+<blockquote>
+<ol>
+<li>while 循环忘了改条件会死循环</li>
+<li>死循环会让电脑卡住</li>
+</ol>
+</blockquote>
+<details><summary>答案</summary>
+
+<p><strong>1.</strong> ✓ 条件不变就一直跑<br><strong>2.</strong> ✓ CPU 100% 风扇狂转</p>
+</details>
+
+<hr>
+<h1>W05-S2 · 条件更新：最常见的坑</h1>
+<blockquote>
+<p><strong>每日节奏（v1.9）：</strong> 本篇纯阅读 ≈11 分钟，读完做当天作业 ≈10 分钟，总共 ≤25 分钟
+<strong>不需要 Thonny</strong>——正文零打码，作业时间才开编辑器
+难度：⭐⭐ · 本篇是原 W05-L01 的后半（死循环解剖 + 三件套 + 两大坑 + 实用 while）</p>
+</blockquote>
+<hr>
+<h2>一、死循环解剖（4 分钟）</h2>
+<p>昨天的死循环再看一眼：</p>
+<pre><code class="language-python">n = 1
+while n &lt;= 5:
+    print(n)
+    # 忘了写 n += 1
+</code></pre>
+<p>程序疯狂打印 1 停不下来。急救键：<strong>Ctrl + C</strong>（Mac 也是它）强制停止。</p>
+<p>病根只有一个：<strong>循环里没有任何动作让条件走向失败</strong>。条件永远真，循环永远转——就像猫追自己尾巴，永远差一口。</p>
+<h2>二、避免死循环三件套（3 分钟）</h2>
+<p>写 while 前自查三件事：</p>
+<ol>
+<li><strong>起手值有</strong>：循环变量先给起手（<code>n = 1</code>）</li>
+<li><strong>条件会变</strong>：循环体里有让条件慢慢变假的步骤（<code>n += 1</code>）</li>
+<li><strong>测试有上限</strong>：写完先跑 5 秒，看会不会自己停</li>
+</ol>
+<p>三件套缺一件，程序就可能变成永动机。</p>
+<h2>三、另外两个坑（2 分钟）</h2>
+<p><strong>坑①：条件一开始就是假。</strong> <code>n = 5</code> 却写 <code>while n &lt; 0:</code> → 一次都不跑。这不是 bug——while 跑 0 次也合法，别慌。</p>
+<p><strong>坑②：<code>=</code> 与 <code>==</code> 老朋友。</strong></p>
+<pre><code class="language-text">while guess = password:   # ❌ SyntaxError！
+</code></pre>
+<p>比较永远用两个等号 <code>==</code>——W03 踩过一次，这里再踩一次更牢。</p>
+<h2>四、while 干正事：密码门卫（2 分钟）</h2>
+<pre><code class="language-python">password = &quot;tiger&quot;
+guess = input(&quot;Password: &quot;)
+while guess != password:
+    print(&quot;Wrong, try again&quot;)
+    guess = input(&quot;Password: &quot;)
+print(&quot;Welcome!&quot;)
+</code></pre>
+<p>看懂了吗？<code>guess</code> 在循环里被重新赋值——这就是「条件更新」的活样例：错就一直问，对了条件变假，Welcome 登场。</p>
+<p><strong>今日口诀：</strong> 起手值、条件、更新，三件套防死循环；Ctrl + C 是最后的急停闸。</p>
+<hr>
+<h2>✅ 今天的阅读完成自查</h2>
+<ul>
+<li><input disabled="" type="checkbox"> 我会用 Ctrl + C 急停死循环，知道病根是「条件不会变假」</li>
+<li><input disabled="" type="checkbox"> 我知道条件一开始为假时，while 一次都不跑（合法）</li>
+<li><input disabled="" type="checkbox"> 我能看懂密码门卫：guess 在循环里更新，条件才会变假</li>
+</ul>
+<p>三格全勾 → 打开作业</p>
+<hr>
+<blockquote>
+<p><strong>📁 作业保存规则</strong>：本课课后练习写进一个文件 <code>W05-S2-homework.py</code>（存 <code>~/sand-hollow/&lt;你的学员ID&gt;/homework/</code>），每道题开头用刚学的备注分隔：<code># --- 题 1 ---</code>、<code># --- 题 2 ---</code>……<strong>交完作业要跟你的智能体说一声</strong>才会批改，评语出现在 <code>reviews/*.review.md</code>。<strong>回报触发词：交完作业或修完坑，都回一句「修完了」</strong>——不回这句 mentor 不知道，坑会一直挂着等。</p>
+</blockquote>
+<h2>📝 今日作业（≈10 分钟）</h2>
+<p>新建 <code>W05-S2-homework.py</code>，3 道题：</p>
+<ol>
+<li><strong>累加到 500</strong>：<code>total = 0</code> 起步，1+2+3+... 加到超过 500 就停，打印加到了哪个数（条件 <code>total &lt; 500</code>，循环里 <code>total += n</code> 和 <code>n += 1</code> 都不能少）</li>
+<li><strong>密码门卫</strong>：密码定为 <code>open</code>，错就一直问，对了打印 &quot;Access granted&quot;（正文范本改一改）</li>
+<li><strong>小菜单</strong>：循环里打印菜单 <code>1. Say Hi</code> / <code>2. Count</code> / <code>3. Quit</code> 并 input 选择：选 1 打 &quot;Hi!&quot;，选 2 用 for 数 1-5，选 3 才退出（条件 <code>choice != &quot;3&quot;</code>）</li>
+</ol>
+<blockquote>
+<p>交完说「<strong>修完了</strong>」。明天 S3 讲 break——想停就停的急刹车 🐾</p>
+</blockquote>
+<h2>👀 C++ 认脸时刻（1 分钟 · 只看不敲）</h2>
+<p>C++ 的对应写法：</p>
+<pre><code class="language-cpp">#include &lt;iostream&gt;
+int main() {
+    int i = 0;
+    while (i &lt; 10) {
+        std::cout &lt;&lt; &quot;stuck&quot; &lt;&lt; std::endl;
+        // 忘记 i++ → 死循环！
+    }
+    return 0;
+}
+</code></pre>
+<p>三个认脸：</p>
+<ol>
+<li>注释 <code>// 忘记 i++</code> 提醒死循环</li>
+<li>生产中用 <code>Ctrl+C</code> 强制中断</li>
+<li>Python 一样忘改 i 会卡住</li>
+</ol>
+<blockquote>
+<p>AI 营笔试的编程题用 C++ 出。不用会写，<strong>认得脸</strong>就行。</p>
+</blockquote>
+</div>
+</section>
+<section class="lesson" data-lid="W05-S3">
+<div class="lesson-head"><span class="lt">break：喊停的艺术</span></div>
+<div class="md" data-lid="W05-S3"><!-- slug: break-art, type: base -->
+<h2>⓪ 🤖 课前 AI 一分钟 · 第 15 颗：AI 也会&quot;喊停&quot;——break（3 分钟）</h2>
+<blockquote>
+<p><strong>第 15 颗</strong></p>
+</blockquote>
+<p>AI 训练够了就 <code>break</code>（早停 early stopping）——<strong>提前结束循环</strong>避免过拟合。</p>
+<p><strong>今日口诀</strong>：AI 训练够了就 <code>break</code>（早停 early stopping）——<strong>提前结束循环</strong>避免过拟合。</p>
+<p><strong>⚔️ 判一判</strong>（AI 营线上测评题型热身，先自己答再看答案）：</p>
+<blockquote>
+<ol>
+<li>break 是提前结束循环</li>
+<li>AI 训练用 early stopping 提前结束</li>
+</ol>
+</blockquote>
+<details><summary>答案</summary>
+
+<p><strong>1.</strong> ✓ break 跳出最近一层循环<br><strong>2.</strong> ✓ 验证集 loss 不再下降就停</p>
+</details>
+
+<hr>
+<h1>W05-S3 · break：喊停的艺术</h1>
+<blockquote>
+<p><strong>每日节奏（v1.9）：</strong> 本篇纯阅读 ≈12 分钟，读完做当天作业 ≈10 分钟，总共 ≤25 分钟
+<strong>不需要 Thonny</strong>——正文零打码，作业时间才开编辑器
+难度：⭐⭐ · 本篇是原 W05-L02 的精华（break / continue / while...else）</p>
+</blockquote>
+<hr>
+<h2>一、概念：条件还没失败，我就要停（2 分钟）</h2>
+<p>while 老老实实看条件。但有时候：密码对了何必再问？找到目标了何必再翻？</p>
+<p><strong>break = 喊停</strong>——立刻跳出循环，不管条件还成不成立。</p>
+<h2>二、break：立刻跳出（4 分钟）</h2>
+<pre><code class="language-python">for i in range(1, 11):
+    if i == 6:
+        print(&quot;Found 6, stop!&quot;)
+        break
+    print(i)
+</code></pre>
+<p>运行：1 2 3 4 5，然后 &quot;Found 6, stop!&quot;——6 没打印，7-10 全跳过。break 是循环的紧急出口，只跳出<strong>所在的那一层</strong>循环。</p>
+<p><strong>缩进警报：</strong> break 必须缩进在 if 手下。忘了缩进 → 第一轮就 break，循环一次活儿都没干。</p>
+<h2>三、continue：跳过这一轮（3 分钟）</h2>
+<p>跟 break 相反——<strong>continue = 这轮不玩了，下一轮继续</strong>：</p>
+<pre><code class="language-python">for i in range(1, 11):
+    if i == 6:
+        continue
+    print(i)
+</code></pre>
+<p>打印 1-10 但唯独没有 6。口诀：<strong>break 是全退，continue 是轮休</strong>。</p>
+<h2>四、while...else：没被 break 才执行（3 分钟）</h2>
+<pre><code class="language-python">password = &quot;tiger&quot;
+tries = 0
+while tries &lt; 3:
+    guess = input(&quot;Password: &quot;)
+    if guess == password:
+        print(&quot;Welcome!&quot;)
+        break
+    tries += 1
+    print(f&quot;Wrong! {3 - tries} tries left&quot;)
+else:
+    print(&quot;Account locked&quot;)
+</code></pre>
+<p>这个 else 属于 <strong>while</strong> 不是 if：循环正常走完（没被 break）才执行它 → 三次全错，锁号。Python 独家语法，初见觉得怪，混个脸熟就好。</p>
+<p><strong>今日口诀：</strong> break 全退，continue 轮休；while 的 else，没被 break 才兑现。</p>
+<hr>
+<h2>✅ 今天的阅读完成自查</h2>
+<ul>
+<li><input disabled="" type="checkbox"> 我能区分 break（跳出整层循环）和 continue（跳过这一轮）</li>
+<li><input disabled="" type="checkbox"> 我知道 break 缩进错了会发生什么（第一轮就跑）</li>
+<li><input disabled="" type="checkbox"> 我知道 while...else 是「没被 break 才执行」</li>
+</ul>
+<p>三格全勾 → 打开作业</p>
+<hr>
+<blockquote>
+<p><strong>📁 作业保存规则</strong>：本课课后练习写进一个文件 <code>W05-S3-homework.py</code>（存 <code>~/sand-hollow/&lt;你的学员ID&gt;/homework/</code>），每道题开头用刚学的备注分隔：<code># --- 题 1 ---</code>、<code># --- 题 2 ---</code>……<strong>交完作业要跟你的智能体说一声</strong>才会批改，评语出现在 <code>reviews/*.review.md</code>。<strong>回报触发词：交完作业或修完坑，都回一句「修完了」</strong>——不回这句 mentor 不知道，坑会一直挂着等。</p>
+</blockquote>
+<h2>📝 今日作业（≈10 分钟）</h2>
+<p>新建 <code>W05-S3-homework.py</code>，3 道题：</p>
+<ol>
+<li><strong>第一个偶数</strong>：for 数 1-20，找到第一个偶数就打印并 break（想想第一个偶数是几）</li>
+<li><strong>跳过 5 的倍数</strong>：for 数 1-30，用 continue 跳过 5 的倍数，其余打印</li>
+<li><strong>找质数</strong>：input 一个数 n，从 2 到 n-1 找有没有能整除它的（<code>n % i == 0</code>），找到立刻 break 并宣布 &quot;not prime&quot;；找完都没有 → &quot;prime&quot;（提示：配一个 <code>is_prime = True</code> 开关变量）</li>
+</ol>
+<blockquote>
+<p>交完说「<strong>修完了</strong>」。明天 S4 大合体——猜数字登场 🐾</p>
+</blockquote>
+<h2>👀 C++ 认脸时刻（1 分钟 · 只看不敲）</h2>
+<p>C++ 的对应写法：</p>
+<pre><code class="language-cpp">#include &lt;iostream&gt;
+int main() {
+    for (int i = 1; i &lt;= 100; i++) {
+        if (i &gt; 5) break;
+        std::cout &lt;&lt; i &lt;&lt; std::endl;
+    }
+    return 0;
+}
+</code></pre>
+<p>三个认脸：</p>
+<ol>
+<li><code>break</code> 跳出最近一层 for</li>
+<li>AI 训练 <code>if loss &gt; prev: break</code></li>
+<li>Python 一样：<code>if x &gt; 5: break</code></li>
+</ol>
+<blockquote>
+<p>AI 营笔试的编程题用 C++ 出。不用会写，<strong>认得脸</strong>就行。</p>
+</blockquote>
+</div>
+</section>
+<section class="lesson" data-lid="W05-S4">
+<div class="lesson-head"><span class="lt">猜数字组装：循环 + 判断合体</span></div>
+<div class="md" data-lid="W05-S4"><!-- slug: guess-number-assemble, type: base -->
+<h2>⓪ 🤖 课前 AI 一分钟 · 第 16 颗：AI 也会&quot;循环+判断&quot;合体（3 分钟）</h2>
+<blockquote>
+<p><strong>第 16 颗</strong></p>
+</blockquote>
+<p>AI 推理 = 循环遍历候选 + 判断哪个最好——<strong>循环 + 判断</strong>合体。</p>
+<p><strong>今日口诀</strong>：AI 推理 = 循环遍历候选 + 判断哪个最好——<strong>循环 + 判断</strong>合体。</p>
+<p><strong>⚔️ 判一判</strong>（AI 营线上测评题型热身，先自己答再看答案）：</p>
+<blockquote>
+<ol>
+<li>猜数字游戏 = 循环 + 判断</li>
+<li>AI 推理 = 循环遍历 + 判断选最优</li>
+</ol>
+</blockquote>
+<details><summary>答案</summary>
+
+<p><strong>1.</strong> ✓ while True: guess; if guess == num: break<br><strong>2.</strong> ✓ beam search = 循环 + 判断</p>
+</details>
+
+<hr>
+<h1>W05-S4 · 猜数字组装：循环 + 判断合体</h1>
+<blockquote>
+<p><strong>每日节奏（v1.9）：</strong> 本篇纯阅读 ≈12 分钟，读完做当天作业 ≈10 分钟，总共 ≤25 分钟
+<strong>不需要 Thonny</strong>——正文零打码，作业时间才开编辑器
+难度：⭐⭐⭐ · 本篇是原 W05-L03 的前半（基础版猜数字）</p>
+</blockquote>
+<hr>
+<h2>一、把三周功夫串起来（2 分钟）</h2>
+<ul>
+<li>W03：if / elif / else——程序会看情况</li>
+<li>W04：for 循环——程序会重复</li>
+<li>W05 前三天：while + break——条件停 + 喊停</li>
+</ul>
+<p>今天全部合体：<strong>猜数字游戏</strong>。W03 周末的猜大小只能猜一次就揭底，今天让电脑「问到猜对为止」——这是语言基础阶段的集大成之作。</p>
+<h2>二、第一版：能一直猜（5 分钟）</h2>
+<pre><code class="language-python">import random
+
+print(&quot;=== Number Guess ===&quot;)
+secret = random.randint(1, 100)
+guess = 0
+
+while guess != secret:
+    guess = int(input(&quot;Your guess (1-100): &quot;))
+    if guess &gt; secret:
+        print(&quot;Too high!&quot;)
+    elif guess &lt; secret:
+        print(&quot;Too low!&quot;)
+    else:
+        print(f&quot;Correct! The answer was {secret}&quot;)
+</code></pre>
+<p>跑一局体会：猜错会继续问，猜中才停。</p>
+<h2>三、逐行拆解（3 分钟）</h2>
+<table>
+<thead>
+<tr>
+<th>部件</th>
+<th>作用</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>import random</code></td>
+<td>借随机数工具（W03 周末老朋友）</td>
+</tr>
+<tr>
+<td><code>random.randint(1, 100)</code></td>
+<td>电脑偷偷想一个 1-100 的数</td>
+</tr>
+<tr>
+<td><code>guess = 0</code></td>
+<td>起手值：先给个猜不中的数，保证进得了循环</td>
+</tr>
+<tr>
+<td><code>while guess != secret:</code></td>
+<td>灵魂条件：没猜对就继续</td>
+</tr>
+<tr>
+<td>if / elif / else</td>
+<td>三分支：大了 / 小了 / 中了</td>
+</tr>
+</tbody></table>
+<p>W03 写一次就完，W05 写一次就一直问——<strong>while 是灵魂</strong>。</p>
+<h2>四、一个必踩的坑（2 分钟）</h2>
+<p>忘了写 <code>import random</code>：</p>
+<pre><code class="language-python">secret = random.randint(1, 100)   # NameError: name &#39;random&#39; is not defined
+</code></pre>
+<p>程序一启动就报 NameError。修法简单：文件第一行补上 import。工具箱没搬来，工具当然拿不出。</p>
+<p><strong>今日口诀：</strong> while 管追问，elif 管提示，random 管出题——三兄弟合体就是游戏。</p>
+<hr>
+<h2>✅ 今天的阅读完成自查</h2>
+<ul>
+<li><input disabled="" type="checkbox"> 我能说出灵魂条件是 <code>guess != secret</code></li>
+<li><input disabled="" type="checkbox"> 我知道 <code>guess = 0</code> 起手是为了第一次也能进循环</li>
+<li><input disabled="" type="checkbox"> 我认识 NameError：忘 import random 的专属报错</li>
+</ul>
+<p>三格全勾 → 打开作业</p>
+<hr>
+<blockquote>
+<p><strong>📁 作业保存规则</strong>：本课课后练习写进一个文件 <code>W05-S4-homework.py</code>（存 <code>~/sand-hollow/&lt;你的学员ID&gt;/homework/</code>），每道题开头用刚学的备注分隔：<code># --- 题 1 ---</code>、<code># --- 题 2 ---</code>……<strong>交完作业要跟你的智能体说一声</strong>才会批改，评语出现在 <code>reviews/*.review.md</code>。<strong>回报触发词：交完作业或修完坑，都回一句「修完了」</strong>——不回这句 mentor 不知道，坑会一直挂着等。</p>
+</blockquote>
+<h2>📝 今日作业（≈10 分钟）</h2>
+<p>新建 <code>W05-S4-homework.py</code>，3 道题：</p>
+<ol>
+<li><strong>跑通第一版</strong>：亲手敲正文代码，连玩 3 局，在注释里记录每局用了几次猜中</li>
+<li><strong>范围提示</strong>：加 <code>low = 1</code> 和 <code>high = 100</code> 两个变量：猜大把 high 改成 <code>guess - 1</code>，猜小把 low 改成 <code>guess + 1</code>，提示改打 f&quot;Try between {low} and {high}&quot;</li>
+<li><strong>改地图</strong>：把范围改成 1-50 再玩一局——体会只改 randint 和提示文字就够了</li>
+</ol>
+<blockquote>
+<p>交完说「<strong>修完了</strong>」。明天 S5 给游戏上强度：限 5 次 + 再来一局 🐾</p>
+</blockquote>
+<h2>👀 C++ 认脸时刻（1 分钟 · 只看不敲）</h2>
+<p>C++ 的对应写法：</p>
+<pre><code class="language-cpp">#include &lt;iostream&gt;
+int main() {
+    int target = 7;
+    for (int guess = 1; guess &lt;= 10; guess++) {
+        if (guess == target) {
+            std::cout &lt;&lt; &quot;found!&quot; &lt;&lt; std::endl;
+            break;
+        }
+    }
+    return 0;
+}
+</code></pre>
+<p>三个认脸：</p>
+<ol>
+<li>循环里套 if 判断</li>
+<li>找到目标就 break</li>
+<li>Python 一样：<code>for guess in range(1, 11): if guess == target: print(&quot;found!&quot;); break</code></li>
+</ol>
+<blockquote>
+<p>AI 营笔试的编程题用 C++ 出。不用会写，<strong>认得脸</strong>就行。</p>
+</blockquote>
+</div>
+</section>
+<section class="lesson" data-lid="W05-S5">
+<div class="lesson-head"><span class="lt">打磨：限 5 次 + 再来一局</span></div>
+<div class="md" data-lid="W05-S5"><!-- slug: guess-number-polish, type: base -->
+<h2>⓪ 🤖 课前 AI 一分钟 · 第 17 颗：AI 也会&quot;打磨&quot;——限次 + 提示（3 分钟）</h2>
+<blockquote>
+<p><strong>第 17 颗</strong></p>
+</blockquote>
+<p>AI 答题超时就提示（timeout hint）。猜数字限 5 次 + 提示&quot;大/小&quot;= <strong>打磨用户体验</strong>——AI 也需要打磨。</p>
+<p><strong>今日口诀</strong>：AI 答题超时就提示（timeout hint）。</p>
+<p><strong>⚔️ 判一判</strong>（AI 营线上测评题型热身，先自己答再看答案）：</p>
+<blockquote>
+<ol>
+<li>猜数字限 5 次 = 打磨</li>
+<li>AI 答题给提示 = 提示工程</li>
+</ol>
+</blockquote>
+<details><summary>答案</summary>
+
+<p><strong>1.</strong> ✓ 限制次数 + 提示 = 友好交互<br><strong>2.</strong> ✓ prompt engineering</p>
+</details>
+
+<hr>
+<h1>W05-S5 · 打磨：限 5 次 + 再来一局</h1>
+<blockquote>
+<p><strong>每日节奏（v1.9）：</strong> 本篇纯阅读 ≈12 分钟，读完做当天作业 ≈10 分钟，总共 ≤25 分钟
+<strong>不需要 Thonny</strong>——正文零打码，作业时间才开编辑器
+难度：⭐⭐⭐ · 本篇是原 W05-L03 的后半（限次数版 + 多局循环）</p>
+</blockquote>
+<hr>
+<h2>一、为什么要限次数（2 分钟）</h2>
+<p>基础版可以无限猜——1 到 100 猜 100 次总能蒙中，游戏没了紧张感。真实游戏都有规则：<strong>限 5 次，猜不中就揭底</strong>。</p>
+<h2>二、第二版：限 5 次（4 分钟）</h2>
+<pre><code class="language-python">secret = random.randint(1, 100)
+guess = 0
+tries = 0
+max_tries = 5
+
+while guess != secret and tries &lt; max_tries:
+    guess = int(input(f&quot;Tries {tries+1}/{max_tries} - guess: &quot;))
+    tries += 1
+    if guess &gt; secret:
+        print(&quot;Too high!&quot;)
+    elif guess &lt; secret:
+        print(&quot;Too low!&quot;)
+    else:
+        print(f&quot;Correct! You got it in {tries} tries&quot;)
+        break
+else:
+    if guess != secret:
+        print(f&quot;Game over! The answer was {secret}&quot;)
+</code></pre>
+<p>关键改动三条：条件用 and 组了两个维度（W03-S5 老朋友）；<code>tries += 1</code> 每轮记账；else 揭底——没被 break（5 次用完还没中）才执行。</p>
+<p>（文件开头照旧 <code>import random</code>，别再 NameError 了。）</p>
+<h2>三、第三版：再来一局（4 分钟）</h2>
+<p>外层再套一个 while，管「玩不玩下一局」：</p>
+<pre><code class="language-python">play_again = &quot;yes&quot;
+while play_again == &quot;yes&quot;:
+    secret = random.randint(1, 100)
+    guess = 0
+    tries = 0
+    while guess != secret and tries &lt; 5:
+        # 内层跟第二版一模一样，整段搬进来
+        pass
+    play_again = input(&quot;Play again? (yes/no): &quot;)
+print(&quot;Thanks for playing!&quot;)
+</code></pre>
+<p>两个要点：<strong>嵌套循环</strong>（W04 学的内层外层，今天实战）；<strong>每局重置</strong>——secret / guess / tries 必须在外层循环里重新赋值，不然第二局带着上一局的旧账开打，直接翻车。</p>
+<h2>四、坑 + 加分预告（2 分钟）</h2>
+<p><strong>坑：else 缩进。</strong> while 的 else 要跟 while 对齐，不是跟里面的 if 对齐——错了的现象是「猜对了也揭底」。</p>
+<p><strong>周末加分方向：</strong> 难度选择（easy 猜 1-50 给 8 次 / hard 猜 1-200 给 5 次）、计分（猜中得 <code>100 - 10 * tries</code> 分）——周末项目「猜数字计分版」正等你。</p>
+<hr>
+<h2>✅ 今天的阅读完成自查</h2>
+<ul>
+<li><input disabled="" type="checkbox"> 我能说出限次条件是两个条件用 and 组的</li>
+<li><input disabled="" type="checkbox"> 我知道每局开始要重置 secret / guess / tries，以及为什么</li>
+<li><input disabled="" type="checkbox"> 我知道 while 的 else 要跟 while 对齐</li>
+</ul>
+<p>三格全勾 → 打开作业（W05 最后一天！）</p>
+<hr>
+<blockquote>
+<p><strong>📁 作业保存规则</strong>：本课课后练习写进一个文件 <code>W05-S5-homework.py</code>（存 <code>~/sand-hollow/&lt;你的学员ID&gt;/homework/</code>），每道题开头用刚学的备注分隔：<code># --- 题 1 ---</code>、<code># --- 题 2 ---</code>……<strong>交完作业要跟你的智能体说一声</strong>才会批改，评语出现在 <code>reviews/*.review.md</code>。<strong>回报触发词：交完作业或修完坑，都回一句「修完了」</strong>——不回这句 mentor 不知道，坑会一直挂着等。</p>
+</blockquote>
+<h2>📝 今日作业（≈10 分钟）</h2>
+<p>新建 <code>W05-S5-homework.py</code>，3 道题：</p>
+<ol>
+<li><strong>限 5 次版</strong>：完整实现第二版，玩两局（一局猜中、一局故意 5 次不中看揭底）</li>
+<li><strong>再来一局</strong>：套上外层 yes/no 循环，连玩两局再退</li>
+<li><strong>难度选择</strong>：开局问 easy / hard——easy 是 1-50 猜 8 次，hard 是 1-200 猜 5 次</li>
+</ol>
+<blockquote>
+<p>交完说「<strong>修完了</strong>」——W05 结业！while / break / 嵌套循环全部到手，周末项目「猜数字计分版」见 🏆🐾</p>
+</blockquote>
+<h2>👀 C++ 认脸时刻（1 分钟 · 只看不敲）</h2>
+<p>C++ 的对应写法：</p>
+<pre><code class="language-cpp">#include &lt;iostream&gt;
+int main() {
+    int target = 7, guess, tries = 0;
+    while (tries &lt; 5) {
+        std::cin &gt;&gt; guess;
+        tries++;
+        if (guess &gt; target) std::cout &lt;&lt; &quot;smaller&quot; &lt;&lt; std::endl;
+        else if (guess &lt; target) std::cout &lt;&lt; &quot;bigger&quot; &lt;&lt; std::endl;
+        else { std::cout &lt;&lt; &quot;win!&quot; &lt;&lt; std::endl; break; }
+    }
+    return 0;
+}
+</code></pre>
+<p>三个认脸：</p>
+<ol>
+<li><code>std::cin</code> 输入（Python 的 input）</li>
+<li><code>tries++</code> 累加尝试次数</li>
+<li>限 5 次 + 提示 = 打磨用户体验</li>
+</ol>
+<blockquote>
+<p>AI 营笔试的编程题用 C++ 出。不用会写，<strong>认得脸</strong>就行。</p>
+</blockquote>
+</div>
+</section>
+<section class="lesson" data-lid="W05-weekend">
+<div class="lesson-head"><span class="lt">打磨猜数字：限 5 次 + 计分 + 再来一局</span></div>
+<div class="md" data-lid="W05-weekend"><!-- slug: guess-game, type: project -->
+<h2>⓪ 🤖 课前 AI 一分钟 · 第 18 颗：AI 也会&quot;反复玩&quot;——再来一局（3 分钟）</h2>
+<blockquote>
+<p><strong>第 18 颗</strong></p>
+</blockquote>
+<p>AI 训练 = 反复用同一数据集训练。猜数字&quot;再来一局&quot;= <strong>外层 while True</strong> + 内层游戏逻辑。</p>
+<p><strong>今日口诀</strong>：AI 训练 = 反复用同一数据集训练。</p>
+<p><strong>⚔️ 判一判</strong>（AI 营线上测评题型热身，先自己答再看答案）：</p>
+<blockquote>
+<ol>
+<li>猜数字&quot;再来一局&quot;用外层 while True</li>
+<li>AI 训练也用外层 epoch 循环</li>
+</ol>
+</blockquote>
+<details><summary>答案</summary>
+
+<p><strong>1.</strong> ✓ while True: play(); if input(&quot;再来？&quot;) != &quot;y&quot;: break<br><strong>2.</strong> ✓ for epoch in range(100):</p>
+</details>
+
+<hr>
+<h1>W05-weekend · 打磨猜数字：限 5 次 + 计分 + 再来一局</h1>
+<blockquote>
+<p>用时：60-90 分钟 · 难度：⭐⭐⭐⭐ · 前置：W05 三课</p>
+</blockquote>
+<hr>
+<h2>一、本周武功盘点（3 分钟）</h2>
+<ul>
+<li>while 循环：条件不满足就一直转</li>
+<li>break / continue：喊停 / 跳过这一轮</li>
+<li>while...else：没被 break 才执行的 else</li>
+<li>嵌套 while：外层管多局，内层管每局</li>
+</ul>
+<p>今天把猜数字打磨到「能分享给家人朋友」的程度。</p>
+<h2>二、项目 A：完整计分版（30 分钟）</h2>
+<blockquote>
+<p>📁 项目存 <code>~/sand-hollow/&lt;你的学员ID&gt;/homework/</code>，新建 <code>guess_pro.py</code>。</p>
+</blockquote>
+<p>需求：</p>
+<ul>
+<li>电脑从 1-100 随机想一个数</li>
+<li>玩家最多猜 7 次</li>
+<li>猜中得分：100 - 10 * tries（最少 30 分）</li>
+<li>多局累加总分</li>
+<li>玩家可随时输入 <code>quit</code> 退出（中途退不算分）</li>
+</ul>
+<p>参考实现：</p>
+<pre><code class="language-python">import random
+
+print(&quot;=== Pro Number Guess ===&quot;)
+
+total_score = 0
+games_played = 0
+
+while True:
+    secret = random.randint(1, 100)
+    guess = None
+    tries = 0
+    max_tries = 7
+    won = False
+
+    while tries &lt; max_tries:
+        guess_raw = input(f&quot;\nGame {games_played + 1} · Try {tries + 1}/{max_tries}: &quot;)
+        if guess_raw == &quot;quit&quot;:
+            break
+        guess = int(guess_raw)
+        tries += 1
+
+        if guess &gt; secret:
+            print(&quot;Too high!&quot;)
+        elif guess &lt; secret:
+            print(&quot;Too low!&quot;)
+        else:
+            score = max(30, 100 - 10 * tries)
+            total_score += score
+            won = True
+            print(f&quot;Correct in {tries} tries! +{score} points&quot;)
+            break
+
+    if not won and guess_raw != &quot;quit&quot;:
+        print(f&quot;Out of tries. Answer: {secret}&quot;)
+
+    if guess_raw == &quot;quit&quot;:
+        print(f&quot;\nFinal score: {total_score} points in {games_played} games&quot;)
+        break
+
+    games_played += 1
+    print(f&quot;Total so far: {total_score} points&quot;)
+
+    play = input(&quot;Play again? (yes/no): &quot;)
+    if play != &quot;yes&quot;:
+        print(f&quot;\nFinal score: {total_score} points in {games_played} games&quot;)
+        break
+</code></pre>
+<h3>拆解</h3>
+<ul>
+<li><strong>三层循环</strong>：外层 while True（多局）、内层 while tries &lt; max_tries（每局猜）、外层嵌套 play 询问</li>
+<li><strong><code>guess_raw == &quot;quit&quot;</code></strong>：两种「退出」要分清——一是「猜够 7 次」、二是「中途 quit」</li>
+<li><strong><code>won = True / False</code></strong>：内层循环退出后判断「赢了吗」，避免揭底谜语被误打</li>
+<li><strong>计分公式</strong>：100 - 10 * tries，最少 30 分（猜 7 次还给 30 分安慰奖）</li>
+</ul>
+<h2>三、项目 B：难度选择 + 历史最佳（20 分钟）</h2>
+<blockquote>
+<p>📁 同目录下新建 <code>guess_pro2.py</code>。</p>
+</blockquote>
+<p>在 A 基础上加：</p>
+<ol>
+<li><strong>开始前选难度</strong>：<ul>
+<li>easy: 1-50，10 次机会</li>
+<li>normal: 1-100，7 次机会</li>
+<li>hard: 1-500，5 次机会</li>
+</ul>
+</li>
+<li><strong>历史最佳</strong>：每局结束比一下当前分和历史最高，破纪录就打印 <code>New record!</code></li>
+</ol>
+<p>参考片段：</p>
+<pre><code class="language-python">print(&quot;Choose difficulty:&quot;)
+print(&quot;1. Easy (1-50, 10 tries)&quot;)
+print(&quot;2. Normal (1-100, 7 tries)&quot;)
+print(&quot;3. Hard (1-500, 5 tries)&quot;)
+diff = input(&quot;Choice: &quot;)
+
+if diff == &quot;1&quot;:
+    high, max_tries = 50, 10
+elif diff == &quot;2&quot;:
+    high, max_tries = 100, 7
+else:
+    high, max_tries = 500, 5
+
+best_score = 0
+# ... after each game ...
+if score &gt; best_score:
+    print(&quot;New record!&quot;)
+    best_score = score
+</code></pre>
+<h2>四、项目 C：排行榜（20 分钟）</h2>
+<blockquote>
+<p>📁 同目录下新建 <code>guess_leaderboard.py</code>。</p>
+</blockquote>
+<p>需求：每次游戏结束，结果追加写入 <code>leaderboard.txt</code>，读取历史前 5 名：</p>
+<pre><code class="language-python"># Append result
+with open(&quot;leaderboard.txt&quot;, &quot;a&quot;) as f:
+    f.write(f&quot;{games_played},{score},{tries}\n&quot;)
+
+# Show top 5
+print(&quot;\n=== Leaderboard ===&quot;)
+with open(&quot;leaderboard.txt&quot;) as f:
+    scores = []
+    for line in f:
+        parts = line.strip().split(&quot;,&quot;)
+        scores.append((int(parts[1]), parts[0], parts[2]))
+    scores.sort(reverse=True)
+    for i, (s, g, t) in enumerate(scores[:5]):
+        print(f&quot;{i+1}. Game {g}: {s} points in {t} tries&quot;)
+</code></pre>
+<h3>关键点</h3>
+<ul>
+<li><strong><code>open(&quot;leaderboard.txt&quot;, &quot;a&quot;)</code></strong>：a = append（追加），写入不覆盖</li>
+<li><strong><code>with open(...) as f:</code></strong>：自动关文件，不用 <code>f.close()</code>，是 W07 项目周会重点用的写法</li>
+<li><strong>tuple 排序</strong>：<code>scores.sort(reverse=True)</code> 默认按 tuple 第一个元素排</li>
+</ul>
+<h2>五、验收标准（自助验收）</h2>
+<ul>
+<li><input disabled="" type="checkbox"> 三个项目（A 完整计分版 / B 难度选择 / C 排行榜）至少做两个</li>
+<li><input disabled="" type="checkbox"> 至少让 3 个家人/朋友玩过，记下每人最高分</li>
+<li><input disabled="" type="checkbox"> 排行榜前 5 名真的有数据</li>
+<li><input disabled="" type="checkbox"> 你能指着代码说清：外层 while True 在管什么，内层 while 在管什么</li>
+<li><input disabled="" type="checkbox"> quit 退出路径和正常退出路径都跑过，零报错</li>
+</ul>
+<h2>六、W05 全周自查</h2>
+<ul>
+<li><input disabled="" type="checkbox"> L01：while 跟 for 区别清楚，知道死循环 Ctrl + C</li>
+<li><input disabled="" type="checkbox"> L02：break / continue / while...else 都用对</li>
+<li><input disabled="" type="checkbox"> L03：限次数猜数字 + 多局循环 跑通</li>
+<li><input disabled="" type="checkbox"> 周末：计分版 + 难度 + 排行榜至少两个完成</li>
+<li><input disabled="" type="checkbox"> 我能给家人玩这个游戏，零报错、零崩溃</li>
+</ul>
+<p>W05 毕业 🎓 → 进入 W06「列表：一串数据」。一个变量装多个数据，班级成绩、商品清单、玩家背包，全都用列表。</p>
+<h2>👀 C++ 认脸时刻（1 分钟 · 只看不敲）</h2>
+<p>C++ 的对应写法：</p>
+<pre><code class="language-cpp">#include &lt;iostream&gt;
+int main() {
+    while (true) {
+        std::cout &lt;&lt; &quot;play once&quot; &lt;&lt; std::endl;
+        char again;
+        std::cin &gt;&gt; again;
+        if (again != &#39;y&#39;) break;
+    }
+    return 0;
+}
+</code></pre>
+<p>三个认脸：</p>
+<ol>
+<li><code>while (true)</code> 无限循环（Python 是 <code>while True:</code>）</li>
+<li><code>if (again != &#39;y&#39;) break;</code> 退出</li>
+<li>外层 while + 内层游戏 = &quot;再来一局&quot;</li>
+</ol>
+<blockquote>
+<p>AI 营笔试的编程题用 C++ 出。不用会写，<strong>认得脸</strong>就行。</p>
+</blockquote>
+</div>
+</section>
+</div>
+</div>
+</body>
+</html>

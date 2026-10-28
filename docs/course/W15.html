@@ -1,0 +1,854 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>W15 · random 三招：让电脑扔骰子（前置 W10/W11 函数/海龟 + W14 加餐④）</title>
+<style>
+:root{--bg:#0f1420;--card:#171e2e;--card2:#1e2740;--border:#2a3550;--text:#e8ecf4;--text2:#8b96ad;--accent:#5b9dff;--ok:#3ecf8e}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+.wrap{max-width:900px;margin:0 auto;padding:28px 20px 60px}
+h1{font-size:1.5rem}
+.wk-meta{color:var(--text2);font-size:.85rem;margin:4px 0 20px}
+.lesson{border:1px solid var(--border);border-radius:12px;padding:16px 18px;margin-bottom:14px;background:var(--card2)}
+.lesson-head{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.lesson-head .lt{font-weight:700;font-size:1rem;flex:1}
+.md{font-size:.92rem;line-height:1.8;color:var(--text);overflow-wrap:break-word}
+.md h1,.md h2,.md h3{margin:14px 0 8px;font-size:1.05rem}
+.md p{margin:8px 0}
+.md code{background:rgba(91,157,255,.12);border-radius:5px;padding:2px 6px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.85em;color:#a8c8ff}
+.md pre{background:#0b0f18;border:1px solid var(--border);border-radius:10px;padding:12px 14px;overflow-x:auto;margin:10px 0}
+.md pre code{background:none;padding:0;color:#c9d7f0}
+.md ul,.md ol{margin:8px 0 8px 22px}
+.md blockquote{border-left:3px solid var(--accent);padding:4px 12px;color:var(--text2);margin:10px 0}
+.md a{color:var(--accent)}
+.md table{border-collapse:collapse;margin:10px 0;font-size:.85rem}
+.md td,.md th{border:1px solid var(--border);padding:6px 10px}
+.md input[type=checkbox]{width:15px;height:15px;accent-color:var(--ok);cursor:pointer;margin-right:6px;vertical-align:-2px}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+<h1 class="wk-title">random 三招：让电脑扔骰子（前置 W10/W11 函数/海龟 + W14 加餐④）</h1>
+<div class="wk-meta">W15 · 6 课</div>
+</header>
+<div class="week-body" data-week="W15">
+<section class="lesson" data-lid="W15-S1">
+<div class="lesson-head"><span class="lt">random 三招：让电脑扔骰子</span></div>
+<div class="md" data-lid="W15-S1"><!-- slug: random-basic, type: base -->
+<h2>⓪ 🤖 课前 AI 一分钟 · 第 49 颗：AI 也会&quot;扔骰子&quot;——random（3 分钟）</h2>
+<blockquote>
+<p><strong>第 49 颗</strong></p>
+</blockquote>
+<p>AI 训练 = 加随机性（dropout、shuffle）。Python <code>random</code> = <strong>扔骰子</strong>。</p>
+<p><strong>今日口诀</strong>：AI 训练 = 加随机性（dropout、shuffle）。</p>
+<p><strong>⚔️ 判一判</strong>（AI 营线上测评题型热身，先自己答再看答案）：</p>
+<blockquote>
+<ol>
+<li>random.randint(a, b) 整数</li>
+<li>AI 训练用 random 加随机性</li>
+</ol>
+</blockquote>
+<details><summary>答案</summary>
+
+<p><strong>1.</strong> ✓ random.randint(1, 6) 模拟骰子<br><strong>2.</strong> ✓ dropout = 随机失活</p>
+</details>
+
+<hr>
+<h1>W15-S1 · random 三招：让电脑扔骰子</h1>
+<blockquote>
+<p><strong>每日节奏（v1.9）：</strong> 本篇纯阅读 ≈11 分钟，读完做当天作业 ≈10 分钟，总共 ≤25 分钟
+<strong>不需要 Thonny</strong>——正文一个字都不用敲，作业时间才开编辑器
+难度：⭐⭐ · 本篇是原 W11-L01（random 模块）的前半</p>
+</blockquote>
+<hr>
+<h2>一、概念：程序要有「运气」（3 分钟）</h2>
+<p>到上周为止，所有程序都是「确定」的——同样的输入，永远给同样的输出。但有些事天生带运气：</p>
+<ul>
+<li>游戏：敌人随机出现、宝物随机掉落</li>
+<li>抽奖：从候选名单里抽一个幸运儿</li>
+<li>密码：随机拼一串谁也猜不到的字符</li>
+</ul>
+<p>Python 的 <strong>random 模块</strong>专门管「运气」。今天认识它的三招主力。</p>
+<h2>二、三招主力 + 两位替补（5 分钟）</h2>
+<p>用之前先请它进门：</p>
+<pre><code class="language-python">import random
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>招式</th>
+<th>作用</th>
+<th>例子</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>random.randint(a, b)</code></td>
+<td>a 到 b 的整数（<strong>含两头</strong>）</td>
+<td><code>randint(1, 6)</code> 掷骰子</td>
+</tr>
+<tr>
+<td><code>random.choice(列表)</code></td>
+<td>从列表里随机抽一个</td>
+<td><code>choice(fruits)</code></td>
+</tr>
+<tr>
+<td><code>random.shuffle(列表)</code></td>
+<td>把列表顺序打乱</td>
+<td>洗牌</td>
+</tr>
+</tbody></table>
+<p>两位替补混个脸熟：<code>random.random()</code> 给 0.0~1.0 的随机小数；<code>random.sample(列表, n)</code> 抽 n 个<strong>不重复</strong>的。</p>
+<pre><code class="language-python">import random
+
+fruits = [&quot;apple&quot;, &quot;banana&quot;, &quot;cherry&quot;]
+cards = [1, 2, 3, 4, 5]
+
+print(random.randint(1, 6))
+print(random.choice(fruits))
+random.shuffle(cards)
+print(cards)
+</code></pre>
+<p>同一个文件多 Run 几次——每次输出都不一样，这就是随机。</p>
+<h2>三、必看的坑：randint 含两头（3 分钟）</h2>
+<pre><code class="language-text">random.randint(1, 10)   # 1 到 10，10 也可能抽到
+range(1, 10)            # 1 到 9，10 永远不来
+</code></pre>
+<p><strong>randint 两头都含，range 不含尾巴</strong>——老朋友 range 的规矩在 randint 这里不适用，混了就差一个数。</p>
+<p>另外两个小坑：忘了 <code>import random</code> 会报 <code>NameError</code>；<code>shuffle</code> 直接改原列表、<strong>没有返回值</strong>（想留原版先 <code>copy()</code>）。</p>
+<p><strong>今日口诀：</strong> randint 两头含，choice 抽一个，shuffle 原地洗。</p>
+<hr>
+<h2>✅ 今天的阅读完成自查</h2>
+<ul>
+<li><input disabled="" type="checkbox"> 三招主力我会各说一句用途</li>
+<li><input disabled="" type="checkbox"> 我知道 randint(1, 10) 含 10、range(1, 10) 不含 10</li>
+<li><input disabled="" type="checkbox"> 我知道 shuffle 直接改原列表，没有返回值</li>
+</ul>
+<p>三格全勾 → 打开作业</p>
+<hr>
+<blockquote>
+<p><strong>📁 作业保存规则</strong>：本课课后练习写进一个文件 <code>W15-S1-homework.py</code>（存 <code>~/sand-hollow/&lt;你的学员ID&gt;/homework/</code>），每道题开头用刚学的备注分隔：<code># --- 题 1 ---</code>、<code># --- 题 2 ---</code>……<strong>交完作业要跟你的智能体说一声</strong>才会批改，评语出现在 <code>reviews/*.review.md</code>。<strong>回报触发词：交完作业或修完坑，都回一句「修完了」</strong>——不回这句 mentor 不知道，坑会一直挂着等。</p>
+</blockquote>
+<h2>📝 今日作业（≈10 分钟）</h2>
+<p>新建 <code>W15-S1-homework.py</code>（存 <code>~/sand-hollow/&lt;你的学员ID&gt;/homework/</code>），3 道题：</p>
+<ol>
+<li><strong>掷双骰</strong>：掷两个骰子（<code>randint</code> 调两次），打印 <code>You rolled: 3 + 5 = 8</code> 这样的式子，多跑几次</li>
+<li><strong>随机选课</strong>：<code>courses = [&quot;Math&quot;, &quot;English&quot;, &quot;Science&quot;, &quot;Art&quot;, &quot;Music&quot;]</code>，用 <code>sample</code> 随机选 3 门<strong>不重复</strong>的课打印出来</li>
+<li><strong>随机密码</strong>：问用户要几位密码，用字母 + 数字随机拼出来打印（提示：<code>string.ascii_letters</code> 和 <code>string.digits</code> 拼成候选串，循环 <code>choice</code>）</li>
+</ol>
+<blockquote>
+<p>交完说「<strong>修完了</strong>」。明天 S2 上第一个对战项目——石头剪刀布 🐾</p>
+</blockquote>
+<h2>👀 C++ 认脸时刻（1 分钟 · 只看不敲）</h2>
+<p>C++ 的对应写法：</p>
+<pre><code class="language-cpp">#include &lt;iostream&gt;
+#include &lt;cstdlib&gt;
+int main() {
+    int n = rand() % 6 + 1;  // 1-6
+    std::cout &lt;&lt; n &lt;&lt; std::endl;
+    return 0;
+}
+</code></pre>
+<p>三个认脸：</p>
+<ol>
+<li><code>rand() % 6 + 1</code> 1-6 随机</li>
+<li>C++ 需 <code>srand(time(0))</code> 设种子</li>
+<li>Python <code>random.randint(1, 6)</code></li>
+</ol>
+<blockquote>
+<p>AI 营笔试的编程题用 C++ 出。不用会写，<strong>认得脸</strong>就行。</p>
+</blockquote>
+</div>
+</section>
+<section class="lesson" data-lid="W15-S2">
+<div class="lesson-head"><span class="lt">石头剪刀布 v1：判定逻辑</span></div>
+<div class="md" data-lid="W15-S2"><!-- slug: rps-logic, type: base -->
+<h2>⓪ 🤖 课前 AI 一分钟 · 第 50 颗：AI 也会&quot;随机判断&quot;——石头剪刀布（3 分钟）</h2>
+<blockquote>
+<p><strong>第 50 颗</strong></p>
+</blockquote>
+<p>AI 玩游戏 = 随机出招 + 规则判定。Python 石头剪刀布 = <strong>随机 + if 判定</strong>。</p>
+<p><strong>今日口诀</strong>：AI 玩游戏 = 随机出招 + 规则判定。</p>
+<p><strong>⚔️ 判一判</strong>（AI 营线上测评题型热身，先自己答再看答案）：</p>
+<blockquote>
+<ol>
+<li>石头剪刀布用 random.choice</li>
+<li>AI 游戏逻辑 = 随机 + 判定</li>
+</ol>
+</blockquote>
+<details><summary>答案</summary>
+
+<p><strong>1.</strong> ✓ random.choice([&quot;rock&quot;, &quot;paper&quot;])<br><strong>2.</strong> ✓ 规则引擎 = if-elif 链</p>
+</details>
+
+<hr>
+<h1>W15-S2 · 石头剪刀布 v1：判定逻辑</h1>
+<blockquote>
+<p><strong>每日节奏（v1.9）：</strong> 本篇纯阅读 ≈11 分钟，读完做当天作业 ≈10 分钟，总共 ≤25 分钟
+<strong>不需要 Thonny</strong>（正文）——作业时间才开编辑器
+难度：⭐⭐⭐ · 本篇是原 W11-L02 的前半（第一版判定逻辑）</p>
+</blockquote>
+<hr>
+<h2>一、概念：经典对战（2 分钟）</h2>
+<p>石头剪刀布 = 玩家出拳 + 电脑随机出拳 → 比规则定胜负：</p>
+<ul>
+<li>石头 砸 剪刀</li>
+<li>剪刀 剪 布</li>
+<li>布 包 石头</li>
+<li>相同 = 平局</li>
+</ul>
+<p>昨天学的 <code>choice</code> 今天就能上场：电脑从列表里随机抽一张拳。</p>
+<h2>二、第一版长什么样（5 分钟）</h2>
+<p>只读不敲，眼睛走一遍：</p>
+<pre><code class="language-python">import random
+
+choices = [&quot;rock&quot;, &quot;paper&quot;, &quot;scissors&quot;]
+
+player = input(&quot;Your choice: &quot;).strip().lower()
+computer = random.choice(choices)
+print(f&quot;You: {player}, Computer: {computer}&quot;)
+
+if player == computer:
+    print(&quot;Tie!&quot;)
+elif (player == &quot;rock&quot; and computer == &quot;scissors&quot;) or \
+     (player == &quot;scissors&quot; and computer == &quot;paper&quot;) or \
+     (player == &quot;paper&quot; and computer == &quot;rock&quot;):
+    print(&quot;You win!&quot;)
+else:
+    print(&quot;Computer wins!&quot;)
+</code></pre>
+<p>三个老朋友全回来了：<code>strip().lower()</code>（W02）防手滑空格大小写、<code>choice</code>（昨天）、and/or 组合条件（W03-S5）。</p>
+<h2>三、判定逻辑拆开看（4 分钟）</h2>
+<p>elif 那长串其实是<strong>三个「赢」的条件用 or 连起来</strong>：</p>
+<pre><code class="language-python">win = (player == &quot;rock&quot; and computer == &quot;scissors&quot;) \
+   or (player == &quot;scissors&quot; and computer == &quot;paper&quot;) \
+   or (player == &quot;paper&quot; and computer == &quot;rock&quot;)
+</code></pre>
+<ul>
+<li>每个小括号 = 一种「刚好克制」的组合</li>
+<li>括号之间用 or：满足任意一种就是赢</li>
+<li>行尾的 <code>\</code> 是续行符——一行太长可以折成三行写</li>
+</ul>
+<p>判断顺序也有讲究：先排除平局（<code>==</code>），再判赢，剩下的自然判负——<strong>平局不先排掉，赢的条件永远轮不到细看</strong>。</p>
+<p><strong>今日口诀：</strong> 先判平，再判赢，剩下的全输给电脑。</p>
+<hr>
+<h2>✅ 今天的阅读完成自查</h2>
+<ul>
+<li><input disabled="" type="checkbox"> 我能说出「赢」的三种克制组合</li>
+<li><input disabled="" type="checkbox"> 我知道为什么先判平局再判胜负</li>
+<li><input disabled="" type="checkbox"> 我知道 <code>\</code> 续行符是干嘛的</li>
+</ul>
+<p>三格全勾 → 打开作业</p>
+<hr>
+<blockquote>
+<p><strong>📁 作业保存规则</strong>：本课课后练习写进一个文件 <code>W15-S2-homework.py</code>（存 <code>~/sand-hollow/&lt;你的学员ID&gt;/homework/</code>），每道题开头用刚学的备注分隔：<code># --- 题 1 ---</code>、<code># --- 题 2 ---</code>……<strong>交完作业要跟你的智能体说一声</strong>才会批改，评语出现在 <code>reviews/*.review.md</code>。<strong>回报触发词：交完作业或修完坑，都回一句「修完了」</strong>——不回这句 mentor 不知道，坑会一直挂着等。</p>
+</blockquote>
+<h2>📝 今日作业（≈10 分钟）</h2>
+<p>新建 <code>W15-S2-homework.py</code>，2 道题：</p>
+<ol>
+<li><strong>第一版跑通</strong>：把正文第二节的代码亲手敲一遍，跟电脑打 5 局，每局结果抄进注释；打完写一句：赢的局是不是都符合「克制组合」</li>
+<li><strong>输入保卫战</strong>：正文代码里玩家输入 &quot;rockkk&quot; 会发生什么？先笔猜（提示：会掉进哪个分支），跑一次验证，然后在 if 前面加一段：<code>if player not in choices:</code> 提示无效并跳过，再跑一次确认修好了</li>
+</ol>
+<blockquote>
+<p>交完说「<strong>修完了</strong>」。明天 S3 加上循环和计分，能打满五局 🐾</p>
+</blockquote>
+<h2>👀 C++ 认脸时刻（1 分钟 · 只看不敲）</h2>
+<p>C++ 的对应写法：</p>
+<pre><code class="language-cpp">#include &lt;iostream&gt;
+#include &lt;cstdlib&gt;
+int main() {
+    int n = rand() % 3;  // 0=rock 1=paper 2=scissors
+    if (n == 0) std::cout &lt;&lt; &quot;rock&quot; &lt;&lt; std::endl;
+    else if (n == 1) std::cout &lt;&lt; &quot;paper&quot; &lt;&lt; std::endl;
+    else std::cout &lt;&lt; &quot;scissors&quot; &lt;&lt; std::endl;
+    return 0;
+}
+</code></pre>
+<p>三个认脸：</p>
+<ol>
+<li><code>rand() % 3</code> 0-2 三选一</li>
+<li>if-elif 判定</li>
+<li>Python <code>random.choice([&quot;rock&quot;, &quot;paper&quot;, &quot;scissors&quot;])</code></li>
+</ol>
+<blockquote>
+<p>AI 营笔试的编程题用 C++ 出。不用会写，<strong>认得脸</strong>就行。</p>
+</blockquote>
+</div>
+</section>
+<section class="lesson" data-lid="W15-S3">
+<div class="lesson-head"><span class="lt">多局 + 计分：打满五局</span></div>
+<div class="md" data-lid="W15-S3"><!-- slug: rps-score, type: base -->
+<h2>⓪ 🤖 课前 AI 一分钟 · 第 51 颗：AI 也会&quot;多局计分&quot;——累加器（3 分钟）</h2>
+<blockquote>
+<p><strong>第 51 颗</strong></p>
+</blockquote>
+<p>AI 训练 = 跑 N 局算平均分。Python 多局计分 = <strong>累加器</strong>。</p>
+<p><strong>今日口诀</strong>：AI 训练 = 跑 N 局算平均分。</p>
+<p><strong>⚔️ 判一判</strong>（AI 营线上测评题型热身，先自己答再看答案）：</p>
+<blockquote>
+<ol>
+<li>多局计分用累加器</li>
+<li>AI 评测跑 N 局算平均</li>
+</ol>
+</blockquote>
+<details><summary>答案</summary>
+
+<p><strong>1.</strong> ✓ wins = 0; for i in range(5): if win: wins += 1<br><strong>2.</strong> ✓ eval on N samples</p>
+</details>
+
+<hr>
+<h1>W15-S3 · 多局 + 计分：打满五局</h1>
+<blockquote>
+<p><strong>每日节奏（v1.9）：</strong> 本篇纯阅读 ≈11 分钟，读完做当天作业 ≈10 分钟，总共 ≤25 分钟
+<strong>不需要 Thonny</strong>——正文一个字都不用敲，作业时间才开编辑器
+难度：⭐⭐⭐ · 本篇对应原 W12-L02 的「第二版：多局 + 计分」部分</p>
+</blockquote>
+<hr>
+<h2>一、概念：一局太短，五局才过瘾（3 分钟）</h2>
+<p>昨天的石头剪刀布只打<strong>一局</strong>就结束——真实对战是「三局两胜」「五局三胜」：单局有运气，<strong>打满多局才见真功夫</strong>。</p>
+<p>升级三件事：</p>
+<ul>
+<li>一局 → <strong>五局</strong>（for 循环，W04 老朋友）</li>
+<li>加两个<strong>计分器</strong>（变量，每局赢的那方 +1）</li>
+<li>打完<strong>宣布总冠军</strong></li>
+</ul>
+<h2>二、计分器：先建空盒子（4 分钟）</h2>
+<pre><code class="language-python">player_score = 0
+computer_score = 0
+</code></pre>
+<p>计分器就是普通变量——开局建两个 <code>0</code>，谁赢一局就 <code>+= 1</code>。<strong>在循环外建、循环里加</strong>：建在循环外才能一路累加；建在循环里，每局都会被清零重开（W04 累加器思想）。</p>
+<h2>三、五局制完整骨架（4 分钟）</h2>
+<p>只读不敲，眼睛走一遍：</p>
+<pre><code class="language-python">import random
+
+choices = [&quot;rock&quot;, &quot;paper&quot;, &quot;scissors&quot;]
+player_score = 0
+computer_score = 0
+
+for round in range(1, 6):
+    print(f&quot;--- Round {round} ---&quot;)
+    player = input(&quot;Your choice: &quot;).strip().lower()
+    computer = random.choice(choices)
+    print(f&quot;You: {player}, Computer: {computer}&quot;)
+
+    if player == computer:
+        print(&quot;Tie!&quot;)
+    elif (player == &quot;rock&quot; and computer == &quot;scissors&quot;) or \
+         (player == &quot;scissors&quot; and computer == &quot;paper&quot;) or \
+         (player == &quot;paper&quot; and computer == &quot;rock&quot;):
+        print(&quot;You win this round!&quot;)
+        player_score += 1
+    else:
+        print(&quot;Computer wins this round!&quot;)
+        computer_score += 1
+
+print(f&quot;Final: You {player_score} - Computer {computer_score}&quot;)
+</code></pre>
+<p>逐段对账：</p>
+<table>
+<thead>
+<tr>
+<th>部件</th>
+<th>作用</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>for round in range(1, 6)</code></td>
+<td>1 到 5——五局；round 是局号（range 不含尾巴，W04 铁律）</td>
+</tr>
+<tr>
+<td><code>player_score += 1</code></td>
+<td>只在赢的分支加——平局谁都不得分</td>
+</tr>
+<tr>
+<td>最后一行</td>
+<td>循环外宣布总分（缩进 0 格，不归 for 管）</td>
+</tr>
+</tbody></table>
+<h2>四、宣布总冠军（2 分钟）</h2>
+<p>总分出来后再加一段（循环外、紧跟 print）：</p>
+<pre><code class="language-python">if player_score &gt; computer_score:
+    print(&quot;You won the match!&quot;)
+elif player_score &lt; computer_score:
+    print(&quot;Computer won the match!&quot;)
+else:
+    print(&quot;It&#39;s a tie overall!&quot;)
+</code></pre>
+<p>三元老朋友：<code>&gt;</code> 赢、<code>&lt;</code> 输、<code>==</code> 冠军（else 兜底）——注意这是<strong>赛后总评</strong>，和循环里「每局判定」是两套判断，别混进同一个缩进层。</p>
+<p><strong>今日口诀：</strong> 循环外建分、循环里加分、循环外宣布冠军。</p>
+<hr>
+<h2>✅ 今天的阅读完成自查</h2>
+<ul>
+<li><input disabled="" type="checkbox"> 我知道计分器为什么必须建在循环外</li>
+<li><input disabled="" type="checkbox"> 我能说出 <code>range(1, 6)</code> 打几局、为什么不是 range(1, 5)</li>
+<li><input disabled="" type="checkbox"> 我能分清「每局判定」和「赛后总评」两段判断各管什么</li>
+</ul>
+<p>三格全勾 → 打开作业</p>
+<hr>
+<blockquote>
+<p><strong>📁 作业保存规则</strong>：本课课后练习写进一个文件 <code>W15-S3-homework.py</code>（存 <code>~/sand-hollow/&lt;你的学员ID&gt;/homework/</code>），每道题开头用刚学的备注分隔：<code># --- 题 1 ---</code>、<code># --- 题 2 ---</code>……<strong>交完作业要跟你的智能体说一声</strong>才会批改，评语出现在 <code>reviews/*.review.md</code>。<strong>回报触发词：交完作业或修完坑，都回一句「修完了」</strong>——不回这句 mentor 不知道，坑会一直挂着等。</p>
+</blockquote>
+<h2>📝 今日作业（≈10 分钟）</h2>
+<p>新建 <code>W15-S3-homework.py</code>，2 道题：</p>
+<ol>
+<li><strong>五局制跑通</strong>：把正文第三节骨架亲手敲一遍（含第四节总评），真打五局；注释里记下比分，并想一句：平局那轮为什么两边分数都没动</li>
+<li><strong>局号实验</strong>：把 <code>range(1, 6)</code> 改成 <code>range(1, 11)</code> 再打一局看局号变化——注释写下现在打几局、第一局局号是几；改回五局制</li>
+</ol>
+<blockquote>
+<p>交完说「<strong>修完了</strong>」。明天 S4：用字典把昨天那串长判定一行撂倒 🐾</p>
+</blockquote>
+<h2>👀 C++ 认脸时刻（1 分钟 · 只看不敲）</h2>
+<p>C++ 的对应写法：</p>
+<pre><code class="language-cpp">#include &lt;iostream&gt;
+int main() {
+    int wins = 0, total = 5;
+    for (int i = 0; i &lt; total; i++) {
+        bool win = (rand() % 2 == 0);
+        if (win) wins++;
+    }
+    std::cout &lt;&lt; &quot;wins = &quot; &lt;&lt; wins &lt;&lt; &quot;/&quot; &lt;&lt; total &lt;&lt; std::endl;
+    return 0;
+}
+</code></pre>
+<p>三个认脸：</p>
+<ol>
+<li>循环 5 局</li>
+<li><code>wins++</code> 累加赢的次数</li>
+<li>Python 一样：wins = sum(...)</li>
+</ol>
+<blockquote>
+<p>AI 营笔试的编程题用 C++ 出。不用会写，<strong>认得脸</strong>就行。</p>
+</blockquote>
+</div>
+</section>
+<section class="lesson" data-lid="W15-S4">
+<div class="lesson-head"><span class="lt">beats 字典重构 + emoji</span></div>
+<div class="md" data-lid="W15-S4"><!-- slug: rps-beats, type: base -->
+<h2>⓪ 🤖 课前 AI 一分钟 · 第 52 颗：AI 也会&quot;规则表&quot;——beats 字典（3 分钟）</h2>
+<blockquote>
+<p><strong>第 52 颗</strong></p>
+</blockquote>
+<p>AI 推理 = 查表（什么克什么）。Python 石头剪刀布 = <strong>dict 规则</strong>。</p>
+<p><strong>今日口诀</strong>：AI 推理 = 查表（什么克什么）。</p>
+<p><strong>⚔️ 判一判</strong>（AI 营线上测评题型热身，先自己答再看答案）：</p>
+<blockquote>
+<ol>
+<li>石头剪刀布可以用 dict 存规则</li>
+<li>AI 推理也是查表</li>
+</ol>
+</blockquote>
+<details><summary>答案</summary>
+
+<p><strong>1.</strong> ✓ beats = {&quot;rock&quot;: &quot;scissors&quot;, &quot;paper&quot;: &quot;rock&quot;, ...}<br><strong>2.</strong> ✓ rule-based system</p>
+</details>
+
+<hr>
+<h1>W15-S4 · beats 字典重构 + emoji</h1>
+<blockquote>
+<p><strong>每日节奏（v1.9）：</strong> 本篇纯阅读 ≈11 分钟，读完做当天作业 ≈10 分钟，总共 ≤25 分钟
+<strong>不需要 Thonny</strong>——正文一个字都不用敲，作业时间才开编辑器
+难度：⭐⭐⭐ · 本篇对应原 W12-L02 的「第三版字典判定 + 第四版 emoji」部分</p>
+</blockquote>
+<hr>
+<h2>一、概念：规则也是数据（3 分钟）</h2>
+<p>昨天的判定长串（三个 or 的 elif）能跑，但——<strong>游戏规则本身写成了一堆 if，改一条规则要翻半天代码</strong>。</p>
+<p>换思路：石头剪刀布的规则是一张「谁克谁」对照表——<strong>对照表 = 字典</strong>（W10 全程都在练这个）。</p>
+<pre><code class="language-python">beats = {
+    &quot;rock&quot;: &quot;scissors&quot;,
+    &quot;scissors&quot;: &quot;paper&quot;,
+    &quot;paper&quot;: &quot;rock&quot;,
+}
+</code></pre>
+<p>读法：键<strong>克</strong>值——rock 克 scissors、scissors 克 paper、paper 克 rock。规则装进字典，判定就变成查表。</p>
+<h2>二、一行撂倒长判定（4 分钟）</h2>
+<pre><code class="language-python">if player == computer:
+    result = &quot;tie&quot;
+elif beats[player] == computer:
+    result = &quot;win&quot;
+else:
+    result = &quot;lose&quot;
+</code></pre>
+<p><strong>beats[player] 存的是 player 能打败的对手</strong>——所以「beats[player] == computer」成立时，computer 正好是 player 的手下败将，player 赢。</p>
+<p>三行读完整个逻辑：先排平局、再查表判赢、剩下判负——和昨天那串 or 的<strong>结果一模一样</strong>，但读起来像一句话。这就是「重构」：<strong>功能不变，代码换更顺的写法</strong>。</p>
+<h2>三、前提：输入必须合法（2 分钟）</h2>
+<p>查表前有个前提——<code>beats[player]</code> 里的 player 必须是三个键之一。玩家手滑输入 &quot;rockkk&quot; 会怎样？<code>KeyError</code> 摔门（W10-S2 的老坑）。</p>
+<p>昨天作业已经练过安检门，今天把它焊在查表<strong>前面</strong>：</p>
+<pre><code class="language-python">if player not in choices:
+    print(&quot;Invalid choice!&quot;)
+    continue
+</code></pre>
+<p>continue = 跳过这局直接进下一局（W04/W05 见过）。<strong>先安检、后查表</strong>，永远。</p>
+<h2>四、emoji 输出（2 分钟）</h2>
+<p>给三种拳配上 emoji 字典，输出瞬间有画面：</p>
+<pre><code class="language-python">emojis = {
+    &quot;rock&quot;: &quot;\U0001FAA8&quot;,
+    &quot;paper&quot;: &quot;\U0001F4C4&quot;,
+    &quot;scissors&quot;: &quot;\u2702\uFE0F&quot;,
+}
+
+print(f&quot;You: {emojis[player]} vs Computer: {emojis[computer]}&quot;)
+</code></pre>
+<p><code>\U0001FAA8</code> 这种是 emoji 的<strong>转义写法</strong>（Unicode 编号）——比直接粘 emoji 进代码稳，不会被编辑器悄悄换成别的字符。</p>
+<p><strong>今日口诀：</strong> 规则进字典，判定变查表；查表先安检，输出配 emoji。</p>
+<hr>
+<h2>✅ 今天的阅读完成自查</h2>
+<ul>
+<li><input disabled="" type="checkbox"> 我能说出 beats[player] == computer 成立时谁赢、为什么</li>
+<li><input disabled="" type="checkbox"> 我知道为什么查表前必须 <code>not in</code> 安检</li>
+<li><input disabled="" type="checkbox"> 我知道「重构」= 功能不变、写法更顺</li>
+</ul>
+<p>三格全勾 → 打开作业</p>
+<hr>
+<blockquote>
+<p><strong>📁 作业保存规则</strong>：本课课后练习写进一个文件 <code>W15-S4-homework.py</code>（存 <code>~/sand-hollow/&lt;你的学员ID&gt;/homework/</code>），每道题开头用刚学的备注分隔：<code># --- 题 1 ---</code>、<code># --- 题 2 ---</code>……<strong>交完作业要跟你的智能体说一声</strong>才会批改，评语出现在 <code>reviews/*.review.md</code>。<strong>回报触发词：交完作业或修完坑，都回一句「修完了」</strong>——不回这句 mentor 不知道，坑会一直挂着等。</p>
+</blockquote>
+<h2>📝 今日作业（≈10 分钟）</h2>
+<p>新建 <code>W15-S4-homework.py</code>，3 道题：</p>
+<ol>
+<li><strong>查表版重构</strong>：把 W15-S2 作业的五局制抄来，判定换成 beats 字典版（含 continue 安检）——真打五局，确认结果和昨天版本一致</li>
+<li><strong>先猜再跑</strong>：笔猜——player 出 &quot;paper&quot;、computer 出 &quot;rock&quot; 时，beats[player] 是什么、result 是什么？运行验证</li>
+<li><strong>emoji 上屏</strong>：把 emojis 字典加进作业 1，出拳行改成 emoji 版；想加分的给结果行也配个 🎉/😭</li>
+</ol>
+<blockquote>
+<p>交完说「<strong>修完了</strong>」。明天 S5：把战斗系统升级成文字 RPG 🐾</p>
+</blockquote>
+<h2>👀 C++ 认脸时刻（1 分钟 · 只看不敲）</h2>
+<p>C++ 的对应写法：</p>
+<pre><code class="language-cpp">#include &lt;iostream&gt;
+#include &lt;map&gt;
+#include &lt;string&gt;
+int main() {
+    std::map&lt;std::string, std::string&gt; beats = {
+        {&quot;rock&quot;, &quot;scissors&quot;},
+        {&quot;paper&quot;, &quot;rock&quot;},
+        {&quot;scissors&quot;, &quot;paper&quot;}
+    };
+    std::cout &lt;&lt; beats[&quot;rock&quot;] &lt;&lt; std::endl;
+    return 0;
+}
+</code></pre>
+<p>三个认脸：</p>
+<ol>
+<li>C++ 嵌套初始化 map</li>
+<li><code>beats[&quot;rock&quot;]</code> 查表</li>
+<li>Python <code>beats = {&quot;rock&quot;: &quot;scissors&quot;}</code></li>
+</ol>
+<blockquote>
+<p>AI 营笔试的编程题用 C++ 出。不用会写，<strong>认得脸</strong>就行。</p>
+</blockquote>
+</div>
+</section>
+<section class="lesson" data-lid="W15-S5">
+<div class="lesson-head"><span class="lt">文字 RPG：战斗骨架</span></div>
+<div class="md" data-lid="W15-S5"><!-- slug: rpg-skeleton, type: base -->
+<h2>⓪ 🤖 课前 AI 一分钟 · 第 53 颗：AI 也会&quot;文字 RPG&quot;——战斗骨架（3 分钟）</h2>
+<blockquote>
+<p><strong>第 53 颗</strong></p>
+</blockquote>
+<p>AI 文字 RPG = 状态 + 行动 + 判定。Python 文字 RPG = <strong>class 雏形</strong>。</p>
+<p><strong>今日口诀</strong>：AI 文字 RPG = 状态 + 行动 + 判定。</p>
+<p><strong>⚔️ 判一判</strong>（AI 营线上测评题型热身，先自己答再看答案）：</p>
+<blockquote>
+<ol>
+<li>文字 RPG 是状态机</li>
+<li>AI 文字游戏 = 状态 + 行动</li>
+</ol>
+</blockquote>
+<details><summary>答案</summary>
+
+<p><strong>1.</strong> ✓ state = &quot;battle&quot;; loop: input; judge<br><strong>2.</strong> ✓ 文字游戏 = FSM</p>
+</details>
+
+<hr>
+<h1>W15-S5 · 文字 RPG：战斗骨架</h1>
+<blockquote>
+<p><strong>每日节奏（v1.9）：</strong> 本篇纯阅读 ≈12 分钟，读完做当天作业 ≈10 分钟，总共 ≤25 分钟
+<strong>不需要 Thonny</strong>——正文一个字都不用敲，作业时间才开编辑器
+难度：⭐⭐⭐⭐ · 本篇对应原 W12-L03（文字 RPG 战斗）的核心骨架</p>
+</blockquote>
+<hr>
+<h2>一、概念：石头剪刀布长大了（2 分钟）</h2>
+<p>石头剪刀布每局只出一次拳。RPG 战斗多了<strong>血条</strong>——你打我一下、我打你一下，谁先掉光谁输。今天搭战斗骨架。</p>
+<h2>二、上场角色（4 分钟）</h2>
+<pre><code class="language-python">import random
+
+player = {&quot;name&quot;: &quot;Paw&quot;, &quot;hp&quot;: 100, &quot;attack&quot;: 15, &quot;defense&quot;: 5,
+          &quot;exp&quot;: 0, &quot;level&quot;: 1}
+enemies = [
+    {&quot;name&quot;: &quot;Slime&quot;, &quot;hp&quot;: 30, &quot;attack&quot;: 5, &quot;defense&quot;: 2, &quot;exp&quot;: 10},
+    {&quot;name&quot;: &quot;Wolf&quot;, &quot;hp&quot;: 60, &quot;attack&quot;: 10, &quot;defense&quot;: 5, &quot;exp&quot;: 25},
+]
+</code></pre>
+<p>敌人是<strong>列表装字典</strong>——<code>random.choice(enemies)</code> 随机点名一只上场。</p>
+<h2>三、伤害公式带随机（3 分钟）</h2>
+<pre><code class="language-python">def calc_dmg(attacker_atk, defender_def):
+    base = attacker_atk - defender_def
+    return max(1, base + random.randint(-2, 3))
+</code></pre>
+<ul>
+<li>攻击减防御 = 基础伤害，再 ±随机浮动——<strong>每刀不一样，战斗才有心跳</strong></li>
+<li><code>max(1, ...)</code>：保底 1 点，防御太高也不至于「打不动」死循环</li>
+</ul>
+<h2>四、战斗回合循环（3 分钟）</h2>
+<pre><code class="language-python">def battle(player, enemy):
+    while enemy[&quot;hp&quot;] &gt; 0 and player[&quot;hp&quot;] &gt; 0:
+        action = input(&quot;(attack/run): &quot;).strip().lower()
+        if action == &quot;run&quot;:
+            return &quot;ran&quot;
+        dmg = calc_dmg(player[&quot;attack&quot;], enemy[&quot;defense&quot;])
+        enemy[&quot;hp&quot;] -= dmg
+        print(f&quot;You hit {enemy[&#39;name&#39;]} for {dmg}! HP left: {enemy[&#39;hp&#39;]}&quot;)
+        if enemy[&quot;hp&quot;] &lt;= 0:
+            player[&quot;exp&quot;] += enemy[&quot;exp&quot;]
+            return &quot;won&quot;
+        dmg = calc_dmg(enemy[&quot;attack&quot;], player[&quot;defense&quot;])
+        player[&quot;hp&quot;] -= dmg
+        print(f&quot;{enemy[&#39;name&#39;]} hits you for {dmg}! HP left: {player[&#39;hp&#39;]}&quot;)
+    return &quot;lost&quot;
+</code></pre>
+<p>三个看点：<strong>while 双条件</strong>——两边都活着才继续打；<strong>return 三种结局</strong>——won / lost / ran；你一刀我一刀 = 一个回合，循环自动转下一回合。</p>
+<h2>五、升级的甜头（3 分钟）</h2>
+<pre><code class="language-python">def check_levelup(player):
+    if player[&quot;exp&quot;] &gt;= player[&quot;level&quot;] * 50:
+        player[&quot;level&quot;] += 1
+        player[&quot;hp&quot;] += 20
+        print(f&quot;*** LEVEL UP! Lv{player[&#39;level&#39;]} ***&quot;)
+</code></pre>
+<p>经验够等级×50 就升级：涨血、回满。<strong>字典传进函数、函数直接改它的键</strong>——改的是本体，不是复印件。</p>
+<p><strong>今日口诀：</strong> 角色是字典、伤害带随机、回合靠 while、结局用 return。</p>
+<hr>
+<h2>✅ 今天的阅读完成自查</h2>
+<ul>
+<li><input disabled="" type="checkbox"> 我能说出 calc_dmg 里 max(1, ...) 防的是什么</li>
+<li><input disabled="" type="checkbox"> 我能对上 battle 的三种 return 结局各在什么时刻触发</li>
+<li><input disabled="" type="checkbox"> 我知道函数里 player[&quot;exp&quot;] += 10 改的是字典本体</li>
+</ul>
+<p>三格全勾 → 打开作业（W11 最后一天！）</p>
+<hr>
+<blockquote>
+<p><strong>📁 作业保存规则</strong>：本课课后练习写进一个文件 <code>W15-S5-homework.py</code>（存 <code>~/sand-hollow/&lt;你的学员ID&gt;/homework/</code>），每道题开头用刚学的备注分隔：<code># --- 题 1 ---</code>、<code># --- 题 2 ---</code>……<strong>交完作业要跟你的智能体说一声</strong>才会批改，评语出现在 <code>reviews/*.review.md</code>。<strong>回报触发词：交完作业或修完坑，都回一句「修完了」</strong>——不回这句 mentor 不知道，坑会一直挂着等。</p>
+</blockquote>
+<h2>📝 今日作业（≈10 分钟）</h2>
+<p>新建 <code>W15-S5-homework.py</code>，2 道题：</p>
+<ol>
+<li><strong>骨架跑通</strong>：把正文四个部件拼成一个文件，跟 Slime 打一架；打赢后调 check_levelup(player)，print player 看 exp 变化</li>
+<li><strong>先猜再跑</strong>：笔猜——如果 player[&quot;defense&quot;] 是 15、Slime attack 才 5，<code>calc_dmg(5, 15)</code> 会返回几？为什么不会是负数？运行验证</li>
+</ol>
+<blockquote>
+<p>交完说「<strong>修完了</strong>」——W11 结业！random + 字典 + 函数三军会师。周末项目：<strong>打磨 + 家人对战赛</strong>——加菜单、存战绩、请两位家人各打一局，听反馈再改一轮 🐾</p>
+</blockquote>
+<h2>👀 C++ 认脸时刻（1 分钟 · 只看不敲）</h2>
+<p>C++ 的对应写法：</p>
+<pre><code class="language-cpp">#include &lt;iostream&gt;
+#include &lt;string&gt;
+int main() {
+    std::string state = &quot;battle&quot;;
+    int player_hp = 100, enemy_hp = 50;
+    while (state == &quot;battle&quot;) {
+        if (player_hp &lt;= 0) state = &quot;lose&quot;;
+        else if (enemy_hp &lt;= 0) state = &quot;win&quot;;
+        else { enemy_hp -= 20; player_hp -= 10; }
+    }
+    return 0;
+}
+</code></pre>
+<p>三个认脸：</p>
+<ol>
+<li>战斗状态循环</li>
+<li>双方扣血</li>
+<li>Python 一样：while state == &quot;battle&quot;: ...</li>
+</ol>
+<blockquote>
+<p>AI 营笔试的编程题用 C++ 出。不用会写，<strong>认得脸</strong>就行。</p>
+</blockquote>
+</div>
+</section>
+<section class="lesson" data-lid="W15-weekend">
+<div class="lesson-head"><span class="lt">文字 RPG 完整版 + 战斗系统</span></div>
+<div class="md" data-lid="W15-weekend"><!-- slug: random-rpg-final, type: project -->
+<h2>⓪ 🤖 课前 AI 一分钟 · 第 54 颗：AI 也会&quot;完整文字 RPG&quot;——random + 战斗（3 分钟）</h2>
+<blockquote>
+<p><strong>第 42 颗</strong></p>
+</blockquote>
+<p>AI 训练 = 复盘上次错误再练。Python &quot;再来一次&quot;= <strong>复盘</strong> 练过的内容。</p>
+<p><strong>今日口诀</strong>：文字 RPG = 随机战斗 + 状态机。</p>
+<p><strong>⚔️ 判一判</strong>（AI 营线上测评题型热身，先自己答再看答案）：</p>
+<blockquote>
+<ol>
+<li>文字 RPG 用 random 生成敌人</li>
+<li>文字 RPG 用 while True 循环</li>
+</ol>
+</blockquote>
+<details><summary>答案</summary>
+
+<p><strong>1.</strong> ✓ random.choice 选敌人<br><strong>2.</strong> ✓ while state == &quot;battle&quot;</p>
+</details>
+
+<hr>
+<h1>W15-weekend · 文字 RPG 完整版 + 战斗系统</h1>
+<blockquote>
+<p>用时：60-90 分钟 · 难度：⭐⭐⭐⭐ · 前置：W09 三课</p>
+</blockquote>
+<hr>
+<h2>一、本周武功盘点（3 分钟）</h2>
+<ul>
+<li>W15-S1：<code>random.choice</code> / <code>randint</code> / <code>random.shuffle</code> 三招</li>
+<li>W15-S2：石头剪刀布 v1 → 完整版（多局 + 计分 + beats 字典）</li>
+<li>W15-S3：文字 RPG 战斗骨架（while + 状态 + 扣血 + 判定）</li>
+</ul>
+<p>今天把三课代码<strong>打包</strong>成一个完整的文字 RPG——<strong>敌人随机 + 战斗循环 + 升级系统 + save/load</strong>。</p>
+<h2>二、项目 A：文字 RPG 完整版（50 分钟）</h2>
+<blockquote>
+<p>📁 项目存 <code>~/sand-hollow/&lt;你的学员ID&gt;/homework/</code>，新建 <code>rpg_final.py</code>。</p>
+</blockquote>
+<h3>第 1 步 · 玩家和敌人数据（5 分钟）</h3>
+<pre><code class="language-python">import random
+import json
+
+def new_player():
+    return {&quot;name&quot;: &quot;勇者&quot;, &quot;hp&quot;: 100, &quot;atk&quot;: 15, &quot;gold&quot;: 0}
+
+def new_enemy(level):
+    enemies = [
+        {&quot;name&quot;: &quot;史莱姆&quot;, &quot;hp&quot;: 30, &quot;atk&quot;: 5, &quot;gold&quot;: 5},
+        {&quot;name&quot;: &quot;狼&quot;, &quot;hp&quot;: 50, &quot;atk&quot;: 10, &quot;gold&quot;: 15},
+        {&quot;name&quot;: &quot;哥布林&quot;, &quot;hp&quot;: 80, &quot;atk&quot;: 12, &quot;gold&quot;: 25},
+        {&quot;name&quot;: &quot;龙&quot;, &quot;hp&quot;: 200, &quot;atk&quot;: 25, &quot;gold&quot;: 100},
+    ]
+    # 随机选 1 个，等级越高敌人越强
+    e = random.choice(enemies)
+    e[&quot;hp&quot;] += level * 10
+    e[&quot;atk&quot;] += level * 2
+    return e
+</code></pre>
+<h3>第 2 步 · 战斗循环（15 分钟）</h3>
+<pre><code class="language-python">def battle(player, enemy):
+    &quot;&quot;&quot;战斗循环：双方轮流扣血，返回赢家&quot;&quot;&quot;
+    print(f&quot;\n⚔️ {player[&#39;name&#39;]} VS {enemy[&#39;name&#39;]}!&quot;)
+    while player[&quot;hp&quot;] &gt; 0 and enemy[&quot;hp&quot;] &gt; 0:
+        # 玩家攻击
+        dmg = random.randint(player[&quot;atk&quot;] - 3, player[&quot;atk&quot;] + 3)
+        enemy[&quot;hp&quot;] -= dmg
+        print(f&quot;  {player[&#39;name&#39;]} 攻击 → {enemy[&#39;name&#39;]} 扣 {dmg} HP (剩 {enemy[&#39;hp&#39;]})&quot;)
+        if enemy[&quot;hp&quot;] &lt;= 0:
+            break
+        # 敌人攻击
+        dmg = random.randint(enemy[&quot;atk&quot;] - 2, enemy[&quot;atk&quot;] + 2)
+        player[&quot;hp&quot;] -= dmg
+        print(f&quot;  {enemy[&#39;name&#39;]} 攻击 → {player[&#39;name&#39;]} 扣 {dmg} HP (剩 {player[&#39;hp&#39;]})&quot;)
+    if player[&quot;hp&quot;] &gt; 0:
+        print(f&quot;  🎉 {player[&#39;name&#39;]} 胜利！获得 {enemy[&#39;gold&#39;]} gold&quot;)
+        player[&quot;gold&quot;] += enemy[&quot;gold&quot;]
+        return &quot;win&quot;
+    else:
+        print(f&quot;  💀 {player[&#39;name&#39;]} 战败...&quot;)
+        return &quot;lose&quot;
+</code></pre>
+<h3>第 3 步 · 主循环 + 升级 + 商店（15 分钟）</h3>
+<pre><code class="language-python">def shop(player):
+    &quot;&quot;&quot;升级系统：用 gold 买 HP / ATK&quot;&quot;&quot;
+    print(f&quot;\n🏪 商店 (你有 {player[&#39;gold&#39;]} gold)&quot;)
+    print(&quot;  1. 补血 30HP → 10 gold&quot;)
+    print(&quot;  2. 加攻击 +5 → 20 gold&quot;)
+    choice = input(&quot;  选 [1/2/0=离开]: &quot;)
+    if choice == &quot;1&quot; and player[&quot;gold&quot;] &gt;= 10:
+        player[&quot;hp&quot;] += 30
+        player[&quot;gold&quot;] -= 10
+        print(&quot;  ✓ HP+30&quot;)
+    elif choice == &quot;2&quot; and player[&quot;gold&quot;] &gt;= 20:
+        player[&quot;atk&quot;] += 5
+        player[&quot;gold&quot;] -= 20
+        print(&quot;  ✓ ATK+5&quot;)
+
+def main():
+    player = new_player()
+    level = 1
+    while player[&quot;hp&quot;] &gt; 0:
+        print(f&quot;\n=== 关卡 {level} ===&quot;)
+        enemy = new_enemy(level)
+        result = battle(player, enemy)
+        if result == &quot;lose&quot;:
+            print(&quot;\n游戏结束！&quot;)
+            break
+        # 战后：补血 + 商店
+        player[&quot;hp&quot;] = min(100, player[&quot;hp&quot;] + 20)
+        shop(player)
+        level += 1
+    print(f&quot;\n最终等级：{level - 1} | 总 gold：{player[&#39;gold&#39;]}&quot;)
+
+if __name__ == &quot;__main__&quot;:
+    main()
+</code></pre>
+<h3>第 4 步 · save/load（5 分钟）</h3>
+<pre><code class="language-python">SAVE_FILE = &quot;rpg_save.json&quot;
+
+def save(player, level):
+    with open(SAVE_FILE, &quot;w&quot;) as f:
+        json.dump({&quot;player&quot;: player, &quot;level&quot;: level}, f)
+    print(&quot;  💾 已存档&quot;)
+
+def load():
+    try:
+        with open(SAVE_FILE) as f:
+            return json.load(f)
+    except FileNotFoundError:
+        return None
+</code></pre>
+<p><strong>要求</strong>：</p>
+<ul>
+<li>至少有 4 种敌人（史莱姆/狼/哥布林/龙）</li>
+<li>每关敌人越来越强（HP 和 ATK 随 level 增加）</li>
+<li>战斗日志打印清晰（双方各扣多少血）</li>
+<li>战后可以补血 / 升级</li>
+<li>通关条件：打到 5 关 = 战胜 level 5 敌人</li>
+</ul>
+<h2>三、验收标准</h2>
+<ul>
+<li>能跑通完整流程（新手 → 史莱姆 → 狼 → ... → 龙）</li>
+<li>战斗日志清晰可读</li>
+<li>输血 / 升级系统工作</li>
+<li>至少能存一次档、读一次档</li>
+</ul>
+<h2>四、扩展挑战（选做）</h2>
+<ul>
+<li>加 BOSS 关卡（每 5 关一只龙）</li>
+<li>加技能系统（暴击、回血）</li>
+<li>加随机事件（捡到宝箱、遇到商人）</li>
+</ul>
+<hr>
+<p>🎮 玩够 5 关 = 文字 RPG 毕业。下一课 W16 选毕业选题 → W17 做完整毕业项目！</p>
+<h2>👀 C++ 认脸时刻（1 分钟 · 只看不敲）</h2>
+<p>C++ 里的文字 RPG 战斗：</p>
+<pre><code class="language-cpp">#include &lt;iostream&gt;
+#include &lt;cstdlib&gt;
+int main() {
+    int player_hp = 100, enemy_hp = 50;
+    while (player_hp &gt; 0 &amp;&amp; enemy_hp &gt; 0) {
+        int dmg = rand() % 20 + 5;  // 5-24 随机伤害
+        enemy_hp -= dmg;
+        std::cout &lt;&lt; &quot;player attack: &quot; &lt;&lt; dmg &lt;&lt; std::endl;
+        if (enemy_hp &lt;= 0) break;
+        int edmg = rand() % 10 + 3;
+        player_hp -= edmg;
+        std::cout &lt;&lt; &quot;enemy attack: &quot; &lt;&lt; edmg &lt;&lt; std::endl;
+    }
+    return 0;
+}
+</code></pre>
+<p>三个认脸：</p>
+<ol>
+<li><code>#include &lt;cstdlib&gt;</code> 领 <code>rand()</code> 工具箱（Python 的 <code>random</code>）</li>
+<li><code>rand() % 20 + 5</code> = 5-24 随机整数（Python <code>random.randint(5, 24)</code>）</li>
+<li>C++ 战斗循环 <code>while (hp &gt; 0)</code> 必须有终止条件（不然死循环）</li>
+</ol>
+<blockquote>
+<p>AI 营笔试的编程题用 C++ 出。不用会写，<strong>认得脸</strong>就行。</p>
+</blockquote>
+</div>
+</section>
+</div>
+</div>
+</body>
+</html>

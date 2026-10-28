@@ -1,0 +1,1113 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>W09 · 加餐②：贪心算法（前置 W04 循环 + W06/W07 列表 + W08 函数）</title>
+<style>
+:root{--bg:#0f1420;--card:#171e2e;--card2:#1e2740;--border:#2a3550;--text:#e8ecf4;--text2:#8b96ad;--accent:#5b9dff;--ok:#3ecf8e}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+.wrap{max-width:900px;margin:0 auto;padding:28px 20px 60px}
+h1{font-size:1.5rem}
+.wk-meta{color:var(--text2);font-size:.85rem;margin:4px 0 20px}
+.lesson{border:1px solid var(--border);border-radius:12px;padding:16px 18px;margin-bottom:14px;background:var(--card2)}
+.lesson-head{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.lesson-head .lt{font-weight:700;font-size:1rem;flex:1}
+.md{font-size:.92rem;line-height:1.8;color:var(--text);overflow-wrap:break-word}
+.md h1,.md h2,.md h3{margin:14px 0 8px;font-size:1.05rem}
+.md p{margin:8px 0}
+.md code{background:rgba(91,157,255,.12);border-radius:5px;padding:2px 6px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.85em;color:#a8c8ff}
+.md pre{background:#0b0f18;border:1px solid var(--border);border-radius:10px;padding:12px 14px;overflow-x:auto;margin:10px 0}
+.md pre code{background:none;padding:0;color:#c9d7f0}
+.md ul,.md ol{margin:8px 0 8px 22px}
+.md blockquote{border-left:3px solid var(--accent);padding:4px 12px;color:var(--text2);margin:10px 0}
+.md a{color:var(--accent)}
+.md table{border-collapse:collapse;margin:10px 0;font-size:.85rem}
+.md td,.md th{border:1px solid var(--border);padding:6px 10px}
+.md input[type=checkbox]{width:15px;height:15px;accent-color:var(--ok);cursor:pointer;margin-right:6px;vertical-align:-2px}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+<h1 class="wk-title">加餐②：贪心算法（前置 W04 循环 + W06/W07 列表 + W08 函数）</h1>
+<div class="wk-meta">W09 · 6 课</div>
+</header>
+<div class="week-body" data-week="W09">
+<section class="lesson" data-lid="W09-S1">
+<div class="lesson-head"><span class="lt">贪心 ①：永远挑最大的硬币</span></div>
+<div class="md" data-lid="W09-S1"><!-- slug: greedy-coin, type: addon -->
+<h1>W09-S1 · 贪心 ①：永远挑最大的硬币</h1>
+<blockquote>
+<p><strong>一句话核心</strong>：<strong>贪心 = 每步挑当前能挑的最大</strong>。找零永远 5 元→1 元→5 角→1 角。简单、O(n)，但<strong>不是所有问题都对</strong>。</p>
+</blockquote>
+<blockquote>
+<p><strong>每日节奏（v1.9）：</strong> 阅读 ≈10 分钟，作业 ≈15 分钟，总共 ≤25 分钟
+<strong>需要 Thonny</strong> —— 看 + 写代码
+难度：⭐⭐ · 本篇是加餐② 贪心算法的第 1 课（前置：W06 二分查找）</p>
+</blockquote>
+<hr>
+<blockquote>
+<p><strong>📂 课前准备</strong>：先在 Thonny <code>文件 → 新建</code>，立刻 <code>文件 → 另存为...</code> 存为 <code>~/sand-hollow/&lt;你的学员ID&gt;/homework/W09-S1-practice.py</code>（ID 就是你注册沙坑用的 8 位数字）。本课所有亲手敲的代码都写进这个文件；课后作业写进同目录的 <code>W09-S1-homework.py</code>，两个文件严格分开，别混。</p>
+</blockquote>
+<h2>一、核心想法（3 分钟）</h2>
+<p>要凑 8.7 元，硬币面额是 [1元, 5角, 1角]。每种硬币无限。</p>
+<p><strong>方法 1：随便挑</strong>（不挑最大）。先挑 1 角、1 角、1 角……要 87 枚。</p>
+<p><strong>方法 2：永远挑最大</strong>。先 5 元（剩 3.7），再 1 元（剩 2.7），再 1 元（剩 1.7），再 1 元（剩 0.7），再 5 角（剩 0.2），再 1 角（剩 0.1），再 1 角（剩 0）。<strong>8 枚</strong>。</p>
+<p>方法 2 用更少硬币（虽然多一步）。这就是贪心：<strong>每步挑当前能挑的最大</strong>。</p>
+<h2>二、示例演算：凑 8.7 元（5 分钟）</h2>
+<table>
+<thead>
+<tr>
+<th>步</th>
+<th>选什么</th>
+<th>还剩</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>1</td>
+<td>1 元</td>
+<td>7.7</td>
+</tr>
+<tr>
+<td>2</td>
+<td>1 元</td>
+<td>6.7</td>
+</tr>
+<tr>
+<td>3</td>
+<td>1 元</td>
+<td>5.7</td>
+</tr>
+<tr>
+<td>4</td>
+<td>1 元</td>
+<td>4.7</td>
+</tr>
+<tr>
+<td>5</td>
+<td>1 元</td>
+<td>3.7</td>
+</tr>
+<tr>
+<td>6</td>
+<td>5 角</td>
+<td>3.2</td>
+</tr>
+<tr>
+<td>7</td>
+<td>1 角</td>
+<td>3.1</td>
+</tr>
+<tr>
+<td>8</td>
+<td>1 角</td>
+<td>3.0</td>
+</tr>
+</tbody></table>
+<p>每步都&quot;挑当前能挑的最大&quot;——每步之后 8.7 的剩余量减少 1 枚最大硬币的量。<strong>每枚大硬币 = 多枚小硬币</strong>——所以挑大能省。</p>
+<h2>三、Python 代码（5 分钟）</h2>
+<pre><code class="language-python">def greedy_coin_change(amount, coins):
+    &#39;&#39;&#39;
+    Return a list of coins that sums to amount, using greedy.
+    coins must be sorted from largest to smallest.
+    &#39;&#39;&#39;
+    result = []
+    for coin in coins:
+        while amount &gt;= coin:
+            result.append(coin)
+            amount = amount - coin
+    return result
+
+# Make 8.7 yuan (870 cents)
+coins = [100, 50, 10]    # 1 yuan, 5 jiao, 1 jiao (unit: cents)
+print(greedy_coin_change(870, coins))
+# [100, 100, 100, 100, 100, 50, 10, 10]  &lt;- 5x 1 yuan + 1x 5 jiao + 2x 1 jiao = 8 coins
+</code></pre>
+<p><strong>核心循环</strong>：<code>for coin in coins: while amount &gt;= coin: 拿一个 coin</code>。</p>
+<h2>四、深入了解：贪心为什么有时错（3 分钟）</h2>
+<p><strong>贪心 = 永远挑局部最优</strong>——不回头看。<strong>有时会&quot;卡&quot;在局部最优，找不到全局最优</strong>。</p>
+<p><strong>真实案例</strong>：</p>
+<ul>
+<li><strong>导航</strong>：贪心 = 每步选最近的路——但可能错过&quot;绕远但快&quot;的高速</li>
+<li><strong>股票</strong>：贪心 = 每天买涨的——但可能错过&quot;低买高卖&quot;的最佳时机</li>
+<li><strong>AI 训练</strong>：贪心梯度下降 = 每步选下降最快的方向——但可能卡在&quot;局部最低&quot;，找不到&quot;全局最低&quot;</li>
+</ul>
+<p><strong>AI 工程师怎么应对</strong>：</p>
+<ul>
+<li><strong>贪心失败时</strong>：升级为动态规划、搜索、模拟退火</li>
+<li><strong>永远先试贪心</strong>：O(n) 简单；失败再升级</li>
+</ul>
+<p><strong>没学贪心的 AI 工程师 = 不会&quot;快但不一定对&quot;哲学</strong>。</p>
+<h2>五、何时用：贪心的 4 个使用场景（3 分钟）</h2>
+<table>
+<thead>
+<tr>
+<th>场景</th>
+<th>用贪心</th>
+<th>理由</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>找零（标准硬币 [1, 5, 10, 25, 100] 美分）</td>
+<td>✓</td>
+<td>数学证明过永远最优</td>
+</tr>
+<tr>
+<td>活动选择（选最多不重叠）</td>
+<td>✓</td>
+<td>选最早结束的</td>
+</tr>
+<tr>
+<td>Huffman 编码（数据压缩）</td>
+<td>✓</td>
+<td>频率最低的先合并</td>
+</tr>
+<tr>
+<td>最短路径（Dijkstra）</td>
+<td>✓</td>
+<td>每步选最近未访问</td>
+</tr>
+<tr>
+<td>0-1 背包</td>
+<td>✗</td>
+<td>贪心可能错（要看反例）</td>
+</tr>
+</tbody></table>
+<p><strong>关键</strong>：用贪心前<strong>先证或找反例</strong>——永远验证对错。</p>
+<h2>六、动手练习（先做完，再看第七节答案）</h2>
+<ol>
+<li>凑 18.3 元，硬币 [100, 50, 10]，用贪心，看结果</li>
+<li>凑 0.9 元，硬币 [50, 30, 10, 1]——贪心失败？手算</li>
+<li>把代码改一下，让它返回 <code>(硬币列表, 总数)</code></li>
+</ol>
+<h2>七、答案</h2>
+<p><strong>1.</strong> <code>[100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 50, 30, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10]</code>（18 个 1 元 + 1 个 5 角 + 10 个 1 角 = 19 枚）</p>
+<p><strong>2.</strong> 0.9 元贪心：5 角 (剩 0.4) → 3 角 (剩 0.1) → 1 角 (剩 0) → 1 分 (剩 0.99)... 贪心结果：1 个 5 角 + 1 个 3 角 + 1 个 1 角 + 90 个 1 分 = 93 枚。<strong>最优：3 个 3 角 = 9 角（3 枚）</strong>。贪心失败。</p>
+<p><strong>3.</strong> 加 <code>return result, len(result)</code>。</p>
+<h2>八、今日口诀 + 下一节预告</h2>
+<p><strong>今日口诀</strong>：<strong>贪心 = 每步挑当前最大。简单、O(n)，但不是所有问题都对。</strong></p>
+<p><strong>下节预告</strong>：贪心失败的例子，活动选择问题。</p>
+<hr>
+<h2>✅ 今天的阅读完成自查</h2>
+<ul>
+<li><input disabled="" type="checkbox"> 我能写 <code>for coin in coins: while amount &gt;= coin: ...</code></li>
+<li><input disabled="" type="checkbox"> 我知道贪心永远不保证最优（有反例）</li>
+<li><input disabled="" type="checkbox"> 我能跑找零问题</li>
+<li><input disabled="" type="checkbox"> 我能举 4 个贪心使用场景</li>
+</ul>
+<hr>
+<blockquote>
+<p><strong>📁 作业保存规则</strong>：本课课后练习写进一个文件 <code>W09-S1-homework.py</code>（存 <code>~/sand-hollow/&lt;你的学员ID&gt;/homework/</code>），每道题开头用刚学的备注分隔：<code># --- 题 1 ---</code>、<code># --- 题 2 ---</code>……<strong>交完作业要跟你的智能体说一声</strong>才会批改，评语出现在 <code>reviews/*.review.md</code>。<strong>回报触发词：交完作业或修完坑，都回一句「修完了」</strong>——不回这句 mentor 不知道，坑会一直挂着等。</p>
+</blockquote>
+<h2>📝 今日作业（≈15 分钟，今天的 30 分钟额度还剩这些）</h2>
+<p>新建文件 <code>W09-S1-homework.py</code>（存 <code>~/sand-hollow/&lt;你的学员ID&gt;/homework/</code>），3 道题：</p>
+<ol>
+<li><strong>小找零</strong>：凑 6.5 元，硬币 [100, 50, 10]。数硬币总数</li>
+<li><strong>大问题</strong>：凑 99.9 元，硬币 [100, 50, 10, 5, 1]。数硬币总数</li>
+<li><strong>贪心反例</strong>：凑 6 角，硬币 [4角, 3角, 1角]。贪心 vs 最优差多少？</li>
+</ol>
+<blockquote>
+<p>交完作业跟你的智能体说一声（回报触发词「修完了」），评语出现在 <code>reviews/*.review.md</code>。</p>
+</blockquote>
+<hr>
+</div>
+</section>
+<section class="lesson" data-lid="W09-S2">
+<div class="lesson-head"><span class="lt">贪心 ②：贪心实战 + 改进</span></div>
+<div class="md" data-lid="W09-S2"><!-- slug: greedy-coin-practice, type: addon -->
+<h1>W09-S2 · 贪心 ②：贪心实战 + 改进</h1>
+<blockquote>
+<p><strong>一句话核心</strong>：<strong>贪心 = 永远挑最大 + 升级到暴力</strong>。<code>greedy_change(amount, coins)</code> 跑 + <code>brute_change(amount, coins)</code> 找最优。</p>
+</blockquote>
+<blockquote>
+<p><strong>每日节奏（v1.9）：</strong> 阅读 ≈10 分钟，作业 ≈15 分钟
+<strong>需要 Thonny</strong>
+难度：⭐⭐ · 本篇是加餐② 贪心算法的第 2 课（前置：W09-S1）</p>
+</blockquote>
+<hr>
+<blockquote>
+<p><strong>📂 课前准备</strong>：先在 Thonny <code>文件 → 新建</code>，立刻 <code>文件 → 另存为...</code> 存为 <code>~/sand-hollow/&lt;你的学员ID&gt;/homework/W09-S2-practice.py</code>（ID 就是你注册沙坑用的 8 位数字）。本课所有亲手敲的代码都写进这个文件；课后作业写进同目录的 <code>W09-S2-homework.py</code>，两个文件严格分开，别混。</p>
+</blockquote>
+<h2>一、贪心函数实战（5 分钟）</h2>
+<pre><code class="language-python">def greedy_change(amount, coins):
+    &#39;&#39;&#39;Greedy. coins sorted largest to smallest.&#39;&#39;&#39;
+    result = []
+    for coin in coins:
+        while amount &gt;= coin:
+            result.append(coin)
+            amount -= coin
+    return result
+
+# Test
+print(greedy_change(870, [100, 50, 10]))    # 8 coins
+print(greedy_change(60, [40, 30, 10]))      # 3 coins (NOT optimal)
+</code></pre>
+<h2>二、暴力函数（5 分钟）</h2>
+<pre><code class="language-python">def brute_change(amount, coins):
+    &#39;&#39;&#39;Try every combination, return shortest.&#39;&#39;&#39;
+    best = None
+    def try_combos(remaining, coins, current):
+        nonlocal best
+        if remaining == 0:
+            if best is None or len(current) &lt; len(best):
+                best = list(current)
+            return
+        if remaining &lt; 0:
+            return
+        if best is not None and len(current) &gt;= len(best):
+            return
+        for i, coin in enumerate(coins):
+            current.append(coin)
+            try_combos(remaining - coin, coins[i:], current)
+            current.pop()
+    try_combos(amount, coins, [])
+    return best if best is not None else []
+</code></pre>
+<p><strong>关键</strong>：先 sort coins + <code>coins[i:]</code> 让后面只看更小硬币，避免重复。</p>
+<h2>三、示例演算：amount=60, coins=[40, 30, 10]（3 分钟）</h2>
+<p><strong>贪心</strong>：40 + 10 + 10 = 60 (3 枚)
+<strong>暴力</strong>：30 + 30 = 60 (2 枚) ✓ 最优</p>
+<p><strong>暴力赢</strong>——贪心用了 3 枚，最优 2 枚。</p>
+<h2>四、深入了解：暴力为什么&quot;慢&quot;（3 分钟）</h2>
+<p>暴力 = 遍历所有组合 = O(2^n)。</p>
+<table>
+<thead>
+<tr>
+<th>金额</th>
+<th>硬币数</th>
+<th>组合数（最坏）</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>60</td>
+<td>3</td>
+<td>2³ = 8</td>
+</tr>
+<tr>
+<td>100</td>
+<td>3</td>
+<td>2³ = 8</td>
+</tr>
+<tr>
+<td>1000</td>
+<td>5</td>
+<td>2⁵ = 32</td>
+</tr>
+<tr>
+<td>100 万</td>
+<td>5</td>
+<td>2⁵ = 32（但 amount 大）</td>
+</tr>
+</tbody></table>
+<p><strong>amount 比 coin 数更影响</strong>——所以暴力适合小 amount 测试贪心对错。</p>
+<h2>五、何时用：算法选择决策树（3 分钟）</h2>
+<pre><code>data small (&lt; 1000)?
+  yes -&gt; brute (gold standard)
+  no -&gt; greedy
+       counter-example?
+            yes -&gt; dynamic programming
+            no -&gt; greedy ✓
+</code></pre>
+<p><strong>默认贪心，失败升级</strong>。</p>
+<h2>六、动手练习</h2>
+<ol>
+<li>跑 <code>greedy_change(60, [40, 30, 10])</code> 看输出</li>
+<li>跑 <code>brute_change(60, [40, 30, 10])</code> 看输出</li>
+<li>写测试函数：随机生成 10 个 (amount, coins)，跑两个函数，对比结果</li>
+</ol>
+<h2>七、答案</h2>
+<pre><code class="language-python">import random
+
+def test_greedy_vs_brute():
+    &#39;&#39;&#39;Random test: greedy vs brute.&#39;&#39;&#39;
+    for _ in range(10):
+        amount = random.randint(10, 100)
+        coins = sorted([random.choice([1, 5, 10, 25, 50, 100]) for _ in range(3)], reverse=True)
+        g = len(greedy_change(amount, coins))
+        b = len(brute_change(amount, coins))
+        status = &#39;OK&#39; if g == b else f&#39;DIFF (g={g}, b={b})&#39;
+        print(f&#39;amount={amount:3d} coins={coins} greedy={g} brute={b} {status}&#39;)
+
+test_greedy_vs_brute()
+</code></pre>
+<h2>八、今日口诀 + 下一节预告</h2>
+<p><strong>今日口诀</strong>：<strong>贪心 vs 暴力 = 快 vs 对</strong>。先试贪心，失败升级暴力。</p>
+<p><strong>下节预告</strong>：活动选择问题——贪心找反例。</p>
+<hr>
+<h2>✅ 自查</h2>
+<ul>
+<li><input disabled="" type="checkbox"> 我能写贪心和暴力两个函数</li>
+<li><input disabled="" type="checkbox"> 我能解释为什么暴力慢</li>
+<li><input disabled="" type="checkbox"> 我能用 random 测试对比结果</li>
+</ul>
+<hr>
+<blockquote>
+<p><strong>📁 作业保存规则</strong>：本课课后练习写进一个文件 <code>W09-S2-homework.py</code>（存 <code>~/sand-hollow/&lt;你的学员ID&gt;/homework/</code>），每道题开头用刚学的备注分隔：<code># --- 题 1 ---</code>、<code># --- 题 2 ---</code>……<strong>交完作业要跟你的智能体说一声</strong>才会批改，评语出现在 <code>reviews/*.review.md</code>。<strong>回报触发词：交完作业或修完坑，都回一句「修完了」</strong>——不回这句 mentor 不知道，坑会一直挂着等。</p>
+</blockquote>
+<h2>📝 今日作业</h2>
+<p>新建 <code>W09-S2-homework.py</code>，3 道题：</p>
+<ol>
+<li><strong>测试函数</strong>：随机 10 个 (amount, coins) 对比贪心 vs 暴力</li>
+<li><strong>改写贪心</strong>：让 <code>greedy_change</code> 返回 <code>(coins_list, count)</code></li>
+<li><strong>场景分析</strong>：你熟悉的场景举一个贪心失败例子</li>
+</ol>
+<hr>
+</div>
+</section>
+<section class="lesson" data-lid="W09-S3">
+<div class="lesson-head"><span class="lt">贪心 ② 续：贪心失败的场景</span></div>
+<div class="md" data-lid="W09-S3"><!-- slug: greedy-coin-fail, type: addon -->
+<h1>W09-S3 · 贪心 ② 续：贪心失败的场景</h1>
+<blockquote>
+<p><strong>一句话核心</strong>：<strong>贪心有反例</strong>——0.9 元凑 50/30/10/1 硬币，贪心用 93 枚，最优 3 枚。<strong>永远检查反例</strong>。</p>
+</blockquote>
+<blockquote>
+<p><strong>每日节奏（v1.9）：</strong> 阅读 ≈8 分钟，作业 ≈17 分钟，总共 ≤25 分钟
+<strong>需要 Thonny</strong> —— 看 + 写代码
+难度：⭐⭐⭐ · 本篇是加餐② 贪心算法的第 2 课（前置：W09-S1）</p>
+</blockquote>
+<hr>
+<blockquote>
+<p><strong>📂 课前准备</strong>：先在 Thonny <code>文件 → 新建</code>，立刻 <code>文件 → 另存为...</code> 存为 <code>~/sand-hollow/&lt;你的学员ID&gt;/homework/W09-S3-practice.py</code>（ID 就是你注册沙坑用的 8 位数字）。本课所有亲手敲的代码都写进这个文件；课后作业写进同目录的 <code>W09-S3-homework.py</code>，两个文件严格分开，别混。</p>
+</blockquote>
+<h2>一、核心想法：贪心失败的例子（3 分钟）</h2>
+<p>凑 6 角，硬币 [4角, 3角, 1角]：</p>
+<p><strong>贪心</strong>：先 4 角（剩 2 角）→ 1 角（剩 1 角）→ 1 角（剩 0）= <strong>3 枚</strong>。</p>
+<p><strong>最优</strong>：3 角 + 3 角 = <strong>2 枚</strong>。</p>
+<p>贪心：<strong>3 枚</strong>。最优：<strong>2 枚</strong>。差 1 枚。</p>
+<p><strong>为什么失败？</strong> 贪心看到 4 角最大就挑，但两个 3 角才 = 6 角，比 4 角 + 1 角 + 1 角 更省。</p>
+<h2>二、示例演算：0.9 元凑 50/30/10/1 硬币（5 分钟）</h2>
+<table>
+<thead>
+<tr>
+<th>步</th>
+<th>选什么</th>
+<th>还剩</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>1</td>
+<td>50 (5 角)</td>
+<td>40</td>
+</tr>
+<tr>
+<td>2</td>
+<td>30 (3 角)</td>
+<td>10</td>
+</tr>
+<tr>
+<td>3</td>
+<td>10 (1 角)</td>
+<td>0</td>
+</tr>
+<tr>
+<td>4</td>
+<td>1 (1 分)</td>
+<td>— 剩 90 分，4 步 4 枚？错了</td>
+</tr>
+</tbody></table>
+<p><strong>重新算</strong>（贪心选最大 5 角）：</p>
+<table>
+<thead>
+<tr>
+<th>步</th>
+<th>选什么</th>
+<th>还剩</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>1</td>
+<td>50 (5 角)</td>
+<td>40</td>
+</tr>
+<tr>
+<td>2</td>
+<td>30 (3 角)</td>
+<td>10</td>
+</tr>
+<tr>
+<td>3</td>
+<td>10 (1 角)</td>
+<td>0</td>
+</tr>
+<tr>
+<td>4-93</td>
+<td>1 (1 分) × 90</td>
+<td>0</td>
+</tr>
+</tbody></table>
+<p><strong>贪心结果</strong>：1 个 5 角 + 1 个 3 角 + 1 个 1 角 + 90 个 1 分 = <strong>93 枚</strong>。</p>
+<p><strong>最优</strong>：3 个 3 角 = 9 角 = <strong>3 枚</strong>。</p>
+<p><strong>差 90 枚</strong>！</p>
+<h2>三、活动选择问题（5 分钟）</h2>
+<p>任务：选最多不重叠的活动。</p>
+<pre><code>Activities: A(1-4)  B(3-5)  C(0-6)  D(5-7)  E(8-9)  F(5-9)
+</code></pre>
+<p><strong>贪心</strong>：选最早结束的活动。</p>
+<ol>
+<li>A 最早结束 (4)，选</li>
+<li>跳过 B (3-5 和 A 重叠)、C (0-6 和 A 重叠)</li>
+<li>D 最早结束 (7)，选</li>
+<li>跳过 F (5-9 和 D 重叠)</li>
+<li>E (8-9)，选</li>
+</ol>
+<p><strong>结果</strong>：[A, D, E] = <strong>3 个活动</strong>。</p>
+<p><strong>最优</strong>：[B, D, E] 或 [B, E, ...] = 同样 3 个。在这个例子贪心刚好对。</p>
+<p><strong>真反例</strong>：</p>
+<pre><code>A(1-4)  B(2-3)  C(3-5)
+</code></pre>
+<ul>
+<li>贪心：A 最早结束 4 选</li>
+<li>最优：B(2-3) + C(3-5) = 2 个</li>
+<li>贪心只选 A = 1 个</li>
+</ul>
+<h2>四、Python 代码（5 分钟）</h2>
+<pre><code class="language-python">def greedy_coin_change_fail(amount, coins):
+    &#39;&#39;&#39;Greedy. coins sorted largest to smallest.&#39;&#39;&#39;
+    result = []
+    for coin in coins:
+        while amount &gt;= coin:
+            result.append(coin)
+            amount = amount - coin
+    return result
+
+# Test: amount=60 (cents), coins=[40, 30, 10]
+print(greedy_coin_change_fail(60, [40, 30, 10]))
+# [40, 10, 10]  &lt;- 3 coins
+# Optimal: [30, 30] = 2 coins
+</code></pre>
+<p>跑一下：贪心选 40 + 10 + 10 = 3 枚。最优 30 + 30 = 2 枚。</p>
+<h2>五、深入了解：贪心 vs 动态规划（3 分钟）</h2>
+<p><strong>当贪心失败时</strong>，AI 工程师升级到<strong>动态规划</strong>：</p>
+<table>
+<thead>
+<tr>
+<th>算法</th>
+<th>复杂度</th>
+<th>何时用</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>贪心</td>
+<td>O(n)</td>
+<td>简单问题（找零/活动选择）</td>
+</tr>
+<tr>
+<td>动态规划</td>
+<td>O(n²) 或更多</td>
+<td>复杂问题（背包/最短路径）</td>
+</tr>
+<tr>
+<td>暴力搜索</td>
+<td>O(2ⁿ)</td>
+<td>极小问题（n &lt; 20）</td>
+</tr>
+</tbody></table>
+<p><strong>实际经验</strong>：</p>
+<ul>
+<li>90% 简单问题贪心搞定</li>
+<li>9% 需要动态规划</li>
+<li>1% 需要暴力/启发式</li>
+</ul>
+<p><strong>AI 工程师的肌肉记忆</strong>：<strong>先试贪心，失败再升级</strong>——别上来就动态规划（杀鸡用牛刀）。</p>
+<h2>六、何时用：识别贪心失败（3 分钟）</h2>
+<p><strong>3 个红旗</strong>：</p>
+<ol>
+<li><strong>整数约束</strong>：硬币只能是整数个（找零、切割）</li>
+<li><strong>组合爆炸</strong>：可能有&quot;大+小&quot;代替&quot;中+中&quot;（背包）</li>
+<li><strong>未来约束</strong>：现在的选择影响未来可能性（活动选择）</li>
+</ol>
+<p><strong>如果有红旗</strong>：别用贪心，先用暴力算法（小数据验证），再升级动态规划。</p>
+<h2>七、动手练习</h2>
+<ol>
+<li>跑上面的代码，验证贪心选 3 枚</li>
+<li>凑 12 角，硬币 [7角, 4角, 3角, 1角]——贪心 vs 最优</li>
+<li>凑 18 角，硬币 [10角, 7角, 1角]——贪心 vs 最优</li>
+</ol>
+<h2>八、答案</h2>
+<ol>
+<li>✓ 3 枚</li>
+<li>贪心：7+4+1=12（3 枚）；最优：4+4+4=12（3 枚）——巧合</li>
+<li>贪心：10+7+1=18（3 枚）；最优：7+7+1=15... 不够。 10+7+1=18（3 枚）——也是 3 枚</li>
+</ol>
+<h2>九、今日口诀 + 下一节预告</h2>
+<p><strong>今日口诀</strong>：<strong>贪心不一定对。永远检查反例。</strong></p>
+<p><strong>下节预告</strong>：当贪心失败，我们用什么算法？（动态规划——更复杂但保证对）</p>
+<hr>
+<h2>✅ 今天的阅读完成自查</h2>
+<ul>
+<li><input disabled="" type="checkbox"> 我能举出贪心失败的例子</li>
+<li><input disabled="" type="checkbox"> 我能区分&quot;贪心结果&quot;和&quot;最优结果&quot;</li>
+<li><input disabled="" type="checkbox"> 我知道 AI 工程师怎么用贪心（先试，不对就升级）</li>
+<li><input disabled="" type="checkbox"> 我能识别贪心失败的 3 个红旗</li>
+</ul>
+<hr>
+<blockquote>
+<p><strong>📁 作业保存规则</strong>：本课课后练习写进一个文件 <code>W09-S3-homework.py</code>（存 <code>~/sand-hollow/&lt;你的学员ID&gt;/homework/</code>），每道题开头用刚学的备注分隔：<code># --- 题 1 ---</code>、<code># --- 题 2 ---</code>……<strong>交完作业要跟你的智能体说一声</strong>才会批改，评语出现在 <code>reviews/*.review.md</code>。<strong>回报触发词：交完作业或修完坑，都回一句「修完了」</strong>——不回这句 mentor 不知道，坑会一直挂着等。</p>
+</blockquote>
+<h2>📝 今日作业（≈17 分钟，今天的 30 分钟额度还剩这些）</h2>
+<p>新建文件 <code>W09-S3-homework.py</code>（存 <code>~/sand-hollow/&lt;你的学员ID&gt;/homework/</code>），3 道题：</p>
+<ol>
+<li><strong>反例收集</strong>：凑 8 角，硬币 [5角, 4角, 1角]。贪心 vs 最优差多少？</li>
+<li><strong>算法升级</strong>：当贪心失败时，写一个<strong>暴力</strong>算法遍历所有组合找最优（O(2^n)）</li>
+<li><strong>场景分析</strong>：在你熟悉的场景（如考试时间表、健身房器械）里举一个贪心失败的例子</li>
+</ol>
+<blockquote>
+<p>交完作业跟你的智能体说一声（回报触发词「修完了」），评语出现在 <code>reviews/*.review.md</code>。</p>
+</blockquote>
+<hr>
+</div>
+</section>
+<section class="lesson" data-lid="W09-S4">
+<div class="lesson-head"><span class="lt">贪心 ③：活动选择问题</span></div>
+<div class="md" data-lid="W09-S4"><!-- slug: greedy-activity, type: addon -->
+<h1>W09-S4 · 贪心 ③：活动选择问题</h1>
+<blockquote>
+<p><strong>一句话核心</strong>：<strong>活动选择 = 选最多不重叠</strong>。贪心（选最早结束）证明过永远最优。</p>
+</blockquote>
+<blockquote>
+<p><strong>每日节奏（v1.9）：</strong> 阅读 ≈8 分钟，作业 ≈17 分钟
+<strong>需要 Thonny</strong>
+难度：⭐⭐⭐ · 本篇是加餐② 贪心算法的第 3 课（前置：W09-S1 + S2）</p>
+</blockquote>
+<hr>
+<blockquote>
+<p><strong>📂 课前准备</strong>：先在 Thonny <code>文件 → 新建</code>，立刻 <code>文件 → 另存为...</code> 存为 <code>~/sand-hollow/&lt;你的学员ID&gt;/homework/W09-S4-practice.py</code>（ID 就是你注册沙坑用的 8 位数字）。本课所有亲手敲的代码都写进这个文件；课后作业写进同目录的 <code>W09-S4-homework.py</code>，两个文件严格分开，别混。</p>
+</blockquote>
+<h2>一、问题：选最多不重叠（3 分钟）</h2>
+<pre><code>Activities: A(1-4)  B(3-5)  C(0-6)  D(5-7)  E(8-9)  F(5-9)
+</code></pre>
+<p><strong>目标</strong>：选最多活动，互不重叠。</p>
+<h2>二、贪心策略：选最早结束（5 分钟）</h2>
+<p><strong>算法</strong>：</p>
+<ol>
+<li>按结束时间排序所有活动</li>
+<li>选第一个（最早结束）</li>
+<li>跳过所有跟它重叠的</li>
+<li>重复选下一个</li>
+</ol>
+<pre><code class="language-python">def activity_selection(activities):
+    &#39;&#39;&#39;Greedy: pick earliest-finishing activity.&#39;&#39;&#39;
+    # Sort by end time
+    sorted_acts = sorted(activities, key=lambda a: a[1])
+    selected = [sorted_acts[0]]
+    last_end = sorted_acts[0][1]
+
+    for activity in sorted_acts[1:]:
+        start, end = activity
+        if start &gt;= last_end:    # no overlap
+            selected.append(activity)
+            last_end = end
+
+    return selected
+</code></pre>
+<h2>三、示例演算：6 个活动（3 分钟）</h2>
+<table>
+<thead>
+<tr>
+<th>步</th>
+<th>候选</th>
+<th>选</th>
+<th>跳过</th>
+<th>选集</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>1</td>
+<td>A(1-4), B(3-5), C(0-6), D(5-7), E(8-9), F(5-9)</td>
+<td><strong>A(1-4)</strong></td>
+<td>C(0-6 重叠)</td>
+<td>[A]</td>
+</tr>
+<tr>
+<td>2</td>
+<td>跳过 C</td>
+<td><strong>D(5-7)</strong></td>
+<td>F(5-9 重叠)</td>
+<td>[A, D]</td>
+</tr>
+<tr>
+<td>3</td>
+<td>跳过 F</td>
+<td><strong>E(8-9)</strong></td>
+<td>—</td>
+<td>[A, D, E]</td>
+</tr>
+</tbody></table>
+<p><strong>结果</strong>：[A, D, E] = 3 个活动。</p>
+<h2>四、深入了解：为什么&quot;选最早结束&quot;最优（3 分钟）</h2>
+<p><strong>数学证明思路</strong>（简化）：</p>
+<ul>
+<li>假设选活动 a 结束时间最早 = t</li>
+<li>任何最优解都可以替换成&quot;选 a + 剩下的最优解&quot;</li>
+<li>剩下的最优解&quot;剩下的活动里&quot; = 选 a 之后的子问题</li>
+<li><strong>递归最优 = 全局最优</strong>（动态规划思想）</li>
+</ul>
+<p><strong>反例</strong>：&quot;选最早开始&quot;会失败：</p>
+<ul>
+<li>A(1-4) 选 → 跳过 B(3-5) 重叠</li>
+<li>失去 B(2-3) + C(3-5) = 2 个</li>
+</ul>
+<h2>五、何时用：活动选择 4 个变种（3 分钟）</h2>
+<table>
+<thead>
+<tr>
+<th>场景</th>
+<th>策略</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>选最多不重叠活动</td>
+<td>贪心（最早结束）</td>
+</tr>
+<tr>
+<td>选最多 k 个活动</td>
+<td>动态规划</td>
+</tr>
+<tr>
+<td>加权活动选择</td>
+<td>动态规划</td>
+</tr>
+<tr>
+<td>带代价活动选择</td>
+<td>线性规划</td>
+</tr>
+</tbody></table>
+<p><strong>AI 工程师原则</strong>：先贪心，不对再升级。</p>
+<h2>六、动手练习</h2>
+<ol>
+<li>跑上面的 <code>activity_selection([A, B, C, D, E, F])</code> 验证 [A, D, E]</li>
+<li>加活动 G(0-1)、H(7-8) 重跑</li>
+<li>改 <code>activity_selection</code> 加 weight 属性，按 weight 排</li>
+</ol>
+<h2>七、答案</h2>
+<pre><code class="language-python"># 1
+acts = [(&#39;A&#39;, 1, 4), (&#39;B&#39;, 3, 5), (&#39;C&#39;, 0, 6),
+        (&#39;D&#39;, 5, 7), (&#39;E&#39;, 8, 9), (&#39;F&#39;, 5, 9)]
+print(activity_selection(acts))   # [(&#39;A&#39;, 1, 4), (&#39;D&#39;, 5, 7), (&#39;E&#39;, 8, 9)]
+
+# 2
+acts.append((&#39;G&#39;, 0, 1))
+acts.append((&#39;H&#39;, 7, 8))
+print(activity_selection(acts))
+# [(&#39;G&#39;, 0, 1), (&#39;A&#39;, 1, 4), (&#39;D&#39;, 5, 7), (&#39;H&#39;, 7, 8)]
+# 4 activities
+
+# 3
+def activity_selection_weighted(activities):
+    sorted_acts = sorted(activities, key=lambda a: (-a[2], a[1]))
+    selected = []
+    last_end = 0
+    for name, start, end, weight in sorted_acts:
+        if start &gt;= last_end:
+            selected.append((name, start, end, weight))
+            last_end = end
+    return selected
+</code></pre>
+<h2>八、今日口诀 + 下一节预告</h2>
+<p><strong>今日口诀</strong>：<strong>活动选择 = 选最早结束</strong>。证明过永远最优。</p>
+<p><strong>下节预告</strong>：贪心项目——巡逻排班游戏。</p>
+<hr>
+<h2>✅ 自查</h2>
+<ul>
+<li><input disabled="" type="checkbox"> 我能写 <code>activity_selection</code> 函数</li>
+<li><input disabled="" type="checkbox"> 我能解释为什么&quot;选最早结束&quot;最优</li>
+<li><input disabled="" type="checkbox"> 我能列举活动选择的 4 个变种</li>
+</ul>
+<hr>
+<blockquote>
+<p><strong>📁 作业保存规则</strong>：本课课后练习写进一个文件 <code>W09-S4-homework.py</code>（存 <code>~/sand-hollow/&lt;你的学员ID&gt;/homework/</code>），每道题开头用刚学的备注分隔：<code># --- 题 1 ---</code>、<code># --- 题 2 ---</code>……<strong>交完作业要跟你的智能体说一声</strong>才会批改，评语出现在 <code>reviews/*.review.md</code>。<strong>回报触发词：交完作业或修完坑，都回一句「修完了」</strong>——不回这句 mentor 不知道，坑会一直挂着等。</p>
+</blockquote>
+<h2>📝 今日作业</h2>
+<p>新建 <code>W09-S4-homework.py</code>，3 道题：</p>
+<ol>
+<li><strong>实现</strong>：写 <code>activity_selection</code> 函数，验证 [A, D, E]</li>
+<li><strong>扩展</strong>：加 weight 属性，按 weight 排</li>
+<li><strong>实战场景</strong>：用活动选择算法安排你一天的活动（5+ 个），看最多能选几个</li>
+</ol>
+<hr>
+</div>
+</section>
+<section class="lesson" data-lid="W09-S5">
+<div class="lesson-head"><span class="lt">贪心项目：巡逻排班游戏</span></div>
+<div class="md" data-lid="W09-S5"><!-- slug: greedy-patrol-game, type: addon -->
+<h1>W09-S5 · 贪心项目：巡逻排班游戏</h1>
+<blockquote>
+<p><strong>一句话核心</strong>：<strong>贪心项目 = 真实场景 + 多种贪心策略对比</strong>。猫武士巡逻：选最多任务/最大价值/最省时间。</p>
+</blockquote>
+<blockquote>
+<p><strong>每日节奏（v1.9）：</strong> 阅读 ≈8 分钟，作业 ≈17 分钟
+<strong>需要 Thonny</strong>
+难度：⭐⭐⭐ · 本篇是加餐② 贪心算法的第 4 课（前置：W09-S1 ~ S4）</p>
+</blockquote>
+<hr>
+<blockquote>
+<p><strong>📂 课前准备</strong>：先在 Thonny <code>文件 → 新建</code>，立刻 <code>文件 → 另存为...</code> 存为 <code>~/sand-hollow/&lt;你的学员ID&gt;/homework/W09-S5-practice.py</code>（ID 就是你注册沙坑用的 8 位数字）。本课所有亲手敲的代码都写进这个文件；课后作业写进同目录的 <code>W09-S5-homework.py</code>，两个文件严格分开，别混。</p>
+</blockquote>
+<h2>一、场景：猫武士巡逻（3 分钟）</h2>
+<p>部落有 N 个巡逻点，每个点：</p>
+<ul>
+<li>距离（km）</li>
+<li>价值（食物/水源/安全）</li>
+<li>时间窗（h-h）</li>
+</ul>
+<p>目标：<strong>8 小时内选最高总价值的巡逻</strong>。</p>
+<h2>二、3 种贪心策略（5 分钟）</h2>
+<pre><code class="language-python">def patrol_greedy_value(patrols):
+    &#39;&#39;&#39;Strategy 1: pick highest value first.&#39;&#39;&#39;
+    sorted_p = sorted(patrols, key=lambda p: -p[&#39;value&#39;])
+    return pick_within_time(sorted_p, 8)
+
+def patrol_greedy_efficiency(patrols):
+    &#39;&#39;&#39;Strategy 2: pick highest value/time ratio.&#39;&#39;&#39;
+    sorted_p = sorted(patrols, key=lambda p: -(p[&#39;value&#39;] / p[&#39;time&#39;]))
+    return pick_within_time(sorted_p, 8)
+
+def patrol_greedy_shortest(patrols):
+    &#39;&#39;&#39;Strategy 3: pick shortest time first.&#39;&#39;&#39;
+    sorted_p = sorted(patrols, key=lambda p: p[&#39;time&#39;])
+    return pick_within_time(sorted_p, 8)
+
+def pick_within_time(sorted_patrols, max_time):
+    &#39;&#39;&#39;Pick patrols in order while time permits.&#39;&#39;&#39;
+    selected = []
+    total_time = 0
+    for p in sorted_patrols:
+        if total_time + p[&#39;time&#39;] &lt;= max_time:
+            selected.append(p)
+            total_time += p[&#39;time&#39;]
+    return selected
+</code></pre>
+<h2>三、示例演算：6 个巡逻点（3 分钟）</h2>
+<table>
+<thead>
+<tr>
+<th>巡逻</th>
+<th>距离</th>
+<th>时间</th>
+<th>价值</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>A</td>
+<td>5 km</td>
+<td>2h</td>
+<td>10</td>
+</tr>
+<tr>
+<td>B</td>
+<td>8 km</td>
+<td>3h</td>
+<td>15</td>
+</tr>
+<tr>
+<td>C</td>
+<td>3 km</td>
+<td>1h</td>
+<td>5</td>
+</tr>
+<tr>
+<td>D</td>
+<td>6 km</td>
+<td>2h</td>
+<td>12</td>
+</tr>
+<tr>
+<td>E</td>
+<td>4 km</td>
+<td>2h</td>
+<td>8</td>
+</tr>
+<tr>
+<td>F</td>
+<td>10 km</td>
+<td>4h</td>
+<td>20</td>
+</tr>
+</tbody></table>
+<p><strong>价值优先</strong>：A(10) + B(15) + D(12) + E(8) = 45 (8h) ← 但 D 时间冲突
+<strong>效率优先</strong>：B(5/h) + C(5/h) + D(6/h) + A(5/h) = 42 (8h)
+<strong>最短优先</strong>：C(1) + A(2) + D(2) + E(2) + B(3) = 45 (10h 超时) → C + A + D + E = 35 (7h)</p>
+<p><strong>效率优先胜出</strong>：用更少时间得更高价值。</p>
+<h2>四、深入了解：3 种策略的取舍（3 分钟）</h2>
+<table>
+<thead>
+<tr>
+<th>策略</th>
+<th>优点</th>
+<th>缺点</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>价值优先</td>
+<td>简单</td>
+<td>不考虑时间，可能超</td>
+</tr>
+<tr>
+<td>效率优先</td>
+<td>时间利用率高</td>
+<td>错过大单</td>
+</tr>
+<tr>
+<td>最短优先</td>
+<td>快速集齐</td>
+<td>可能选低价值</td>
+</tr>
+</tbody></table>
+<p><strong>实战</strong>：<strong>效率优先</strong>最常用（折中）。</p>
+<h2>五、何时用：项目模板（3 分钟）</h2>
+<pre><code>def project(real_scenario, strategies, metric):
+    &#39;&#39;&#39;Run all strategies, compare metric.&#39;&#39;&#39;
+    for name, strategy in strategies.items():
+        result = strategy(real_scenario)
+        print(f&#39;{name}: {metric(result)}&#39;)
+</code></pre>
+<p><strong>模板通用</strong>：换场景/策略/度量就行。</p>
+<h2>六、动手练习</h2>
+<ol>
+<li>跑 3 种策略，对比总价值</li>
+<li>加 brute 暴力策略（穷举所有组合）</li>
+<li>画图：横轴策略，纵轴总价值</li>
+</ol>
+<h2>七、答案</h2>
+<pre><code class="language-python">import random
+
+# Random patrols
+patrols = [
+    {&#39;name&#39;: chr(65+i), &#39;time&#39;: random.randint(1, 4),
+     &#39;value&#39;: random.randint(5, 25)}
+    for i in range(10)
+]
+
+print(&#39;Strategy comparison:&#39;)
+for name, fn in [(&#39;value-first&#39;, patrol_greedy_value),
+                 (&#39;efficiency-first&#39;, patrol_greedy_efficiency),
+                 (&#39;shortest-first&#39;, patrol_greedy_shortest)]:
+    selected = fn(patrols)
+    total_value = sum(p[&#39;value&#39;] for p in selected)
+    total_time = sum(p[&#39;time&#39;] for p in selected)
+    print(f&#39;  {name}: total value={total_value}, total time={total_time}h, count={len(selected)}&#39;)
+</code></pre>
+<h2>八、今日口诀 + 周末预告</h2>
+<p><strong>今日口诀</strong>：<strong>项目 = 场景 + 策略 + 度量</strong>。3 件齐全。</p>
+<p><strong>周末预告</strong>：贪心找零比赛——贪心 vs 暴力 vs 动态规划。</p>
+<hr>
+<h2>✅ 自查</h2>
+<ul>
+<li><input disabled="" type="checkbox"> 我能写 3 种贪心策略</li>
+<li><input disabled="" type="checkbox"> 我能用模板跑项目</li>
+<li><input disabled="" type="checkbox"> 我能解释效率优先的优点</li>
+</ul>
+<hr>
+<blockquote>
+<p><strong>📁 作业保存规则</strong>：本课课后练习写进一个文件 <code>W09-S5-homework.py</code>（存 <code>~/sand-hollow/&lt;你的学员ID&gt;/homework/</code>），每道题开头用刚学的备注分隔：<code># --- 题 1 ---</code>、<code># --- 题 2 ---</code>……<strong>交完作业要跟你的智能体说一声</strong>才会批改，评语出现在 <code>reviews/*.review.md</code>。<strong>回报触发词：交完作业或修完坑，都回一句「修完了」</strong>——不回这句 mentor 不知道，坑会一直挂着等。</p>
+</blockquote>
+<h2>📝 今日作业</h2>
+<p>新建 <code>W09-S5-homework.py</code>，3 道题：</p>
+<ol>
+<li><strong>3 策略对比</strong>：写 3 种策略，对比总价值</li>
+<li><strong>brute 暴力</strong>：穷举所有组合找最优</li>
+<li><strong>场景迁移</strong>：把 3 种策略用在你熟悉的场景（学习/游戏/吃饭）</li>
+</ol>
+<hr>
+</div>
+</section>
+<section class="lesson" data-lid="W09-weekend">
+<div class="lesson-head"><span class="lt">找零比赛：贪心 vs 暴力</span></div>
+<div class="md" data-lid="W09-weekend"><!-- slug: greedy-coin-game, type: addon -->
+<h1>W09-weekend · 找零比赛：贪心 vs 暴力</h1>
+<blockquote>
+<p><strong>一句话核心</strong>：<strong>最好的工程师不是用最复杂的算法，是用最合适的算法</strong>。先贪心，失败再升级。</p>
+</blockquote>
+<blockquote>
+<p><strong>每日节奏（v1.9）：</strong> 周末项目 ≈60 分钟（纯动手，没阅读）
+<strong>写代码时间</strong> —— 设计、写、调试
+难度：⭐⭐⭐ · 前置：W09-S1 + W09-S3</p>
+</blockquote>
+<hr>
+<blockquote>
+<p><strong>📂 课前准备 · 随堂练习文件</strong>：先在 Thonny <code>文件 → 新建</code>，立刻 <code>文件 → 另存为...</code> 存为 <code>~/sand-hollow/&lt;你的学员ID&gt;/homework/W09-weekend-practice.py</code>。周末代码都写在这里。</p>
+</blockquote>
+<h2>⓪ 🤖 课前 AI 一分钟 · 第 33 颗：AI 工程师 = 选对算法（3 分钟）</h2>
+<p>今天的周末：建一个找零比赛场。贪心算法 vs 暴力算法，赛跑找最优解。</p>
+<p><strong>AI 工程师每天做的事</strong>：选对算法。<strong>先试最简单（贪心），不行就升级（动态规划、搜索）</strong>。这是 AI 工程师的肌肉记忆。</p>
+<p><strong>今日口诀</strong>：<strong>最好的工程师不是用最复杂的算法，是用最合适的算法</strong>。今天你练这招。</p>
+<p><strong>⚔️ 判一判</strong>：</p>
+<blockquote>
+<ol>
+<li>暴力算法永远没价值</li>
+<li>AI 工程师选算法时考虑性能和正确性</li>
+</ol>
+</blockquote>
+<details><summary>答案</summary>
+
+<p><strong>1.</strong> ✗ 暴力是黄金标准（用来测试贪心对错）；<strong>2.</strong> ✓ 永远 2 选 1：快但可能错（贪心），还是慢但保证对（暴力）？</p>
+</details>
+
+<hr>
+<h2>一、项目：找零比赛（60 分钟）</h2>
+<p>写两个找零函数：</p>
+<ol>
+<li><code>greedy_change(amount, coins)</code> —— 永远挑最大</li>
+<li><code>brute_change(amount, coins)</code> —— 试所有组合找最少</li>
+</ol>
+<p>跑 5 组输入，比较：</p>
+<ul>
+<li>贪心选了 N 枚</li>
+<li>暴力选了 M 枚</li>
+<li>谁赢？</li>
+</ul>
+<h2>二、贪心函数（10 分钟）</h2>
+<pre><code class="language-python">def greedy_change(amount, coins):
+    &#39;&#39;&#39;Return a list of coins that sums to amount using greedy.&#39;&#39;&#39;
+    result = []
+    for coin in coins:
+        while amount &gt;= coin:
+            result.append(coin)
+            amount = amount - coin
+    return result
+</code></pre>
+<h2>三、暴力函数（15 分钟）</h2>
+<pre><code class="language-python">def brute_change(amount, coins):
+    &#39;&#39;&#39;
+    Try every combination, return the shortest.
+    Exponential: only works for small amount and small coin set.
+    &#39;&#39;&#39;
+    best = None
+    def try_combinations(remaining, coins, current):
+        nonlocal best
+        if remaining == 0:
+            if best is None or len(current) &lt; len(best):
+                best = list(current)   # copy
+            return
+        if remaining &lt; 0:
+            return
+        if best is not None and len(current) &gt;= len(best):
+            return   # prune: cannot beat current best
+        for i, coin in enumerate(coins):
+            current.append(coin)
+            try_combinations(remaining - coin, coins[i:], current)
+            current.pop()
+
+    try_combinations(amount, coins, [])
+    return best if best is not None else []
+</code></pre>
+<p><strong>技巧</strong>：先 sort coins（最大到最小），同时 <code>coins[i:]</code> 让后面递归只看当前和更小的硬币，避免重复。</p>
+<h2>四、跑比赛（10 分钟）</h2>
+<pre><code class="language-python">tests = [
+    (87, [100, 50, 10]),       # 8.7 yuan
+    (60, [40, 30, 10]),        # 6 jiao (greedy fails)
+    (99, [50, 30, 10, 1]),     # 9.9 yuan
+    (200, [100, 50, 20, 10, 5]),  # 20 yuan
+    (1000, [500, 200, 100, 50, 20, 10, 5, 1]),  # 100 yuan
+]
+
+for amount, coins in tests:
+    sorted_coins = sorted(coins, reverse=True)
+    g = greedy_change(amount, sorted_coins)
+    b = brute_change(amount, sorted_coins)
+    winner = &#39;greedy win&#39; if len(g) == len(b) else f&#39;brute {len(b)} coins vs greedy {len(g)} coins&#39;
+    print(f&#39;amount={amount:4d}  greedy={len(g):2d}  brute={len(b):2d}  winner={winner}&#39;)
+</code></pre>
+<p>跑一下。看哪些 case 贪心赢，哪些 case 暴力赢。</p>
+<h2>五、示例演算：amount=60, coins=[40, 30, 10]（3 分钟）</h2>
+<p><strong>贪心</strong>：</p>
+<ul>
+<li>40 + 10 + 10 = 60 (3 枚)</li>
+</ul>
+<p><strong>暴力</strong>（试所有组合）：</p>
+<ul>
+<li>30 + 30 = 60 (2 枚) ✓ 最优</li>
+<li>40 + 10 + 10 = 60 (3 枚)</li>
+<li>10 + 10 + 10 + 10 + 10 + 10 = 60 (6 枚)</li>
+</ul>
+<p><strong>暴力赢</strong>——贪心用了 3 枚，最优 2 枚。</p>
+<h2>六、深入了解：暴力为什么仍有用（3 分钟）</h2>
+<p><strong>暴力算法 = 黄金标准</strong>——慢但保证对。3 个用途：</p>
+<ol>
+<li><strong>测试贪心对错</strong>：暴力找最优，贪心 vs 暴力 = 反例检测</li>
+<li><strong>小数据 baseline</strong>：n &lt; 20 时暴力足够，不必优化</li>
+<li><strong>教学</strong>：暴力最直观，先写暴力再优化</li>
+</ol>
+<p><strong>真实案例</strong>：</p>
+<ul>
+<li><strong>单元测试</strong>：永远拿&quot;已知答案&quot;测试代码（参考实现是暴力）</li>
+<li><strong>算法竞赛</strong>：小数据暴力得部分分，大数据再优化</li>
+<li><strong>AI debug</strong>：用暴力结果对比 ML 输出，看偏差</li>
+</ul>
+<p><strong>没学暴力的 AI 工程师 = 不会&quot;找反例&quot;的工程师</strong>。</p>
+<h2>七、何时用：算法选择的决策树（3 分钟）</h2>
+<pre><code>data small (&lt; 20)?
+  yes -&gt; brute force
+  no -&gt; greedy
+       if counter-example?
+         yes -&gt; dynamic programming
+         no -&gt; greedy OK
+</code></pre>
+<p><strong>永远先试最简单的</strong>——别上来就动归/搜索。</p>
+<h2>八、读代码挑战（10 分钟）</h2>
+<p>找出下面代码里的 2 个 bug：</p>
+<pre><code class="language-python">def greedy_change_buggy(amount, coins):
+    result = []
+    for coin in coins:           # bug 1?
+        if amount &lt; coin:        # bug 2?
+            continue
+        while amount &gt;= coin:
+            result.append(coin)
+            amount = amount - coin
+    return result
+</code></pre>
+<details><summary>提示</summary>
+
+<ol>
+<li><code>for coin in coins</code>——如果 <code>coins</code> 没排好序（不是从大到小），贪心就失败。应该 <code>sorted(coins, reverse=True)</code></li>
+<li><code>if amount &lt; coin: continue</code>——可以工作，但当 amount &gt; 0 但所有 coin 都 &gt; amount 时，函数返回 <code>[]</code>，应该至少报错&quot;无法找零&quot;</li>
+</ol>
+</details>
+
+<h2>九、提交（5 分钟）</h2>
+<p>存到 <code>W09-weekend-practice.py</code>。跟 mentor 说&quot;<strong>修完了</strong>&quot;。</p>
+<h2>十、反思（5 分钟）</h2>
+<ul>
+<li>贪心：快，O(n)，但不一定对</li>
+<li>暴力：慢，O(2^n)，但保证对</li>
+<li>AI 工程师的&quot;肌肉记忆&quot;：先试贪心，失败再升级</li>
+</ul>
+<p>下周：W10（还是 Python 基础，函数与模块）。</p>
+<hr>
+<h2>✅ 周末自查</h2>
+<ul>
+<li><input disabled="" type="checkbox"> 写好两个找零函数</li>
+<li><input disabled="" type="checkbox"> 跑过 5 组测试，看到贪心赢和暴力赢的 case</li>
+<li><input disabled="" type="checkbox"> 找到并修了 2 个 bug</li>
+<li><input disabled="" type="checkbox"> 存到 <code>W09-weekend-practice.py</code></li>
+</ul>
+<p>四格全勾 → 周末完成。下周：W10。</p>
+<hr>
+<h2>👀 C++ 认脸时刻（1 分钟 · 只看不敲）</h2>
+<pre><code class="language-cpp">#include &lt;iostream&gt;
+#include &lt;vector&gt;
+#include &lt;algorithm&gt;
+int main() {
+    std::vector&lt;int&gt; coins = {1, 5, 10, 25};
+    int amount = 41;
+    std::sort(coins.rbegin(), coins.rend());   // sort descending
+    // coins is now {25, 10, 5, 1}
+    std::cout &lt;&lt; &quot;sorted descending&quot; &lt;&lt; std::endl;
+    return 0;
+}
+</code></pre>
+<p>三个认脸：</p>
+<ul>
+<li><code>std::sort(begin, end)</code> 排序</li>
+<li><code>rbegin()</code> / <code>rend()</code> 反向迭代器（Python 的 <code>reversed</code>）</li>
+<li>跟 Python 的 <code>sorted(coins, reverse=True)</code> 等价</li>
+</ul>
+</div>
+</section>
+</div>
+</div>
+</body>
+</html>

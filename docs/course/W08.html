@@ -1,0 +1,782 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>W08 · 🏆 项目周：画地图（前置 W07 列表）</title>
+<style>
+:root{--bg:#0f1420;--card:#171e2e;--card2:#1e2740;--border:#2a3550;--text:#e8ecf4;--text2:#8b96ad;--accent:#5b9dff;--ok:#3ecf8e}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+.wrap{max-width:900px;margin:0 auto;padding:28px 20px 60px}
+h1{font-size:1.5rem}
+.wk-meta{color:var(--text2);font-size:.85rem;margin:4px 0 20px}
+.lesson{border:1px solid var(--border);border-radius:12px;padding:16px 18px;margin-bottom:14px;background:var(--card2)}
+.lesson-head{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.lesson-head .lt{font-weight:700;font-size:1rem;flex:1}
+.md{font-size:.92rem;line-height:1.8;color:var(--text);overflow-wrap:break-word}
+.md h1,.md h2,.md h3{margin:14px 0 8px;font-size:1.05rem}
+.md p{margin:8px 0}
+.md code{background:rgba(91,157,255,.12);border-radius:5px;padding:2px 6px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.85em;color:#a8c8ff}
+.md pre{background:#0b0f18;border:1px solid var(--border);border-radius:10px;padding:12px 14px;overflow-x:auto;margin:10px 0}
+.md pre code{background:none;padding:0;color:#c9d7f0}
+.md ul,.md ol{margin:8px 0 8px 22px}
+.md blockquote{border-left:3px solid var(--accent);padding:4px 12px;color:var(--text2);margin:10px 0}
+.md a{color:var(--accent)}
+.md table{border-collapse:collapse;margin:10px 0;font-size:.85rem}
+.md td,.md th{border:1px solid var(--border);padding:6px 10px}
+.md input[type=checkbox]{width:15px;height:15px;accent-color:var(--ok);cursor:pointer;margin-right:6px;vertical-align:-2px}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+<h1 class="wk-title">🏆 项目周：画地图（前置 W07 列表）</h1>
+<div class="wk-meta">W08 · 6 课</div>
+</header>
+<div class="week-body" data-week="W08">
+<section class="lesson" data-lid="W08-S1">
+<div class="lesson-head"><span class="lt">画地图：先想后写</span></div>
+<div class="md" data-lid="W08-S1"><!-- slug: cat-adv-map, type: base -->
+<h2>⓪ 🤖 课前 AI 一分钟 · 第 25 颗：AI 也会&quot;先想后写&quot;——设计（3 分钟）</h2>
+<blockquote>
+<p><strong>第 25 颗</strong></p>
+</blockquote>
+<p>AI 写代码 = 先想架构（函数/类/数据）→ 再写实现。<strong>先想后写</strong>是 AI 工程的核心。</p>
+<p><strong>今日口诀</strong>：AI 写代码 = 先想架构（函数/类/数据）→ 再写实现。</p>
+<p><strong>⚔️ 判一判</strong>（AI 营线上测评题型热身，先自己答再看答案）：</p>
+<blockquote>
+<ol>
+<li>AI 写代码先想架构</li>
+<li>画地图项目 = 先设计后实现</li>
+</ol>
+</blockquote>
+<details><summary>答案</summary>
+
+<p><strong>1.</strong> ✓ 训练代码先设计 model 类<br><strong>2.</strong> ✓ 设计图 + 最小骨架 → 逐块实现</p>
+</details>
+
+<hr>
+<h1>W08-S1 · 画地图：先想后写</h1>
+<blockquote>
+<p><strong>每日节奏（v1.9）：</strong> 本篇纯阅读 ≈10 分钟，读完做当天作业 ≈10 分钟，总共 ≤25 分钟
+<strong>不需要 Thonny</strong>——正文一个字都不用敲，作业时间才开编辑器
+难度：⭐⭐ · 本篇是原 W07-L01 的前半（项目周开张 + 地图设计）</p>
+</blockquote>
+<hr>
+<h2>一、项目周开张：做一个完整的游戏（3 分钟）</h2>
+<p>前 6 周都是一课一招式。从今天起连着 5 节课做一件大事——<strong>文字冒险游戏「猫咪冒险岛」</strong>。你是一只在岛上的年轻猫武士，要走房间、拿道具、打敌人、最后挑战大 Boss。</p>
+<p>游戏五要素：地图、玩家、敌人、道具、胜负判定。每天一小步：S1 画地图（今天）→ S2 骨架 → S3 状态 → S4 战斗 → S5 Boss！</p>
+<h2>二、先想后写：今天的任务是画图（3 分钟）</h2>
+<p>新手最常见的翻车：上来就敲代码，敲到一半发现房间连不上。职业做法是「<strong>先想后写</strong>」——先画清地图，代码只是把图翻译成 Python。今天全在纸上完成，不建游戏文件。</p>
+<h2>三、地图长什么样（2 分钟）</h2>
+<p>每张地图 = <strong>房间</strong>（方块）+ <strong>连线</strong>（能走的路）。一张 6 房间示例：</p>
+<pre><code class="language-text">[ 神社 Shrine ] —— 起点，玩家从这里出发
+   |         \
+[ 树林 Forest ]   [ 河边 RiverBank ]
+  狼敌人          草药道具
+                    |
+              [ 独木桥 Bridge ]
+                    |
+              [ 巨鹰巢穴 BossNest ] —— 终点，打败巨鹰通关
+</code></pre>
+<p><strong>规矩：没有线的房间，玩家走不到。</strong> 画图时每条线都要双向考虑——从 A 能去 B，那从 B 也得能回 A。</p>
+<h2>四、五个关键设计问题（2 分钟）</h2>
+<p>拿着笔，边画边答：</p>
+<ol>
+<li><strong>几个房间？</strong> 5-7 个最适合（多于 10 难维护，少于 4 没探索感）</li>
+<li><strong>起点在哪？</strong> 一个入口</li>
+<li><strong>终点在哪？</strong> 一个 Boss 房，打赢通关</li>
+<li><strong>有没有岔路？</strong> 1-2 个刚好，多了迷路</li>
+<li><strong>敌人 / 道具放哪？</strong> 标在方块旁边</li>
+</ol>
+<h2>五、从一个房间想到一堆数据（1 分钟）</h2>
+<p>写代码之前先学会「看图说话」：站在神社，玩家能做什么？</p>
+<ul>
+<li>看到自己的位置 → 一个变量 <code>room</code></li>
+<li>选方向走 → <code>input</code> + <code>if</code> 判断</li>
+<li>换房间 → 给 <code>room</code> 换一个新值</li>
+</ul>
+<p>看到没有——<strong>房间 = 一个 if 分支，方向 = 一个 if 条件</strong>。这就是明天 S2 骨架的全部秘密。</p>
+<p><strong>今日口诀：</strong> 先想后写，房间是分支，连线是 if。</p>
+<hr>
+<h2>✅ 今天的阅读完成自查</h2>
+<ul>
+<li><input disabled="" type="checkbox"> 我能说出项目周 5 节课各做什么（地图→骨架→状态→战斗→Boss）</li>
+<li><input disabled="" type="checkbox"> 我知道「房间 = 一个 if 分支，方向 = 一个 if 条件」</li>
+<li><input disabled="" type="checkbox"> 我知道每条连线都要双向考虑，否则玩家会被困住</li>
+</ul>
+<p>三格全勾 → 打开作业，今天动手画你自己的地图 🐾</p>
+<hr>
+<blockquote>
+<p><strong>📁 作业保存规则</strong>：本课课后练习写进一个文件 <code>W08-S1-homework.py</code>（存 <code>~/sand-hollow/&lt;你的学员ID&gt;/homework/</code>），每道题开头用刚学的备注分隔：<code># --- 题 1 ---</code>、<code># --- 题 2 ---</code>……<strong>交完作业要跟你的智能体说一声</strong>才会批改，评语出现在 <code>reviews/*.review.md</code>。<strong>回报触发词：交完作业或修完坑，都回一句「修完了」</strong>——不回这句 mentor 不知道，坑会一直挂着等。</p>
+</blockquote>
+<h2>📝 今日作业（≈10 分钟）</h2>
+<p>新建 <code>W08-S1-homework.py</code>，2 道题：</p>
+<ol>
+<li><strong>画地图</strong>：在纸上画你的 5-7 房间地图，标注起点、Boss 房、敌人、道具。然后在作业文件里用注释把连接关系写下来，每行一条，例如：<code># shrine -&gt; north -&gt; forest</code></li>
+<li><strong>房间清单</strong>：写一个字典存房间介绍——<code>rooms = {&quot;shrine&quot;: &quot;old cat shrine, paths go north and east&quot;, &quot;forest&quot;: &quot;whispering forest, a feather glints on the moss&quot;}</code>，至少 5 个房间，最后 <code>print(rooms)</code> 验证。这个字典 S2 马上就要用！</li>
+</ol>
+<blockquote>
+<p>交完说「<strong>修完了</strong>」。明天 S2 把你的地图变成能跑的代码——3 房间走通 🐾</p>
+</blockquote>
+<h2>👀 C++ 认脸时刻（1 分钟 · 只看不敲）</h2>
+<p>C++ 的对应写法：</p>
+<pre><code class="language-cpp">#include &lt;iostream&gt;
+// 先想：需要什么数据？函数？类？
+// 画地图：房间数据 + 玩家位置 + 移动函数
+struct Room {
+    std::string name;
+    int x, y;
+};
+int main() { return 0; }
+</code></pre>
+<p>三个认脸：</p>
+<ol>
+<li>C++ <code>struct</code> 类似 Python dataclass</li>
+<li><code>std::string</code> 字符串类型</li>
+<li>先想数据 + 函数 = 设计</li>
+</ol>
+<blockquote>
+<p>AI 营笔试的编程题用 C++ 出。不用会写，<strong>认得脸</strong>就行。</p>
+</blockquote>
+</div>
+</section>
+<section class="lesson" data-lid="W08-S2">
+<div class="lesson-head"><span class="lt">最小骨架：三房间走通</span></div>
+<div class="md" data-lid="W08-S2"><!-- slug: cat-adv-design, type: base -->
+<h2>⓪ 🤖 课前 AI 一分钟 · 第 26 颗：AI 也会&quot;骨架&quot;——最小可运行（3 分钟）</h2>
+<blockquote>
+<p><strong>第 26 颗</strong></p>
+</blockquote>
+<p>AI 训练 = 先建最小模型（1 层网络）→ 跑通 → 慢慢加层。<strong>最小骨架</strong>是 AI 工程的范式。</p>
+<p><strong>今日口诀</strong>：AI 训练 = 先建最小模型（1 层网络）→ 跑通 → 慢慢加层。</p>
+<p><strong>⚔️ 判一判</strong>（AI 营线上测评题型热身，先自己答再看答案）：</p>
+<blockquote>
+<ol>
+<li>最小骨架 = 跑通最简版本</li>
+<li>AI 训练先跑通最小模型</li>
+</ol>
+</blockquote>
+<details><summary>答案</summary>
+
+<p><strong>1.</strong> ✓ Hello world 模式<br><strong>2.</strong> ✓ 1 层神经网络先跑通</p>
+</details>
+
+<hr>
+<h1>W08-S2 · 最小骨架：三房间走通</h1>
+<blockquote>
+<p><strong>每日节奏（v1.9）：</strong> 本篇纯阅读 ≈11 分钟 + 作业 ≈10 分钟，共 ≤25 分钟
+<strong>不需要 Thonny</strong>——作业时间才开编辑器
+难度：⭐⭐⭐ · 原W07-L01 后半（主循环骨架 + 一个 bug）</p>
+</blockquote>
+<hr>
+<h2>一、今天的目标：让地图跑起来（2 分钟）</h2>
+<p>昨天画好地图，今天翻译成代码。规矩「<strong>最小骨架</strong>」：先让 3 房间能走通、不报错，再加花样。先能跑，再好玩。用这张小图（你自己的地图留作业）：</p>
+<pre><code class="language-text">[ 神社 shrine ] —— north 到 forest / east 到 riverbank
+[ 树林 forest ] —— south 回 shrine
+[ 河边 riverbank ] —— south 回 shrine
+</code></pre>
+<h2>二、主循环的样子（4 分钟）</h2>
+<p>发动机是一个 <code>while</code> 循环（W05 老朋友）：</p>
+<pre><code class="language-python">print(&quot;=== Cat Adventure ===&quot;)
+print(&quot;You are a young cat warrior. Find your way to the top!&quot;)
+
+room = &quot;shrine&quot;
+
+while room != &quot;quit&quot;:
+    if room == &quot;shrine&quot;:
+        print(&quot;\n--- Cat Shrine ---&quot;)
+        print(&quot;You stand at the old shrine. Paths lead north and east.&quot;)
+        choice = input(&quot;&gt; &quot;)
+        if choice == &quot;north&quot;:
+            room = &quot;forest&quot;
+        elif choice == &quot;east&quot;:
+            room == &quot;riverbank&quot;
+</code></pre>
+<p>逐行看懂：</p>
+<ul>
+<li><code>room = &quot;shrine&quot;</code>：从神社出发，<code>room</code> 记住「我在哪」</li>
+<li><code>while room != &quot;quit&quot;</code>：不是 <code>&quot;quit&quot;</code> 就一直转</li>
+<li><code>if room == &quot;shrine&quot;</code>：站神社放神社剧情</li>
+<li><code>choice = input(&quot;&gt; &quot;)</code>：问走哪边</li>
+<li><code>room = &quot;forest&quot;</code>：换新值，下一圈进树林分支</li>
+</ul>
+<p><strong>房间 = 一个 if 分支</strong>：每圈先看 <code>room</code>，再放对应剧情。</p>
+<h2>三、补完另外两个房间（3 分钟）</h2>
+<p>在 <code>while</code> 里接着写 <code>elif</code>：</p>
+<pre><code class="language-python">while room != &quot;quit&quot;:
+    if room == &quot;shrine&quot;:
+        pass
+    elif room == &quot;forest&quot;:
+        print(&quot;--- Whispering Forest ---&quot;)
+        choice = input(&quot;&gt; &quot;)
+        if choice == &quot;south&quot;:
+            room = &quot;shrine&quot;
+    elif room == &quot;riverbank&quot;:
+        print(&quot;--- River Bank ---&quot;)
+        choice = input(&quot;&gt; &quot;)
+        if choice == &quot;south&quot;:
+            room = &quot;shrine&quot;
+</code></pre>
+<p>三个分支拼起来，shrine ↔ forest、shrine ↔ riverbank 通了。<strong>每条连线都要双向走通。</strong></p>
+<h2>四、藏了一颗地雷：<code>==</code> 写成赋值（2 分钟）</h2>
+<p>看第二节神社代码最后两行：</p>
+<pre><code class="language-text">if choice == &quot;north&quot;:
+    room = &quot;forest&quot;          # 一个等号：装进去，走！
+elif choice == &quot;east&quot;:
+    room == &quot;riverbank&quot;      # 两个等号：只是比较，啥也没发生！
+</code></pre>
+<p>W03-S3 的坑又来了：<code>==</code> 只是<strong>比一比</strong>，比完啥也不发生、不报错。症状诡异——输入 east「没反应」，永远困在神社。</p>
+<p><strong>作业第一题就是排这颗雷</strong>：改成单等号赋值，east 才生效。不报错的 bug 比报错的更狡猾——「没反应」时先查等号。</p>
+<p><strong>今日口诀：</strong> 房间是分支，换房靠赋值；没反应的 bug，先查等号数。</p>
+<hr>
+<h2>✅ 今天的阅读完成自查</h2>
+<ul>
+<li><input disabled="" type="checkbox"> 我能说出主循环怎么工作：看 room → 放剧情 → 换 room → 转下一圈</li>
+<li><input disabled="" type="checkbox"> 我知道 3 房间骨架每条连线都要双向走通</li>
+<li><input disabled="" type="checkbox"> 我知道 <code>room == &quot;riverbank&quot;</code> 的症状是「没反应」且不报错</li>
+</ul>
+<p>三格全勾 → 打开作业 🐾</p>
+<hr>
+<blockquote>
+<p><strong>📁 作业保存规则</strong>：本课课后练习写进一个文件 <code>W08-S2-homework.py</code>（存 <code>~/sand-hollow/&lt;你的学员ID&gt;/homework/</code>），每道题开头用刚学的备注分隔：<code># --- 题 1 ---</code>、<code># --- 题 2 ---</code>……<strong>交完作业要跟你的智能体说一声</strong>才会批改，评语出现在 <code>reviews/*.review.md</code>。<strong>回报触发词：交完作业或修完坑，都回一句「修完了」</strong>——不回这句 mentor 不知道，坑会一直挂着等。</p>
+</blockquote>
+<h2>📝 今日作业（≈10 分钟）</h2>
+<p>新建 <code>W08-S2-homework.py</code>，3 道题：</p>
+<ol>
+<li><strong>排雷</strong>：把骨架（含 bug）敲进文件，跑一遍看 east「没反应」；找到那行改成单等号，跑通</li>
+<li><strong>接第 4 个房间</strong>：加 <code>bridge</code>（riverbank 往 north），保证能走回</li>
+<li><strong>测试走图</strong>：所有连线去+回各走一遍，零死角</li>
+</ol>
+<blockquote>
+<p>交完说「<strong>修完了</strong>」。明天 S3 给玩家发血条和道具 🐾</p>
+</blockquote>
+<h2>👀 C++ 认脸时刻（1 分钟 · 只看不敲）</h2>
+<p>C++ 的对应写法：</p>
+<pre><code class="language-cpp">#include &lt;iostream&gt;
+int main() {
+    // 最小骨架：让空房子通电
+    std::cout &lt;&lt; &quot;Hello, Adventure!&quot; &lt;&lt; std::endl;
+    return 0;
+}
+</code></pre>
+<p>三个认脸：</p>
+<ol>
+<li><code>int main()</code> 是程序入口</li>
+<li><code>std::cout</code> 输出</li>
+<li>先跑通最小版本 = 骨架</li>
+</ol>
+<blockquote>
+<p>AI 营笔试的编程题用 C++ 出。不用会写，<strong>认得脸</strong>就行。</p>
+</blockquote>
+</div>
+</section>
+<section class="lesson" data-lid="W08-S3">
+<div class="lesson-head"><span class="lt">玩家状态：HP 和道具栏</span></div>
+<div class="md" data-lid="W08-S3"><!-- slug: cat-adv-skeleton, type: base -->
+<h2>⓪ 🤖 课前 AI 一分钟 · 第 27 颗：AI 也会&quot;状态&quot;——HP/背包（3 分钟）</h2>
+<blockquote>
+<p><strong>第 27 颗</strong></p>
+</blockquote>
+<p>AI Agent = 维护&quot;状态&quot;（HP/背包/位置）。Python dict = <strong>存状态数据</strong>。</p>
+<p><strong>今日口诀</strong>：AI Agent = 维护&quot;状态&quot;（HP/背包/位置）。</p>
+<p><strong>⚔️ 判一判</strong>（AI 营线上测评题型热身，先自己答再看答案）：</p>
+<blockquote>
+<ol>
+<li>玩家 HP 用变量存</li>
+<li>AI Agent 状态 = 多变量字典</li>
+</ol>
+</blockquote>
+<details><summary>答案</summary>
+
+<p><strong>1.</strong> ✓ hp = 100; mp = 50<br><strong>2.</strong> ✓ state = {&quot;hp&quot;: 100, &quot;mp&quot;: 50, &quot;pos&quot;: [0,0]}</p>
+</details>
+
+<hr>
+<h1>W08-S3 · 玩家状态：HP 和道具栏</h1>
+<blockquote>
+<p><strong>每日节奏（v1.9）：</strong> 本篇纯阅读 ≈10 分钟，读完做当天作业 ≈10 分钟，总共 ≤25 分钟
+<strong>不需要 Thonny</strong>——正文一个字都不用敲，作业时间才开编辑器
+难度：⭐⭐⭐ · 本篇是原 W07-L02 的前半（玩家状态字典 + 道具栏）</p>
+</blockquote>
+<hr>
+<h2>一、光会走还不够：玩家得有「状态」（3 分钟）</h2>
+<p>前两节的猫武士只会走来走去，像幽灵。今天起她有了身体——<strong>HP（生命值）、攻击、防御、道具栏</strong>。这些数据合起来叫<strong>玩家状态</strong>，整个游戏都在读写它：战斗扣血、捡道具入库、喝草药回血，全是改这几个数。</p>
+<p>存哪？一个<strong>字典</strong>：</p>
+<pre><code class="language-python">player = {
+    &quot;name&quot;: &quot;Paw&quot;,
+    &quot;hp&quot;: 100,
+    &quot;max_hp&quot;: 100,
+    &quot;attack&quot;: 10,
+    &quot;defense&quot;: 5,
+    &quot;inventory&quot;: [],
+}
+print(f&quot;{player[&#39;name&#39;]}: HP {player[&#39;hp&#39;]}/{player[&#39;max_hp&#39;]}&quot;)
+</code></pre>
+<h2>二、字典：钥匙开锁式取数（4 分钟）</h2>
+<p>W06 学过列表 <code>[值, 值]</code>——按<strong>位置</strong>取。字典是 <code>{键: 值}</code>——按<strong>名字</strong>取：</p>
+<ul>
+<li><code>player[&quot;hp&quot;]</code> → 拿到 100</li>
+<li><code>player[&quot;inventory&quot;]</code> → 拿到空列表</li>
+<li><code>player[&quot;mp&quot;]</code> → 💥 <code>KeyError: &#39;mp&#39;</code>——字典里没有这把钥匙！</li>
+</ul>
+<p><strong>新手第一坑：</strong> 键名打错不报「拼写错误」，报 KeyError。卡住时先 <code>print(player)</code> 看清楚到底有哪些键。</p>
+<p><strong>新手第二坑：</strong> 花括号 <code>{}</code> 是字典，方括号 <code>[]</code> 是列表。第一眼分清，别混。</p>
+<h2>三、道具栏：列表长在字典里（3 分钟）</h2>
+<p><code>&quot;inventory&quot;: []</code>——道具栏就是一个空列表，挂在字典里当值。捡到东西用 W06 的 <code>append</code>：</p>
+<pre><code class="language-python">player[&quot;inventory&quot;].append(&quot;herb&quot;)
+print(player[&quot;inventory&quot;])
+</code></pre>
+<p>回头看 S1 画的地图：草药房、羽毛房……那些标注今天全部有了着落——<strong>地图上的道具 = inventory 里将来会多出来的一项</strong>。</p>
+<h2>四、状态显示在游戏里（2 分钟）</h2>
+<p>把状态打印接进 S2 骨架，每圈循环开头亮一次血条：</p>
+<pre><code class="language-python">while room != &quot;quit&quot;:
+    print(f&quot;\n[{player[&#39;name&#39;]}] HP: {player[&#39;hp&#39;]}/{player[&#39;max_hp&#39;]}&quot;)
+    if room == &quot;shrine&quot;:
+        print(&quot;--- Cat Shrine ---&quot;)
+</code></pre>
+<p>玩家随时知道自己几条命，游戏立刻有「活」的感觉。</p>
+<p><strong>今日口诀：</strong> 状态进字典，取数用钥匙；道具是列表，append 一键塞。</p>
+<hr>
+<h2>✅ 今天的阅读完成自查</h2>
+<ul>
+<li><input disabled="" type="checkbox"> 我能说出 player 字典六个键各自的意思</li>
+<li><input disabled="" type="checkbox"> 我知道 <code>player[&quot;mp&quot;]</code> 为什么报 KeyError、卡住时先 print(player)</li>
+<li><input disabled="" type="checkbox"> 我知道道具栏是「字典里的列表」，捡东西用 append</li>
+</ul>
+<p>三格全勾 → 打开作业 🐾</p>
+<hr>
+<blockquote>
+<p><strong>📁 作业保存规则</strong>：本课课后练习写进一个文件 <code>W08-S3-homework.py</code>（存 <code>~/sand-hollow/&lt;你的学员ID&gt;/homework/</code>），每道题开头用刚学的备注分隔：<code># --- 题 1 ---</code>、<code># --- 题 2 ---</code>……<strong>交完作业要跟你的智能体说一声</strong>才会批改，评语出现在 <code>reviews/*.review.md</code>。<strong>回报触发词：交完作业或修完坑，都回一句「修完了」</strong>——不回这句 mentor 不知道，坑会一直挂着等。</p>
+</blockquote>
+<h2>📝 今日作业（≈10 分钟）</h2>
+<p>新建 <code>W08-S3-homework.py</code>，3 道题：</p>
+<ol>
+<li><strong>建状态</strong>：抄下第一节的 player 字典并 print 整个字典，数一数六个键都在</li>
+<li><strong>故意踩坑</strong>：加一行 <code>print(player[&quot;mp&quot;])</code>，看 KeyError 报错长什么样；把报错抄成注释</li>
+<li><strong>捡两件道具</strong>：append 两个道具（如 <code>&quot;herb&quot;</code>、<code>&quot;feather&quot;</code>），最后打印 HP 和道具栏各一次</li>
+</ol>
+<blockquote>
+<p>交完说「<strong>修完了</strong>」。明天 S4 狼来了——战斗系统 🐾</p>
+</blockquote>
+<h2>👀 C++ 认脸时刻（1 分钟 · 只看不敲）</h2>
+<p>C++ 的对应写法：</p>
+<pre><code class="language-cpp">#include &lt;iostream&gt;
+#include &lt;map&gt;
+int main() {
+    std::map&lt;std::string, int&gt; state;
+    state[&quot;hp&quot;] = 100;
+    state[&quot;mp&quot;] = 50;
+    std::cout &lt;&lt; &quot;HP = &quot; &lt;&lt; state[&quot;hp&quot;] &lt;&lt; std::endl;
+    return 0;
+}
+</code></pre>
+<p>三个认脸：</p>
+<ol>
+<li><code>std::map&lt;string, int&gt;</code> 类似 Python dict</li>
+<li><code>state[&quot;hp&quot;]</code> 取值</li>
+<li>C++ 没有 dict 字面量，要逐个 insert</li>
+</ol>
+<blockquote>
+<p>AI 营笔试的编程题用 C++ 出。不用会写，<strong>认得脸</strong>就行。</p>
+</blockquote>
+</div>
+</section>
+<section class="lesson" data-lid="W08-S4">
+<div class="lesson-head"><span class="lt">战斗逻辑：回合攻防</span></div>
+<div class="md" data-lid="W08-S4"><!-- slug: cat-adv-block, type: base -->
+<h2>⓪ 🤖 课前 AI 一分钟 · 第 28 颗：AI 也会&quot;逻辑&quot;——战斗回合（3 分钟）</h2>
+<blockquote>
+<p><strong>第 28 颗</strong></p>
+</blockquote>
+<p>AI 战斗 = 回合制（玩家行动 → 敌人行动 → 检查胜负）。<strong>回合制</strong>是游戏 AI 的基础。</p>
+<p><strong>今日口诀</strong>：AI 战斗 = 回合制（玩家行动 → 敌人行动 → 检查胜负）。</p>
+<p><strong>⚔️ 判一判</strong>（AI 营线上测评题型热身，先自己答再看答案）：</p>
+<blockquote>
+<ol>
+<li>战斗是回合制</li>
+<li>AI 战斗算法 = 状态机</li>
+</ol>
+</blockquote>
+<details><summary>答案</summary>
+
+<p><strong>1.</strong> ✓ player_turn(); enemy_turn(); check_win()<br><strong>2.</strong> ✓ FSM（有限状态机）</p>
+</details>
+
+<hr>
+<h1>W08-S4 · 战斗逻辑：回合攻防</h1>
+<blockquote>
+<p><strong>每日节奏（v1.9）：</strong> 本篇纯阅读 ≈11 分钟，读完做当天作业 ≈10 分钟，总共 ≤25 分钟
+<strong>不需要 Thonny</strong>——正文一个字都不用敲，作业时间才开编辑器
+难度：⭐⭐⭐ · 本篇是原 W07-L02 的中段（敌人字典 + battle 函数 + 伤害公式）</p>
+</blockquote>
+<hr>
+<h2>一、敌人也是一串数据（3 分钟）</h2>
+<p>狼不是「怪物」，它只是另一个字典——跟 player 一个模子：</p>
+<pre><code class="language-python">enemies = {
+    &quot;wolf&quot;: {&quot;name&quot;: &quot;Gray Wolf&quot;, &quot;hp&quot;: 30, &quot;attack&quot;: 8, &quot;defense&quot;: 2},
+    &quot;eagle&quot;: {&quot;name&quot;: &quot;Giant Eagle&quot;, &quot;hp&quot;: 80, &quot;attack&quot;: 15, &quot;defense&quot;: 8},
+}
+</code></pre>
+<p><code>enemies[&quot;wolf&quot;]</code> 拿到狼的整张卡片。<strong>游戏世界的本质：把万物都变成数据，再写规则去改数据。</strong></p>
+<h2>二、伤害公式：攻击减防御（3 分钟）</h2>
+<p>打一下掉多少血？</p>
+<pre><code class="language-python">dmg = max(1, player[&quot;attack&quot;] - enemy[&quot;defense&quot;])
+enemy[&quot;hp&quot;] -= dmg
+</code></pre>
+<p><code>攻击 10 - 防御 2 = 掉 8 血</code>。为什么套 <code>max(1, ...)</code>？防御 12 的铁罐头碰上攻击 10——不能加血也不能零伤害，<strong>至少刮 1 点</strong>。<code>max(1, x)</code> 就是「x 和 1 里取大的」，保底 1。</p>
+<h2>三、battle 函数：一场架的完整剧本（5 分钟）</h2>
+<pre><code class="language-python">def battle(player, enemy):
+    print(f&quot;A wild {enemy[&#39;name&#39;]} appears!&quot;)
+    while enemy[&quot;hp&quot;] &gt; 0 and player[&quot;hp&quot;] &gt; 0:
+        action = input(&quot;(attack/run): &quot;).strip()
+        if action == &quot;run&quot;:
+            print(&quot;You escaped!&quot;)
+            return True
+        dmg = max(1, player[&quot;attack&quot;] - enemy[&quot;defense&quot;])
+        enemy[&quot;hp&quot;] -= dmg
+        print(f&quot;You hit for {dmg}. Enemy HP: {enemy[&#39;hp&#39;]}&quot;)
+        if enemy[&quot;hp&quot;] &lt;= 0:
+            print(&quot;You won!&quot;)
+            return True
+        dmg = max(1, enemy[&quot;attack&quot;] - player[&quot;defense&quot;])
+        player[&quot;hp&quot;] -= dmg
+        print(f&quot;Enemy hits for {dmg}. Your HP: {player[&#39;hp&#39;]}&quot;)
+    return player[&quot;hp&quot;] &gt; 0
+</code></pre>
+<p>逐层拆：</p>
+<ul>
+<li><code>def battle(...)</code>：<strong>函数</strong>——把一场架打包成一块积木，W08 会亲手学做，今天先用</li>
+<li><code>while 双方都活着</code>：回合循环，W05 的 while 长在这里</li>
+<li><code>return True/False</code>：打完告诉调用处「玩家赢没赢活没活」</li>
+<li>玩家先动手 → 敌人反击，一回合结束，回到 while 判断</li>
+</ul>
+<h2>四、三个分支，三个结局（2 分钟）</h2>
+<p>battle 只有三种出口：<strong>打赢</strong>（enemy HP ≤ 0）、<strong>打输</strong>（player HP ≤ 0）、<strong>跑掉</strong>。写游戏逻辑时先数清楚出口数——三个出口少写一个，玩家就会卡死在循环里。</p>
+<p><strong>今日口诀：</strong> 敌人是卡片，伤害减防御；胜负数出口，打赢打输跑。</p>
+<hr>
+<h2>✅ 今天的阅读完成自查</h2>
+<ul>
+<li><input disabled="" type="checkbox"> 我能说出 <code>max(1, attack - defense)</code> 里 max(1,…) 防的是什么</li>
+<li><input disabled="" type="checkbox"> 我能指出 battle 的 while 条件什么时候结束</li>
+<li><input disabled="" type="checkbox"> 我能数出 battle 的三个出口</li>
+</ul>
+<p>三格全勾 → 打开作业 🐾</p>
+<hr>
+<blockquote>
+<p><strong>📁 作业保存规则</strong>：本课课后练习写进一个文件 <code>W08-S4-homework.py</code>（存 <code>~/sand-hollow/&lt;你的学员ID&gt;/homework/</code>），每道题开头用刚学的备注分隔：<code># --- 题 1 ---</code>、<code># --- 题 2 ---</code>……<strong>交完作业要跟你的智能体说一声</strong>才会批改，评语出现在 <code>reviews/*.review.md</code>。<strong>回报触发词：交完作业或修完坑，都回一句「修完了」</strong>——不回这句 mentor 不知道，坑会一直挂着等。</p>
+</blockquote>
+<h2>📝 今日作业（≈10 分钟）</h2>
+<p>新建 <code>W08-S4-homework.py</code>，2 道题：</p>
+<ol>
+<li><strong>手算伤害</strong>：笔算三组（ATK 10 vs DEF 2 / ATK 5 vs DEF 12 / ATK 8 vs DEF 8），写出 max(1,…) 各得多少；再用 Python 验证</li>
+<li><strong>抄跑 battle</strong>：把第三节的 battle 和 player、wolf 字典敲进文件，真打一场（attack 到赢）；再改 <code>player[&quot;hp&quot;] = 5</code> 打一场看看输的样子</li>
+</ol>
+<blockquote>
+<p>交完说「<strong>修完了</strong>」。明天 S5 巨鹰 Boss 等着你 🐾</p>
+</blockquote>
+<h2>👀 C++ 认脸时刻（1 分钟 · 只看不敲）</h2>
+<p>C++ 的对应写法：</p>
+<pre><code class="language-cpp">#include &lt;iostream&gt;
+#include &lt;string&gt;
+int main() {
+    std::string state = &quot;player_turn&quot;;
+    while (state != &quot;end&quot;) {
+        if (state == &quot;player_turn&quot;) state = &quot;enemy_turn&quot;;
+        else if (state == &quot;enemy_turn&quot;) state = &quot;check_win&quot;;
+        else state = &quot;end&quot;;
+    }
+    return 0;
+}
+</code></pre>
+<p>三个认脸：</p>
+<ol>
+<li>状态机：当前状态决定下一步</li>
+<li><code>while (state != &quot;end&quot;)</code> 循环</li>
+<li>Python 一样用 if-elif</li>
+</ol>
+<blockquote>
+<p>AI 营笔试的编程题用 C++ 出。不用会写，<strong>认得脸</strong>就行。</p>
+</blockquote>
+</div>
+</section>
+<section class="lesson" data-lid="W08-S5">
+<div class="lesson-head"><span class="lt">Boss 战 + 胜负判定：通关！</span></div>
+<div class="md" data-lid="W08-S5"><!-- slug: cat-adv-save, type: base -->
+<h2>⓪ 🤖 课前 AI 一分钟 · 第 29 颗：AI 也会&quot;胜负判定&quot;——if 链（3 分钟）</h2>
+<blockquote>
+<p><strong>第 29 颗</strong></p>
+</blockquote>
+<p>AI 判定胜负 = 比较 HP/分数/条件。<strong>判定逻辑</strong> = if 链 + return。</p>
+<p><strong>今日口诀</strong>：AI 判定胜负 = 比较 HP/分数/条件。</p>
+<p><strong>⚔️ 判一判</strong>（AI 营线上测评题型热身，先自己答再看答案）：</p>
+<blockquote>
+<ol>
+<li>Boss 战胜负判定用 if 链</li>
+<li>AI 终局判断 = 多个条件组合</li>
+</ol>
+</blockquote>
+<details><summary>答案</summary>
+
+<p><strong>1.</strong> ✓ if player.hp &lt;= 0: return &quot;lose&quot;<br><strong>2.</strong> ✓ if all(goal_met): return &quot;win&quot;</p>
+</details>
+
+<hr>
+<h1>W08-S5 · Boss 战 + 胜负判定：通关！</h1>
+<blockquote>
+<p><strong>每日节奏（v1.9）：</strong> 本篇纯阅读 ≈10 分钟，读完做当天作业 ≈10 分钟，总共 ≤25 分钟
+<strong>不需要 Thonny</strong>——正文一个字都不用敲，作业时间才开编辑器
+难度：⭐⭐⭐ · 本篇是原 W07-L02 后半 + L03 开头（Boss 房 + game_over + 通关判定）</p>
+</blockquote>
+<hr>
+<h2>一、把战斗接进地图（3 分钟）</h2>
+<p>battle 是积木，地图是骨架，今天拼上。贴进主循环的 forest 分支：</p>
+<pre><code class="language-python">while room != &quot;quit&quot;:
+    if room == &quot;forest&quot;:
+        choice = input(&quot;(fight/run): &quot;)
+        if choice == &quot;fight&quot;:
+            won = battle(player, enemies[&quot;wolf&quot;])
+            if not won:
+                room = &quot;game_over&quot;
+            else:
+                print(&quot;Forest cleared!&quot;)
+                room = &quot;shrine&quot;
+</code></pre>
+<p>关键两行：<code>won = battle(...)</code> 接住胜负；输了就把 <code>room</code> 改成 <code>&quot;game_over&quot;</code>——主循环下一圈自动跳进结局分支。<strong>改 room 就是游戏的万能开关。</strong></p>
+<h2>二、game_over 房间：输了也有结局（2 分钟）</h2>
+<pre><code class="language-python">if room == &quot;game_over&quot;:
+    print(&quot;=== GAME OVER ===&quot;)
+    print(&quot;You have fallen. The island keeps your legend.&quot;)
+    room = &quot;quit&quot;
+</code></pre>
+<p><code>room = &quot;quit&quot;</code> 让 while 条件不成立，游戏安静退出。game_over 也只是地图上一个方块——这就是 S1「先想后写」的红利。</p>
+<h2>三、Boss 房：巨鹰巢穴（4 分钟）</h2>
+<p>S1 地图终点站今天启用。Boss 房加一道<strong>钥匙检查</strong>：</p>
+<pre><code class="language-python">while room != &quot;quit&quot;:
+    if room == &quot;bossnest&quot;:
+        if &quot;feather&quot; in player[&quot;inventory&quot;]:
+            won = battle(player, enemies[&quot;eagle&quot;])
+            if won:
+                print(&quot;VICTORY! The island sings your name!&quot;)
+                room = &quot;quit&quot;
+            else:
+                room = &quot;game_over&quot;
+        else:
+            print(&quot;The eagle ignores you. Need the feather.&quot;)
+            room = &quot;bridge&quot;
+</code></pre>
+<p><code>&quot;feather&quot; in player[&quot;inventory&quot;]</code>——W06 的 <code>in</code> 检查：道具栏里有羽毛才开打。<strong>道具从此变成钥匙。</strong> 没羽毛？巨鹰看都不看你。打赢，通关分支打印胜利并 <code>room = &quot;quit&quot;</code> 收场。</p>
+<h2>四、五种结局，一张网（3 分钟）</h2>
+<p>数一数所有出口：<strong>胜</strong>（打倒巨鹰）/ <strong>败</strong>（HP 归零）/ <strong>逃</strong>（run 回神社）/ <strong>被拒</strong>（没羽毛）/ <strong>quit</strong>。写完任何游戏都做一遍「出口清点」——每个出口都要真的能到达、真的能退出循环。卡死比无聊更致命。</p>
+<p><strong>今日口诀：</strong> 胜负改 room，道具是钥匙；通关先清点，出口要真通。</p>
+<p><strong>🎉 W07 项目周结业！</strong> 五天拼出完整文字冒险游戏：地图→骨架→状态→战斗→Boss。周末：给你的岛加新房间、新敌人、新道具，打磨成自己的版本 🐾</p>
+<hr>
+<h2>✅ 今天的阅读完成自查</h2>
+<ul>
+<li><input disabled="" type="checkbox"> 我能说出 <code>won = battle(...)</code> 和 <code>if not won: room = ...</code> 各自的职责</li>
+<li><input disabled="" type="checkbox"> 我知道 Boss 房用 <code>in</code> 检查道具，道具因此变成「钥匙」</li>
+<li><input disabled="" type="checkbox"> 我数得出全游戏五个出口</li>
+</ul>
+<p>三格全勾 → 打开作业 🐾</p>
+<hr>
+<blockquote>
+<p><strong>📁 作业保存规则</strong>：本课课后练习写进一个文件 <code>W08-S5-homework.py</code>（存 <code>~/sand-hollow/&lt;你的学员ID&gt;/homework/</code>），每道题开头用刚学的备注分隔：<code># --- 题 1 ---</code>、<code># --- 题 2 ---</code>……<strong>交完作业要跟你的智能体说一声</strong>才会批改，评语出现在 <code>reviews/*.review.md</code>。<strong>回报触发词：交完作业或修完坑，都回一句「修完了」</strong>——不回这句 mentor 不知道，坑会一直挂着等。</p>
+</blockquote>
+<h2>📝 今日作业（≈10 分钟）</h2>
+<p>新建 <code>W08-S5-homework.py</code>，2 道题：</p>
+<ol>
+<li><strong>出口清点表</strong>：五个结局各写成一行注释，注明「由哪个变量改动触发」（如：败 → <code>room = &quot;game_over&quot;</code>）</li>
+<li><strong>通关剧本</strong>：抄第三节 bossnest 分支；先不带羽毛走一遍看被拒文案，再 <code>append(&quot;feather&quot;)</code> 打一场（attack 可改大稳赢），抄下胜利输出</li>
+</ol>
+<blockquote>
+<p>交完说「<strong>修完了</strong>」。W07 结业——周末「扩展你的冒险岛」见 🐾</p>
+</blockquote>
+<h2>👀 C++ 认脸时刻（1 分钟 · 只看不敲）</h2>
+<p>C++ 的对应写法：</p>
+<pre><code class="language-cpp">#include &lt;iostream&gt;
+int main() {
+    int player_hp = 30, boss_hp = 0;
+    if (player_hp &lt;= 0) std::cout &lt;&lt; &quot;lose&quot; &lt;&lt; std::endl;
+    else if (boss_hp &lt;= 0) std::cout &lt;&lt; &quot;win&quot; &lt;&lt; std::endl;
+    else std::cout &lt;&lt; &quot;continue&quot; &lt;&lt; std::endl;
+    return 0;
+}
+</code></pre>
+<p>三个认脸：</p>
+<ol>
+<li><code>if-else if-else</code> 三分支判定</li>
+<li>判定结束直接 return/print</li>
+<li>Python 一样用 if-elif-else</li>
+</ol>
+<blockquote>
+<p>AI 营笔试的编程题用 C++ 出。不用会写，<strong>认得脸</strong>就行。</p>
+</blockquote>
+</div>
+</section>
+<section class="lesson" data-lid="W08-weekend">
+<div class="lesson-head"><span class="lt">猫咪冒险岛 · 打磨 + 多人测试</span></div>
+<div class="md" data-lid="W08-weekend"><!-- slug: cat-adventure, type: project -->
+<h2>⓪ 🤖 课前 AI 一分钟 · 第 30 颗：AI 也会&quot;打磨&quot;——多人测试（3 分钟）</h2>
+<blockquote>
+<p><strong>第 30 颗</strong></p>
+</blockquote>
+<p>AI 模型上线前 = 多人测试（找 bug/调优）。<strong>多人测试</strong> = 收集反馈 → 改进。</p>
+<p><strong>今日口诀</strong>：AI 模型上线前 = 多人测试（找 bug/调优）。</p>
+<p><strong>⚔️ 判一判</strong>（AI 营线上测评题型热身，先自己答再看答案）：</p>
+<blockquote>
+<ol>
+<li>AI 模型要测试</li>
+<li>多人测试找 bug</li>
+</ol>
+</blockquote>
+<details><summary>答案</summary>
+
+<p><strong>1.</strong> ✓ A/B testing<br><strong>2.</strong> ✓ beta testing</p>
+</details>
+
+<hr>
+<h1>W08-weekend · 猫咪冒险岛 · 打磨 + 多人测试</h1>
+<blockquote>
+<p>用时：90-120 分钟 · 难度：⭐⭐⭐⭐ · 前置：W07 三课</p>
+</blockquote>
+<hr>
+<h2>一、本周武功盘点（3 分钟）</h2>
+<ul>
+<li>L1 画地图 + 最小骨架</li>
+<li>L2 玩家状态（字典）+ 战斗雏形</li>
+<li>L3 道具系统 + Boss + 完整流程</li>
+</ul>
+<p>今天把游戏打磨到「<strong>家人愿意完整玩一局</strong>」的程度，然后请 3 个真人测一遍。</p>
+<h2>二、打磨清单（30 分钟）</h2>
+<p>按优先级做这几件——每件都是「从能玩到好玩」的关键：</p>
+<h3>打磨 1：清晰的提示文案</h3>
+<p>每个房间的 <code>print</code> 至少要说清：</p>
+<ul>
+<li><strong>你现在在哪</strong>（房间名）</li>
+<li><strong>你看到什么</strong>（环境 + 敌人 + 道具）</li>
+<li><strong>你能做什么</strong>（可输入的选项）</li>
+</ul>
+<p>❌ Bad：</p>
+<pre><code class="language-python">print(&quot;Forest&quot;)
+choice = input(&quot;&gt; &quot;)
+</code></pre>
+<p>✅ Good：</p>
+<pre><code class="language-python">print(&quot;\n--- Whispering Forest ---&quot;)
+print(&quot;Tall oaks block the sky. A gray wolf snarls at you.&quot;)
+print(&quot;Choices: (fight/run)&quot;)
+choice = input(&quot;&gt; &quot;)
+</code></pre>
+<h3>打磨 2：输入容错</h3>
+<p>用户可能输入 <code>Fight</code>（大写）/ <code>fight</code>（带空格）/ <code>gg</code>（瞎打）。</p>
+<pre><code class="language-python">choice = input(&quot;&gt; &quot;).strip().lower()
+</code></pre>
+<p><strong>两招搞定</strong>：<code>strip()</code> 去前后空格，<code>lower()</code> 全小写。然后所有 if 都跟小写比。</p>
+<h3>打磨 3：回血 / 加攻击有反馈</h3>
+<p>不能默默改数据，必须 print：</p>
+<pre><code class="language-python">if item[&quot;effect&quot;] == &quot;heal&quot;:
+    old = player[&quot;hp&quot;]
+    player[&quot;hp&quot;] = min(player[&quot;max_hp&quot;], player[&quot;hp&quot;] + item[&quot;value&quot;])
+    gained = player[&quot;hp&quot;] - old
+    print(f&quot;Used {item[&#39;name&#39;]}! +{gained} HP (now {player[&#39;hp&#39;]}/{player[&#39;max_hp&#39;]})&quot;)
+</code></pre>
+<p><strong>显示「变了多少」+ 「现在是多少」</strong>——玩家一眼看到反馈。</p>
+<h3>打磨 4：保存最佳战绩</h3>
+<p>把分数（通关剩余 HP）写到文件：</p>
+<pre><code class="language-python"># After victory
+score = player[&quot;hp&quot;] * 10 + player[&quot;attack&quot;]
+with open(&quot;best_score.txt&quot;, &quot;a&quot;) as f:
+    f.write(f&quot;{score}\n&quot;)
+
+# Show top 3
+with open(&quot;best_score.txt&quot;) as f:
+    scores = sorted([int(line) for line in f], reverse=True)
+print(&quot;\n=== Top Scores ===&quot;)
+for i, s in enumerate(scores[:3]):
+    print(f&quot;{i+1}. {s}&quot;)
+</code></pre>
+<p>跟 W05-weekend 排行榜同款套路。</p>
+<h3>打磨 5：ASCII 标题</h3>
+<pre><code class="language-python">print(&quot;&quot;&quot;
+ /\_/\  
+( o.o ) 
+ &gt; ^ &lt; 
+=== Cat Adventure ===
+&quot;&quot;&quot;)
+</code></pre>
+<p>简单 ASCII 猫脸，让开场有仪式感。</p>
+<h2>三、邀请 3 个真人测（30 分钟）</h2>
+<p><strong>这是项目周最重要的一步</strong>——自己测和自己玩是两回事。</p>
+<h3>测试流程</h3>
+<p>找 3 个不会编程的家人/朋友，让他们各自完整玩一局：</p>
+<ol>
+<li>你在旁边观察 + 记笔记（<strong>不提示</strong>）</li>
+<li>看他们卡在哪、问什么问题、笑/吐槽在哪</li>
+<li>玩完问三个问题：<ul>
+<li>「你最喜欢哪个部分？」</li>
+<li>「哪个地方最让你卡住？」</li>
+<li>「你会想再玩一次吗？」</li>
+</ul>
+</li>
+</ol>
+<h3>收集反馈</h3>
+<p>记下每个人的回答 + 卡点。下一步就是根据反馈改。</p>
+<h3>常见反馈模式</h3>
+<ul>
+<li><strong>「我看不懂能做什么」</strong> → print 文案不够清楚（打磨 1 没做到位）</li>
+<li><strong>「输了不知道发生了什么」</strong> → game_over 太突然，加死亡描述</li>
+<li><strong>「打完 Boss 没什么成就感」</strong> → 加胜利徽章 + 通关动画</li>
+<li><strong>「我想存个档下次玩」</strong> → W10 字典学了可以加 save/load</li>
+</ul>
+<h2>四、根据反馈改一轮（30 分钟）</h2>
+<p>按反馈优先级（影响最大 → 最易改）排：</p>
+<ol>
+<li><strong>卡死的地方</strong>（如果有人走不出去 = 严重 bug，必修）</li>
+<li><strong>看不懂的提示</strong>（改成清楚的文案）</li>
+<li><strong>想要的彩蛋</strong>（如果简单就加）</li>
+</ol>
+<p>**这一轮不要重写，只改细节。**项目周不是重写周。</p>
+<h2>五、验收标准（自助验收）</h2>
+<ul>
+<li><input disabled="" type="checkbox"> 打磨清单 5 项至少做 3 项</li>
+<li><input disabled="" type="checkbox"> 至少 3 个真人测过，记下反馈</li>
+<li><input disabled="" type="checkbox"> 根据反馈改了至少 3 处</li>
+<li><input disabled="" type="checkbox"> 你能向家人 / 朋友完整演示一局，零崩溃</li>
+<li><input disabled="" type="checkbox"> 测的人里至少 1 个说「想再玩一次」或「想推荐给别人」</li>
+</ul>
+<h2>六、W07 全周自查</h2>
+<ul>
+<li><input disabled="" type="checkbox"> L1：地图设计 + 最小骨架 3 个房间跑通</li>
+<li><input disabled="" type="checkbox"> L2：玩家字典 + 战斗函数 + game_over 跑通</li>
+<li><input disabled="" type="checkbox"> L3：道具 + Boss + victory 完整流程跑通</li>
+<li><input disabled="" type="checkbox"> 周末：打磨清单 5 项中至少 3 项 + 3 真人测试 + 反馈改一轮</li>
+<li><input disabled="" type="checkbox"> 我能给 mentor 演示一局完整通关</li>
+</ul>
+<p>W07 毕业 🏆 → 进入 W08「函数：自制积木」。W02-W06 写的代码经常重复——今天学一招让代码「写一次，处处调用」。</p>
+<h2>👀 C++ 认脸时刻（1 分钟 · 只看不敲）</h2>
+<p>C++ 的对应写法：</p>
+<pre><code class="language-cpp">#include &lt;iostream&gt;
+#include &lt;vector&gt;
+int main() {
+    std::vector&lt;int&gt; feedback = {5, 4, 3, 5, 4};
+    int sum = 0;
+    for (int s : feedback) sum += s;
+    std::cout &lt;&lt; &quot;avg = &quot; &lt;&lt; sum / feedback.size() &lt;&lt; std::endl;
+    return 0;
+}
+</code></pre>
+<p>三个认脸：</p>
+<ol>
+<li>收集反馈评分</li>
+<li><code>sum / feedback.size()</code> 算平均</li>
+<li>Python 一样：sum(feedback) / len(feedback)</li>
+</ol>
+<blockquote>
+<p>AI 营笔试的编程题用 C++ 出。不用会写，<strong>认得脸</strong>就行。</p>
+</blockquote>
+</div>
+</section>
+</div>
+</div>
+</body>
+</html>

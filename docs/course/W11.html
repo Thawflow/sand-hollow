@@ -1,0 +1,890 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>W11 · turtle 海龟登场：编程画画（前置 W10 函数）</title>
+<style>
+:root{--bg:#0f1420;--card:#171e2e;--card2:#1e2740;--border:#2a3550;--text:#e8ecf4;--text2:#8b96ad;--accent:#5b9dff;--ok:#3ecf8e}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+.wrap{max-width:900px;margin:0 auto;padding:28px 20px 60px}
+h1{font-size:1.5rem}
+.wk-meta{color:var(--text2);font-size:.85rem;margin:4px 0 20px}
+.lesson{border:1px solid var(--border);border-radius:12px;padding:16px 18px;margin-bottom:14px;background:var(--card2)}
+.lesson-head{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.lesson-head .lt{font-weight:700;font-size:1rem;flex:1}
+.md{font-size:.92rem;line-height:1.8;color:var(--text);overflow-wrap:break-word}
+.md h1,.md h2,.md h3{margin:14px 0 8px;font-size:1.05rem}
+.md p{margin:8px 0}
+.md code{background:rgba(91,157,255,.12);border-radius:5px;padding:2px 6px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.85em;color:#a8c8ff}
+.md pre{background:#0b0f18;border:1px solid var(--border);border-radius:10px;padding:12px 14px;overflow-x:auto;margin:10px 0}
+.md pre code{background:none;padding:0;color:#c9d7f0}
+.md ul,.md ol{margin:8px 0 8px 22px}
+.md blockquote{border-left:3px solid var(--accent);padding:4px 12px;color:var(--text2);margin:10px 0}
+.md a{color:var(--accent)}
+.md table{border-collapse:collapse;margin:10px 0;font-size:.85rem}
+.md td,.md th{border:1px solid var(--border);padding:6px 10px}
+.md input[type=checkbox]{width:15px;height:15px;accent-color:var(--ok);cursor:pointer;margin-right:6px;vertical-align:-2px}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+<h1 class="wk-title">turtle 海龟登场：编程画画（前置 W10 函数）</h1>
+<div class="wk-meta">W11 · 6 课</div>
+</header>
+<div class="week-body" data-week="W11">
+<section class="lesson" data-lid="W11-S1">
+<div class="lesson-head"><span class="lt">海龟登场：前进与转弯</span></div>
+<div class="md" data-lid="W11-S1"><!-- slug: turtle-basics, type: base -->
+<h2>⓪ 🤖 课前 AI 一分钟 · 第 37 颗：AI 也会&quot;画图&quot;——turtle（3 分钟）</h2>
+<blockquote>
+<p><strong>第 37 颗</strong></p>
+</blockquote>
+<p>AI 画图 = 几何变换（turtle 是简化版）。Python turtle = <strong>画图入门</strong>。</p>
+<p><strong>今日口诀</strong>：AI 画图 = 几何变换（turtle 是简化版）。</p>
+<p><strong>⚔️ 判一判</strong>（AI 营线上测评题型热身，先自己答再看答案）：</p>
+<blockquote>
+<ol>
+<li>turtle 是画图工具</li>
+<li>AI 画图本质是几何变换</li>
+</ol>
+</blockquote>
+<details><summary>答案</summary>
+
+<p><strong>1.</strong> ✓ import turtle; t.forward(100)<br><strong>2.</strong> ✓ Diffusion 模型的几何变换</p>
+</details>
+
+<hr>
+<h1>W11-S1 · 海龟登场：前进与转弯</h1>
+<blockquote>
+<p><strong>每日节奏（v1.9）：</strong> 本篇纯阅读 ≈10 分钟，读完做当天作业 ≈10 分钟，总共 ≤25 分钟
+<strong>不需要 Thonny</strong>——正文一个字都不用敲，作业时间才开编辑器
+难度：⭐⭐ · 本篇对应原 turtle 第一课（文件名 W10-L01）的起笔部分——<strong>本篇为新增内容</strong>（v1.9 拆分补写，保持原难度）</p>
+</blockquote>
+<hr>
+<h2>一、概念：让程序「画」出来（3 分钟）</h2>
+<p>前八周的程序全是文字输出：print 一行行往上滚。从今天起，程序能<strong>画</strong>了——</p>
+<p><strong>turtle</strong>（海龟画图）是 Python 自带的画画工具：想象屏幕上有一只小海龟，肚皮底下绑着一支笔。你喊口令，它就爬；爬过的地方，留下线条。</p>
+<p>玩过 Scratch 画笔的同学：一模一样的思想，只是口令换成了英文单词。</p>
+<h2>二、第一段海龟代码（4 分钟）</h2>
+<p>今天只看不敲，记住三句口令的样子：</p>
+<pre><code class="language-python">import turtle
+
+t = turtle.Turtle()
+t.forward(100)   # 前进 100 像素，画出一条线
+t.left(90)       # 左转 90 度
+t.forward(100)   # 再前进，画出新方向的线
+</code></pre>
+<p>逐行拆解：</p>
+<table>
+<thead>
+<tr>
+<th>部件</th>
+<th>作用</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>import turtle</code></td>
+<td>领出画画工具箱（Python 自带，不用安装）</td>
+</tr>
+<tr>
+<td><code>t = turtle.Turtle()</code></td>
+<td>创建一只海龟，给它起名叫 <code>t</code>（变量名随你）</td>
+</tr>
+<tr>
+<td><code>t.forward(100)</code></td>
+<td>前进 100 像素（像素 = 屏幕上的小格子）</td>
+</tr>
+<tr>
+<td><code>t.left(90)</code></td>
+<td>原地左转 90 度（不移动，只转向）</td>
+</tr>
+</tbody></table>
+<p>海龟刚出生时站在屏幕正中央，头朝<strong>右</strong>（东边）。</p>
+<h2>三、角度是方向的语言（2 分钟）</h2>
+<p>转弯的单位是<strong>度</strong>，和数学课的量角器同一套：</p>
+<ul>
+<li><code>t.left(90)</code> → 左转一个直角</li>
+<li><code>t.right(45)</code> → 右转半 个直角</li>
+<li><code>t.left(180)</code> → 掉头，原地反向</li>
+</ul>
+<p><strong>关键：</strong> 角度是「相对」的——海龟不管自己脸朝哪，<code>left(90)</code> 永远是「往自己左手边转 90 度」。转完后的方向 = 原方向 + 转的角度。</p>
+<h2>四、预告：正方形只差一把火（1 分钟）</h2>
+<p>前进 → 左转 90 → 前进 → 左转 90……重复 4 次就是正方形。你心里应该已经冒出老朋友了——<strong>for 循环</strong>（W04）。明天就让它和海龟合体。</p>
+<p><strong>今日口诀：</strong> forward 爬、left/right 转、角度跟着感觉走。</p>
+<hr>
+<h2>✅ 今天的阅读完成自查</h2>
+<ul>
+<li><input disabled="" type="checkbox"> 我能说出 <code>import turtle</code> 和 <code>t = turtle.Turtle()</code> 各干什么</li>
+<li><input disabled="" type="checkbox"> 我知道海龟出生在屏幕中央、头朝右</li>
+<li><input disabled="" type="checkbox"> 我知道 <code>left(90)</code> 是相对自己左手边转 90 度</li>
+</ul>
+<p>三格全勾 → 打开 Thonny，做今天的作业 <code>W11-S1-homework.py</code></p>
+<hr>
+<blockquote>
+<p><strong>📁 作业保存规则</strong>：本课课后练习写进一个文件 <code>W11-S1-homework.py</code>（存 <code>~/sand-hollow/&lt;你的学员ID&gt;/homework/</code>），每道题开头用刚学的备注分隔：<code># --- 题 1 ---</code>、<code># --- 题 2 ---</code>……<strong>交完作业要跟你的智能体说一声</strong>才会批改，评语出现在 <code>reviews/*.review.md</code>。<strong>回报触发词：交完作业或修完坑，都回一句「修完了」</strong>——不回这句 mentor 不知道，坑会一直挂着等。</p>
+</blockquote>
+<h2>📝 今日作业（≈10 分钟）</h2>
+<p>新建文件 <code>W11-S1-homework.py</code>（存 <code>~/sand-hollow/&lt;你的学员ID&gt;/homework/</code>），3 道题：</p>
+<ol>
+<li><strong>第一幅画</strong>：亲手敲正文第二节的四行代码，末尾加一行 <code>turtle.done()</code>（窗口才不会闪退），运行，看海龟画出一个直角折线</li>
+<li><strong>转向实验</strong>：在折线后面接着写 <code>t.right(90)</code> 和 <code>t.forward(50)</code>，先在注释里笔猜方向，再运行对答案</li>
+<li><strong>掉头验证</strong>：新起一段，<code>t.left(180)</code> 后 <code>t.forward(80)</code>——线画在原来的哪一侧？注释里写一句话</li>
+</ol>
+<blockquote>
+<p>交完作业跟你的智能体说一声（回报触发词「<strong>修完了</strong>」）。明天 S2：for 循环上 海龟，画出第一个正方形 🐾</p>
+</blockquote>
+<h2>👀 C++ 认脸时刻（1 分钟 · 只看不敲）</h2>
+<p>C++ 的对应写法：</p>
+<pre><code class="language-cpp">#include &lt;iostream&gt;
+// C++ 没有 turtle，用 cout 模拟
+void forward(int d) { std::cout &lt;&lt; &quot;go &quot; &lt;&lt; d &lt;&lt; std::endl; }
+void right(int deg) { std::cout &lt;&lt; &quot;turn &quot; &lt;&lt; deg &lt;&lt; std::endl; }
+int main() {
+    forward(100); right(90);
+    return 0;
+}
+</code></pre>
+<p>三个认脸：</p>
+<ol>
+<li><code>forward(100)</code> 前进（Python <code>t.forward(100)</code>）</li>
+<li><code>right(90)</code> 右转</li>
+<li>C++ 没图形库，AI 训练用专门的 graphics lib</li>
+</ol>
+<blockquote>
+<p>AI 营笔试的编程题用 C++ 出。不用会写，<strong>认得脸</strong>就行。</p>
+</blockquote>
+</div>
+</section>
+<section class="lesson" data-lid="W11-S2">
+<div class="lesson-head"><span class="lt">for 上场：第一个正方形</span></div>
+<div class="md" data-lid="W11-S2"><!-- slug: turtle-square, type: base -->
+<h2>⓪ 🤖 课前 AI 一分钟 · 第 38 颗：AI 也会&quot;循环画图&quot;——for 上场（3 分钟）</h2>
+<blockquote>
+<p><strong>第 38 颗</strong></p>
+</blockquote>
+<p>AI 训练 = 循环画图（正方形 = 4 次重复）。Python 循环 = <strong>画图自动化</strong>。</p>
+<p><strong>今日口诀</strong>：AI 训练 = 循环画图（正方形 = 4 次重复）。</p>
+<p><strong>⚔️ 判一判</strong>（AI 营线上测评题型热身，先自己答再看答案）：</p>
+<blockquote>
+<ol>
+<li>画正方形 = 4 次循环</li>
+<li>AI 训练循环画几何图形</li>
+</ol>
+</blockquote>
+<details><summary>答案</summary>
+
+<p><strong>1.</strong> ✓ for i in range(4): t.forward(100); t.right(90)<br><strong>2.</strong> ✓ 几何图形 = 循环 + 角度</p>
+</details>
+
+<hr>
+<h1>W11-S2 · for 上场：第一个正方形</h1>
+<blockquote>
+<p><strong>每日节奏（v1.9）：</strong> 本篇纯阅读 ≈10 分钟，读完做当天作业 ≈10 分钟，总共 ≤25 分钟
+<strong>不需要 Thonny</strong>——正文一个字都不用敲，作业时间才开编辑器
+难度：⭐⭐ · 本篇对应原 turtle 第一课（文件名 W10-L01）的正方形部分</p>
+</blockquote>
+<hr>
+<h2>一、四条边 = 四次重复（2 分钟）</h2>
+<p>正方形有什么特点？<strong>四条一样长的边、四个 90 度的角。</strong></p>
+<p>「一样的活儿干 4 次」——这不就是 for 循环吗（W04 老朋友）。海龟画图和循环天生一对。</p>
+<h2>二、第一个正方形（4 分钟）</h2>
+<pre><code class="language-python">import turtle
+
+t = turtle.Turtle()
+t.speed(0)
+
+for i in range(4):
+    t.forward(100)
+    t.left(90)
+
+turtle.done()
+</code></pre>
+<p>运行：海龟「上、左、下、右」爬一圈，闭合出一个正方形。</p>
+<p>逐行拆解：</p>
+<table>
+<thead>
+<tr>
+<th>部件</th>
+<th>作用</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>t.speed(0)</code></td>
+<td>最快档（1 最慢，10 很快，0 瞬移）——画几何图不用等动画</td>
+</tr>
+<tr>
+<td><code>for i in range(4):</code></td>
+<td>重复 4 次 = 4 条边</td>
+</tr>
+<tr>
+<td><code>t.forward(100)</code></td>
+<td>画一条边（长 100 像素）</td>
+</tr>
+<tr>
+<td><code>t.left(90)</code></td>
+<td>转过直角，准备画下一条边</td>
+</tr>
+<tr>
+<td><code>turtle.done()</code></td>
+<td>「画完了别关窗」——不写的话窗口闪一下就没了</td>
+</tr>
+</tbody></table>
+<p><strong>关键观察：</strong> 画完第 4 条边，海龟<strong>回到起点、朝回原方向</strong>——4 × 90 = 360，转了一整圈。这不是巧合，是明天的密码。</p>
+<h2>三、边和角怎么数（2 分钟）</h2>
+<ul>
+<li>每次循环 = 一条边 + 一个转角</li>
+<li>4 边形循环 4 次，每次转 90：<code>4 × 90 = 360</code></li>
+<li>想画三角形？3 条边……每次该转多少度？先自己口算一下，明天公布答案</li>
+</ul>
+<h2>四、常见坑：忘 done、忘缩进（2 分钟）</h2>
+<pre><code class="language-text">for i in range(4):
+t.forward(100)    # ❌ 没缩进——不属于循环，只画一条线
+</code></pre>
+<pre><code class="language-text"># 文件结尾忘了 turtle.done()
+# ❌ 窗口闪退，画没看清
+</code></pre>
+<p>缩进即语法（W03 的老规矩）在 turtle 世界照样管用；<code>turtle.done()</code> 是画完的「定妆照」，别忘。</p>
+<p><strong>今日口诀：</strong> 边数 = 循环次数，一条边配一个转角。</p>
+<hr>
+<h2>✅ 今天的阅读完成自查</h2>
+<ul>
+<li><input disabled="" type="checkbox"> 我能说出正方形循环体里两行各干什么</li>
+<li><input disabled="" type="checkbox"> 我知道 <code>speed(0)</code> 是最快、<code>turtle.done()</code> 是保持窗口</li>
+<li><input disabled="" type="checkbox"> 我算出了 4 × 90 = 360，明白海龟回正的含义</li>
+</ul>
+<p>三格全勾 → 打开作业</p>
+<hr>
+<blockquote>
+<p><strong>📁 作业保存规则</strong>：本课课后练习写进一个文件 <code>W11-S2-homework.py</code>（存 <code>~/sand-hollow/&lt;你的学员ID&gt;/homework/</code>），每道题开头用刚学的备注分隔：<code># --- 题 1 ---</code>、<code># --- 题 2 ---</code>……<strong>交完作业要跟你的智能体说一声</strong>才会批改，评语出现在 <code>reviews/*.review.md</code>。<strong>回报触发词：交完作业或修完坑，都回一句「修完了」</strong>——不回这句 mentor 不知道，坑会一直挂着等。</p>
+</blockquote>
+<h2>📝 今日作业（≈10 分钟）</h2>
+<p>新建 <code>W11-S2-homework.py</code>，3 道题：</p>
+<ol>
+<li><strong>正方形</strong>：敲正文第二节的代码跑通；把 <code>range(4)</code> 改成 <code>range(2)</code> 再跑——画出什么？注释里写结论</li>
+<li><strong>大小随意</strong>：把边长 100 改成 60，正方形变大还是变小？再用 <code>t.backward(100)</code> 替换 forward 试试（backward = 倒着爬，方向反着但照样画）</li>
+<li><strong>两连方</strong>：画完第一个正方形后，<code>t.penup()</code> + <code>t.forward(150)</code> + <code>t.pendown()</code>（抬笔挪窝，不留线），把循环整段再写一遍——屏幕上两个正方形</li>
+</ol>
+<blockquote>
+<p>交完说「<strong>修完了</strong>」。明天 S3：颜色、粗细 + 填充，黑线变彩画 🐾</p>
+</blockquote>
+<h2>👀 C++ 认脸时刻（1 分钟 · 只看不敲）</h2>
+<p>C++ 的对应写法：</p>
+<pre><code class="language-cpp">#include &lt;iostream&gt;
+void forward(int d) { std::cout &lt;&lt; &quot;go &quot; &lt;&lt; d &lt;&lt; std::endl; }
+void right(int deg) { std::cout &lt;&lt; &quot;turn &quot; &lt;&lt; deg &lt;&lt; std::endl; }
+int main() {
+    for (int i = 0; i &lt; 4; i++) {
+        forward(100);
+        right(90);
+    }
+    return 0;
+}
+</code></pre>
+<p>三个认脸：</p>
+<ol>
+<li>4 次循环画正方形</li>
+<li><code>i &lt; 4</code> 循环 4 次</li>
+<li>Python <code>for i in range(4):</code> 更简洁</li>
+</ol>
+<blockquote>
+<p>AI 营笔试的编程题用 C++ 出。不用会写，<strong>认得脸</strong>就行。</p>
+</blockquote>
+</div>
+</section>
+<section class="lesson" data-lid="W11-S3">
+<div class="lesson-head"><span class="lt">上色：笔刷三件套与填充</span></div>
+<div class="md" data-lid="W11-S3"><!-- slug: turtle-color, type: base -->
+<h2>⓪ 🤖 课前 AI 一分钟 · 第 39 颗：AI 也会&quot;上色&quot;——属性（3 分钟）</h2>
+<blockquote>
+<p><strong>第 39 颗</strong></p>
+</blockquote>
+<p>AI 画图 = 设置颜色/粗细/填充。Python turtle 颜色/速度/粗细 = <strong>画图属性</strong>。</p>
+<p><strong>今日口诀</strong>：AI 画图 = 设置颜色/粗细/填充。</p>
+<p><strong>⚔️ 判一判</strong>（AI 营线上测评题型热身，先自己答再看答案）：</p>
+<blockquote>
+<ol>
+<li>turtle 可以改颜色</li>
+<li>AI 画图也有样式属性</li>
+</ol>
+</blockquote>
+<details><summary>答案</summary>
+
+<p><strong>1.</strong> ✓ t.color(&quot;red&quot;); t.pensize(3)<br><strong>2.</strong> ✓ fill style / stroke style</p>
+</details>
+
+<hr>
+<h1>W11-S3 · 上色：笔刷三件套与填充</h1>
+<blockquote>
+<p><strong>每日节奏（v1.9）：</strong> 本篇纯阅读 ≈13 分钟，读完做当天作业 ≈10 分钟，总共 ≤25 分钟
+<strong>不需要 Thonny</strong>——正文一个字都不用敲，作业时间才开编辑器
+难度：⭐⭐ · 本篇对应原 turtle 第二课（文件名 W10-L02）的颜色 / 粗细 / 速度 / 填充</p>
+</blockquote>
+<hr>
+<h2>一、画笔个性化三件套（3 分钟）</h2>
+<p>默认的画是黑线白底。三件套让它变身：</p>
+<table>
+<thead>
+<tr>
+<th>命令</th>
+<th>作用</th>
+<th>例子</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>t.pencolor(&quot;red&quot;)</code></td>
+<td>线条颜色</td>
+<td>颜色名是字符串，要加引号</td>
+</tr>
+<tr>
+<td><code>t.pensize(3)</code></td>
+<td>线条粗细（像素）</td>
+<td>数字越大线越粗</td>
+</tr>
+<tr>
+<td><code>t.speed(0)</code></td>
+<td>速度（S2 见过）</td>
+<td>1 最慢 → 10 快 → 0 瞬移</td>
+</tr>
+</tbody></table>
+<p>颜色名常用的有：<code>&quot;red&quot;</code> <code>&quot;orange&quot;</code> <code>&quot;yellow&quot;</code> <code>&quot;green&quot;</code> <code>&quot;blue&quot;</code> <code>&quot;purple&quot;</code> <code>&quot;pink&quot;</code> <code>&quot;black&quot;</code> <code>&quot;white&quot;</code>。拼错了会报 <code>bad color sequence</code>——颜色名也是字符串，种族规矩不变（W02）。</p>
+<h2>二、填充：begin 和 end 夹三明治（4 分钟）</h2>
+<p>给形状「涂色」靠一对搭档：</p>
+<pre><code class="language-python">import turtle
+
+t = turtle.Turtle()
+t.speed(0)
+t.pensize(3)
+
+t.fillcolor(&quot;yellow&quot;)
+t.begin_fill()
+for i in range(4):
+    t.forward(100)
+    t.left(90)
+t.end_fill()
+
+turtle.done()
+</code></pre>
+<p>运行：一个<strong>实心黄正方形</strong>。</p>
+<p>套路像夹三明治：</p>
+<ol>
+<li><code>t.fillcolor(&quot;yellow&quot;)</code>——先选好果酱</li>
+<li><code>t.begin_fill()</code>——掀开面包</li>
+<li>中间画形状（循环照旧）</li>
+<li><code>t.end_fill()</code>——盖上另一片面包，果酱自动涂满</li>
+</ol>
+<p><strong>规矩：</strong> begin 和 end <strong>必须配对</strong>。只有 begin 没有 end → 不涂；画了两个形状才 end → 涂成一大坨。</p>
+<h2>三、抬笔挪窝：penup / pendown（2 分钟）</h2>
+<p>想在别处再画一个，可不想连一条「飞行线」过去：</p>
+<pre><code class="language-python">t.penup()          # 抬笔：接下来移动不留痕
+t.goto(-50, 0)     # 直接飞到坐标 (-50, 0)
+t.pendown()        # 落笔：恢复画画
+</code></pre>
+<p><code>t.goto(x, y)</code> 是瞬移到坐标点。<strong>落着笔 goto = 画一条直线过去</strong>，多半不是你要的。</p>
+<h2>四、彩虹五角星预告（2 分钟）</h2>
+<p>颜色还能从<strong>列表</strong>里轮流取（W06 老朋友）：</p>
+<pre><code class="language-python">colors = [&quot;red&quot;, &quot;orange&quot;, &quot;yellow&quot;, &quot;green&quot;, &quot;blue&quot;]
+for i in range(5):
+    t.pencolor(colors[i])
+    t.forward(120)
+    t.left(144)
+</code></pre>
+<p>每画一条边换一种颜色——五条边五种颜色。角度 144° 的秘密下节课拆。</p>
+<p><strong>今日口诀：</strong> pencolor 换色、pensize 加粗、begin/end 夹心填色、penup 挪窝不留痕。</p>
+<hr>
+<h2>✅ 今天的阅读完成自查</h2>
+<ul>
+<li><input disabled="" type="checkbox"> 我会换线条颜色和粗细，知道颜色名要加引号</li>
+<li><input disabled="" type="checkbox"> 我能说出填充三明治：fillcolor → begin_fill → 画 → end_fill</li>
+<li><input disabled="" type="checkbox"> 我知道 goto 前要先 penup，不然会拖出一条线</li>
+</ul>
+<p>三格全勾 → 打开作业</p>
+<hr>
+<blockquote>
+<p><strong>📁 作业保存规则</strong>：本课课后练习写进一个文件 <code>W11-S3-homework.py</code>（存 <code>~/sand-hollow/&lt;你的学员ID&gt;/homework/</code>），每道题开头用刚学的备注分隔：<code># --- 题 1 ---</code>、<code># --- 题 2 ---</code>……<strong>交完作业要跟你的智能体说一声</strong>才会批改，评语出现在 <code>reviews/*.review.md</code>。<strong>回报触发词：交完作业或修完坑，都回一句「修完了」</strong>——不回这句 mentor 不知道，坑会一直挂着等。</p>
+</blockquote>
+<h2>📝 今日作业（≈10 分钟）</h2>
+<p>新建 <code>W11-S3-homework.py</code>，3 道题：</p>
+<ol>
+<li><strong>四色正方形</strong>：正方形每条边换一种颜色（提示：<code>colors = [&quot;red&quot;, &quot;blue&quot;, &quot;green&quot;, &quot;yellow&quot;]</code>，循环里 <code>t.pencolor(colors[i])</code>）</li>
+<li><strong>实心红圆</strong>：<code>t.fillcolor(&quot;red&quot;)</code> + begin/end 夹住 <code>t.circle(50)</code>——circle(50) 画一个半径 50 的圆</li>
+<li><strong>双房子</strong>：先画一个边长 80 的正方形，penup 挪到 (150, 0) pendown，再画一个<strong>实心</strong>正方形——注意第二个的填充要在挪窝<strong>之后</strong>才 begin</li>
+</ol>
+<blockquote>
+<p>交完说「<strong>修完了</strong>」。明天 S4：正多边形通用公式，一个函数画遍所有形状 🐾</p>
+</blockquote>
+<h2>👀 C++ 认脸时刻（1 分钟 · 只看不敲）</h2>
+<p>C++ 的对应写法：</p>
+<pre><code class="language-cpp">#include &lt;iostream&gt;
+// 上色：模拟
+void setColor(std::string c) { std::cout &lt;&lt; &quot;color=&quot; &lt;&lt; c &lt;&lt; std::endl; }
+void setWidth(int w)        { std::cout &lt;&lt; &quot;width=&quot; &lt;&lt; w &lt;&lt; std::endl; }
+int main() {
+    setColor(&quot;red&quot;);
+    setWidth(3);
+    return 0;
+}
+</code></pre>
+<p>三个认脸：</p>
+<ol>
+<li><code>setColor(&quot;red&quot;)</code> 改颜色</li>
+<li><code>setWidth(3)</code> 改粗细</li>
+<li>Python turtle 一样：t.color(&quot;red&quot;)</li>
+</ol>
+<blockquote>
+<p>AI 营笔试的编程题用 C++ 出。不用会写，<strong>认得脸</strong>就行。</p>
+</blockquote>
+</div>
+</section>
+<section class="lesson" data-lid="W11-S4">
+<div class="lesson-head"><span class="lt">正多边形公式：360 的秘密</span></div>
+<div class="md" data-lid="W11-S4"><!-- slug: turtle-polygon, type: base -->
+<h2>⓪ 🤖 课前 AI 一分钟 · 第 40 颗：AI 也会&quot;正多边形&quot;——360 度（3 分钟）</h2>
+<blockquote>
+<p><strong>第 40 颗</strong></p>
+</blockquote>
+<p>AI 画正 N 边形 = 每次转 360/N 度。Python turtle + 公式 = <strong>几何计算</strong>。</p>
+<p><strong>今日口诀</strong>：AI 画正 N 边形 = 每次转 360/N 度。</p>
+<p><strong>⚔️ 判一判</strong>（AI 营线上测评题型热身，先自己答再看答案）：</p>
+<blockquote>
+<ol>
+<li>正 N 边形外角 = 360/N</li>
+<li>AI 画图按几何公式</li>
+</ol>
+</blockquote>
+<details><summary>答案</summary>
+
+<p><strong>1.</strong> ✓ 正六边形外角 60 度<br><strong>2.</strong> ✓ 几何变换 = 数学公式</p>
+</details>
+
+<hr>
+<h1>W11-S4 · 正多边形公式：360 的秘密</h1>
+<blockquote>
+<p><strong>每日节奏（v1.9）：</strong> 本篇纯阅读 ≈11 分钟，读完做当天作业 ≈10 分钟，总共 ≤25 分钟
+<strong>不需要 Thonny</strong>——正文一个字都不用敲，作业时间才开编辑器
+难度：⭐⭐⭐ · 本篇对应原 turtle 第三课（文件名 W10-L03）的正多边形函数部分</p>
+</blockquote>
+<hr>
+<h2>一、一个观察值千金（3 分钟）</h2>
+<p>正方形：4 条边，每次转 90°。算一算：<code>4 × 90 = 360</code>。</p>
+<p>等边三角形：3 条边，每次转 120°。<code>3 × 120 = 360</code>。</p>
+<p>五边形：5 条边，每次转 72°。<code>5 × 72 = 360</code>。</p>
+<p><strong>秘密揭晓：</strong> 不管几边形，海龟画完一圈<strong>总共转了 360 度</strong>——转回出发方向，图形才能闭合。这叫<strong>外角和定理</strong>：任何正多边形的外角和都是 360°。</p>
+<p>所以每次转的角度 = <strong>360 ÷ 边数</strong>：</p>
+<table>
+<thead>
+<tr>
+<th>形状</th>
+<th>边数</th>
+<th>每次左转</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>三角形</td>
+<td>3</td>
+<td>360/3 = 120°</td>
+</tr>
+<tr>
+<td>正方形</td>
+<td>4</td>
+<td>360/4 = 90°</td>
+</tr>
+<tr>
+<td>五边形</td>
+<td>5</td>
+<td>360/5 = 72°</td>
+</tr>
+<tr>
+<td>六边形</td>
+<td>6</td>
+<td>360/6 = 60°</td>
+</tr>
+</tbody></table>
+<h2>二、一个函数画遍全家（4 分钟）</h2>
+<p>把公式塞进函数（W08 老朋友），一个积木画所有形状：</p>
+<pre><code class="language-python">import turtle
+
+t = turtle.Turtle()
+t.speed(0)
+
+def polygon(sides, length):
+    angle = 360 / sides
+    for i in range(sides):
+        t.forward(length)
+        t.left(angle)
+
+polygon(3, 100)    # 三角形
+polygon(6, 60)     # 六边形
+polygon(8, 50)     # 八边形
+
+turtle.done()
+</code></pre>
+<p>逐行拆解：</p>
+<table>
+<thead>
+<tr>
+<th>部件</th>
+<th>作用</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>def polygon(sides, length):</code></td>
+<td>积木的两个凹槽：边数 + 边长</td>
+</tr>
+<tr>
+<td><code>angle = 360 / sides</code></td>
+<td>公式本体：360 ÷ 边数</td>
+</tr>
+<tr>
+<td><code>for i in range(sides):</code></td>
+<td>有几条边循环几次</td>
+</tr>
+</tbody></table>
+<p>（三个形状会叠在一起——S3 的 penup 挪窝正好用来把它们摆开，作业里试。）</p>
+<h2>三、多边形家族合影（3 分钟）</h2>
+<p>让 for 循环<strong>套在外面</strong>，边数从 3 涨到 7：</p>
+<pre><code class="language-python">for sides in range(3, 8):
+    polygon(sides, 70)
+    t.penup()
+    t.forward(120)
+    t.pendown()
+</code></pre>
+<p>跑出来一排：三角形、正方形、五边形、六边形、七边形——边数越多越像圆。W04 的嵌套循环在画纸上活了。</p>
+<h2>四、坑：为什么 144 不是 72（1 分钟）</h2>
+<p>五角星每次转 <strong>144°</strong>，不是 72°——因为五角星画的是<strong>星形路径</strong>，不是绕一圈的普通五边形。记住区分：普通多边形 360/边数；五角星这种「跨着画」的另有角度。猜角度前先想清楚海龟走的是什么路线。</p>
+<p><strong>今日口诀：</strong> 360 除以边数，外角和定天下。</p>
+<hr>
+<h2>✅ 今天的阅读完成自查</h2>
+<ul>
+<li><input disabled="" type="checkbox"> 我能说出「总转角 360°」和「每次转 = 360 ÷ 边数」</li>
+<li><input disabled="" type="checkbox"> 我能看懂 polygon 函数每一行</li>
+<li><input disabled="" type="checkbox"> 我知道五角星的 144° 不是普通多边形公式算出来的</li>
+</ul>
+<p>三格全勾 → 打开作业</p>
+<hr>
+<blockquote>
+<p><strong>📁 作业保存规则</strong>：本课课后练习写进一个文件 <code>W11-S4-homework.py</code>（存 <code>~/sand-hollow/&lt;你的学员ID&gt;/homework/</code>），每道题开头用刚学的备注分隔：<code># --- 题 1 ---</code>、<code># --- 题 2 ---</code>……<strong>交完作业要跟你的智能体说一声</strong>才会批改，评语出现在 <code>reviews/*.review.md</code>。<strong>回报触发词：交完作业或修完坑，都回一句「修完了」</strong>——不回这句 mentor 不知道，坑会一直挂着等。</p>
+</blockquote>
+<h2>📝 今日作业（≈10 分钟）</h2>
+<p>新建 <code>W11-S4-homework.py</code>，3 道题：</p>
+<ol>
+<li><strong>默写公式</strong>：不看正文，写出 polygon 函数，画一个七边形（边长 60）</li>
+<li><strong>家族合影</strong>：用嵌套循环画 3 到 8 边形一排（每个之间 penup 挪 110 再 pendown）</li>
+<li><strong>先猜再跑</strong>：<code>polygon(10, 50)</code> 画出来更像圆还是更像正方形？先在注释里笔猜再运行——再试试 <code>polygon(36, 15)</code>，写下「边数越多，多边形越接近__」</li>
+</ol>
+<blockquote>
+<p>交完说「<strong>修完了</strong>」。明天 S5：雪花与螺旋——循环画图的巅峰，W09 收官 🐾</p>
+</blockquote>
+<h2>👀 C++ 认脸时刻（1 分钟 · 只看不敲）</h2>
+<p>C++ 的对应写法：</p>
+<pre><code class="language-cpp">#include &lt;iostream&gt;
+int main() {
+    int n = 6;
+    for (int i = 0; i &lt; n; i++) {
+        std::cout &lt;&lt; &quot;forward 100, turn &quot; &lt;&lt; 360 / n &lt;&lt; std::endl;
+    }
+    return 0;
+}
+</code></pre>
+<p>三个认脸：</p>
+<ol>
+<li><code>n = 6</code> 画六边形</li>
+<li><code>360 / n</code> 算外角</li>
+<li>Python 一样：for i in range(6): t.forward(100); t.left(60)</li>
+</ol>
+<blockquote>
+<p>AI 营笔试的编程题用 C++ 出。不用会写，<strong>认得脸</strong>就行。</p>
+</blockquote>
+</div>
+</section>
+<section class="lesson" data-lid="W11-S5">
+<div class="lesson-head"><span class="lt">雪花与螺旋：循环艺术巅峰</span></div>
+<div class="md" data-lid="W11-S5"><!-- slug: turtle-snowflake, type: base -->
+<h2>⓪ 🤖 课前 AI 一分钟 · 第 41 颗：AI 也会&quot;分形&quot;——递归画图（3 分钟）</h2>
+<blockquote>
+<p><strong>第 41 颗</strong></p>
+</blockquote>
+<p>AI 画雪花 = 分形（fractal）。Python turtle + 递归 = <strong>自相似图形</strong>。</p>
+<p><strong>今日口诀</strong>：AI 画雪花 = 分形（fractal）。</p>
+<p><strong>⚔️ 判一判</strong>（AI 营线上测评题型热身，先自己答再看答案）：</p>
+<blockquote>
+<ol>
+<li>分形是自相似图形</li>
+<li>AI 画雪花用分形</li>
+</ol>
+</blockquote>
+<details><summary>答案</summary>
+
+<p><strong>1.</strong> ✓ 雪花 = 6 个分支 + 每分支又是小雪花<br><strong>2.</strong> ✓ fractal</p>
+</details>
+
+<hr>
+<h1>W11-S5 · 雪花与螺旋：循环艺术巅峰</h1>
+<blockquote>
+<p><strong>每日节奏（v1.9）：</strong> 本篇纯阅读 ≈11 分钟，读完做当天作业 ≈10 分钟，总共 ≤25 分钟
+<strong>不需要 Thonny</strong>——正文一个字都不用敲，作业时间才开编辑器
+难度：⭐⭐⭐ · 本篇对应原 turtle 第三课（文件名 W10-L03）的雪花 / 螺旋部分——W09 收官！</p>
+</blockquote>
+<hr>
+<h2>一、雪花 = 一根冰枝 × 转圈盖章（3 分钟）</h2>
+<p>先造一个「积木」：一条带分叉的冰枝。</p>
+<pre><code class="language-python">import turtle
+
+t = turtle.Turtle()
+t.speed(0)
+
+def snowflake_arm():
+    for i in range(5):
+        t.forward(30)
+        t.backward(30)   # 原路退回，不留往返线
+        t.left(60)       # 换个角度再画一根小刺
+</code></pre>
+<p>拆解：前进 30 画一根刺，<strong>backward 原路退回</strong>回到出发点，左转 60° 再画下一根——5 根刺组成一根冰枝（backward 不留线是因为退回的线<strong>盖在去线上</strong>，看起来一根）。</p>
+<h2>二、转圈盖章：6 枝成雪花（3 分钟）</h2>
+<p>一根冰枝不够，转着复印 6 次：</p>
+<pre><code class="language-python">for arm in range(6):
+    snowflake_arm()
+    t.left(60)
+
+turtle.done()
+</code></pre>
+<p><strong>眼熟吗？</strong> 6 枝 × 60° = 360°——又是 S4 的外角和公式！雪花 = 冰枝积木 × 总转角 360°。想要 8 枝雪花？360 ÷ 8 = 45°，换两个数字就成。</p>
+<h2>三、螺旋：递增 + 偏一点（3 分钟）</h2>
+<p>换个魔法：边长<strong>每次变长一点</strong>，角度<strong>故意不整</strong>：</p>
+<pre><code class="language-python">t.pencolor(&quot;blue&quot;)
+for i in range(40):
+    t.forward(5 + i * 5)   # 边长随 i 递增：5,10,15,...
+    t.left(91)             # 91 度 = 90 多 1 度
+</code></pre>
+<p>为什么 91° 会旋出去？每次多偏 1°，40 步累计偏 40°——正方形框架被慢慢「拧」成螺旋。若一直转 90°，画出来的只是越来越大的方框，<strong>永远闭不成螺旋</strong>。</p>
+<p><strong>递增公式：</strong> <code>5 + i * 5</code>——起步 5，每步加 5。想让螺旋更密，把 5 换小；更疏，换大。</p>
+<h2>四、三件套合体回顾（2 分钟）</h2>
+<table>
+<thead>
+<tr>
+<th>图案</th>
+<th>套路</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>多边形</td>
+<td>360/边数 转角 × 边数次</td>
+</tr>
+<tr>
+<td>雪花</td>
+<td>冰枝函数 × (360/枝数) 次</td>
+</tr>
+<tr>
+<td>螺旋</td>
+<td>递增边长 + 「差一点」的角度</td>
+</tr>
+</tbody></table>
+<p>全是<strong>循环 + 角度</strong>的组合拳——这就是「循环艺术」的全部配方。</p>
+<p><strong>今日口诀：</strong> 雪花靠盖章，螺旋靠递增 + 偏角。</p>
+<hr>
+<h2>✅ 今天的阅读完成自查</h2>
+<ul>
+<li><input disabled="" type="checkbox"> 我能说出雪花 = 冰枝 × (360 ÷ 枝数) 的盖章套路</li>
+<li><input disabled="" type="checkbox"> 我知道 <code>5 + i * 5</code> 的递增意思和 91° 的偏角秘密</li>
+<li><input disabled="" type="checkbox"> 三种图案的配方表我能默出来</li>
+</ul>
+<p>三格全勾 → 打开作业（W09 最后一天！）</p>
+<hr>
+<blockquote>
+<p><strong>📁 作业保存规则</strong>：本课课后练习写进一个文件 <code>W11-S5-homework.py</code>（存 <code>~/sand-hollow/&lt;你的学员ID&gt;/homework/</code>），每道题开头用刚学的备注分隔：<code># --- 题 1 ---</code>、<code># --- 题 2 ---</code>……<strong>交完作业要跟你的智能体说一声</strong>才会批改，评语出现在 <code>reviews/*.review.md</code>。<strong>回报触发词：交完作业或修完坑，都回一句「修完了」</strong>——不回这句 mentor 不知道，坑会一直挂着等。</p>
+</blockquote>
+<h2>📝 今日作业（≈10 分钟）</h2>
+<p>新建 <code>W11-S5-homework.py</code>，3 道题：</p>
+<ol>
+<li><strong>雪花</strong>：敲 S1+S2 的雪花代码跑通；改成 8 枝（提示：<code>range(8)</code> + <code>left(45)</code>，为什么是 45？注释里写理由）</li>
+<li><strong>方螺旋</strong>：<code>forward(5 + i * 5)</code> + <code>left(91)</code>，跑通后把 91 改成 90——画出什么？注释里写差别</li>
+<li><strong>彩色螺旋</strong>：给螺旋加颜色——<code>colors = [&quot;red&quot;, &quot;purple&quot;, &quot;blue&quot;, &quot;cyan&quot;]</code>，循环里 <code>t.pencolor(colors[i % 4])</code>，一个四色循环渐变螺旋（<code>i % 4</code> 让颜色永远循环取）</li>
+</ol>
+<blockquote>
+<p>交完说「<strong>修完了</strong>」——W09 结业！turtle 三板斧（形状 / 颜色 / 循环艺术）全到手。周末项目：<strong>用 turtle 画一幅完整的画并签名</strong>（<code>t.write(&quot;By ...&quot;)</code> 落款），画布等你 🎨🐾</p>
+</blockquote>
+<h2>👀 C++ 认脸时刻（1 分钟 · 只看不敲）</h2>
+<p>C++ 的对应写法：</p>
+<pre><code class="language-cpp">#include &lt;iostream&gt;
+void drawBranch(int len) {
+    if (len &lt; 5) return;
+    std::cout &lt;&lt; &quot;forward &quot; &lt;&lt; len &lt;&lt; std::endl;
+    drawBranch(len / 2);
+}
+int main() {
+    drawBranch(100);
+    return 0;
+}
+</code></pre>
+<p>三个认脸：</p>
+<ol>
+<li>递归函数 <code>drawBranch</code></li>
+<li><code>if (len &lt; 5) return;</code> 终止条件</li>
+<li>Python 一样：def draw_branch(len): ...</li>
+</ol>
+<blockquote>
+<p>AI 营笔试的编程题用 C++ 出。不用会写，<strong>认得脸</strong>就行。</p>
+</blockquote>
+</div>
+</section>
+<section class="lesson" data-lid="W11-weekend">
+<div class="lesson-head"><span class="lt">用 turtle 画一幅完整的画（签名！）</span></div>
+<div class="md" data-lid="W11-weekend"><!-- slug: turtle-gallery, type: project -->
+<h2>⓪ 🤖 课前 AI 一分钟 · 第 48 颗：AI 也会&quot;画图鉴&quot;——turtle 画（3 分钟）</h2>
+<blockquote>
+<p><strong>第 48 颗</strong></p>
+</blockquote>
+<p>AI 画图鉴 = turtle 画（每个宠物画头像）。Python turtle + 字典 = <strong>可视化项目</strong>。</p>
+<p><strong>今日口诀</strong>：AI 画图鉴 = turtle 画（每个宠物画头像）。</p>
+<p><strong>⚔️ 判一判</strong>（AI 营线上测评题型热身，先自己答再看答案）：</p>
+<blockquote>
+<ol>
+<li>宠物图鉴可以画</li>
+<li>turtle 画头像 = 几何图形</li>
+</ol>
+</blockquote>
+<details><summary>答案</summary>
+
+<p><strong>1.</strong> ✓ t.circle(50) 画圆当头<br><strong>2.</strong> ✓ turtle 画图 = 几何变换</p>
+</details>
+
+<hr>
+<h1>W11-weekend · 用 turtle 画一幅完整的画（签名！）</h1>
+<blockquote>
+<p>用时：60-90 分钟 · 难度：⭐⭐⭐ · 前置：W09 三课</p>
+</blockquote>
+<hr>
+<h2>一、本周武功盘点（3 分钟）</h2>
+<ul>
+<li>W09-L01：forward / left / right + 正多边形</li>
+<li>W09-L02：pencolor / fillcolor / pensize + 填充</li>
+<li>W09-L03：循环画图（多边形族 / 雪花 / 螺旋）</li>
+</ul>
+<p>今天画一幅<strong>完整的画</strong>——能签上名字、给家人看那种。</p>
+<h2>二、项目：自由创作（60 分钟）</h2>
+<blockquote>
+<p>📁 项目存 <code>~/sand-hollow/&lt;你的学员ID&gt;/homework/</code>，新建 <code>my_art.py</code>。</p>
+</blockquote>
+<p>任选一题（也可自己设计）：</p>
+<h3>选项 A：彩色曼陀罗</h3>
+<pre><code class="language-python">import turtle
+import random
+
+t = turtle.Turtle()
+t.speed(0)
+t.pensize(2)
+
+colors = [&quot;red&quot;, &quot;orange&quot;, &quot;yellow&quot;, &quot;green&quot;, &quot;blue&quot;, &quot;purple&quot;, &quot;pink&quot;]
+
+# Draw 12 petals
+for petal in range(12):
+    t.pencolor(random.choice(colors))
+    t.fillcolor(random.choice(colors))
+    t.begin_fill()
+    for i in range(3):
+        t.forward(80)
+        t.left(120)
+    t.end_fill()
+    t.left(30)
+
+turtle.done()
+</code></pre>
+<h3>选项 B：星空</h3>
+<pre><code class="language-python">import turtle
+import random
+
+t = turtle.Turtle()
+t.speed(0)
+t.penup()
+
+# 100 random stars
+for star in range(100):
+    x = random.randint(-200, 200)
+    y = random.randint(-200, 200)
+    size = random.randint(2, 8)
+    color = random.choice([&quot;white&quot;, &quot;yellow&quot;, &quot;lightyellow&quot;, &quot;lightblue&quot;])
+
+    t.goto(x, y)
+    t.pendown()
+    t.pencolor(color)
+    t.dot(size)  # small filled circle
+    t.penup()
+
+# Moon
+t.goto(150, 150)
+t.pendown()
+t.fillcolor(&quot;lightyellow&quot;)
+t.begin_fill()
+t.circle(40)
+t.end_fill()
+
+turtle.done()
+</code></pre>
+<h3>选项 C：自定义（推荐）</h3>
+<p>画你想画的东西：</p>
+<ul>
+<li>一只卡通动物（猫/狗/鱼）</li>
+<li>一棵树（树干 + 树叶圆圈）</li>
+<li>一辆汽车（矩形 + 圆形轮子）</li>
+<li>一栋房子 + 花园 + 太阳</li>
+<li>你名字的首字母装饰版</li>
+</ul>
+<h2>三、签名（5 分钟）</h2>
+<p>画完给作品签上名字：</p>
+<pre><code class="language-python">import turtle
+# ... your drawing ...
+
+# Signature
+t.penup()
+t.goto(-200, -250)
+t.pendown()
+t.pencolor(&quot;black&quot;)
+t.write(&quot;By [your name], Sep 2026&quot;, font=(&quot;Arial&quot;, 12, &quot;normal&quot;))
+
+turtle.done()
+</code></pre>
+<p><code>t.write()</code> 是 turtle 的「写字」功能，可以写 ASCII 文字（中文需要换字体）。</p>
+<h2>四、验收标准（自助验收）</h2>
+<ul>
+<li><input disabled="" type="checkbox"> 画作能完整跑通，无报错</li>
+<li><input disabled="" type="checkbox"> 至少用了 3 种颜色（线条或填充）</li>
+<li><input disabled="" type="checkbox"> 用到循环画图（不只是画静态形状）</li>
+<li><input disabled="" type="checkbox"> 签名落档</li>
+<li><input disabled="" type="checkbox"> 给家人 / 朋友看过，至少 1 人说「好看」</li>
+</ul>
+<h2>五、W09 全周自查</h2>
+<ul>
+<li><input disabled="" type="checkbox"> L01：forward / left / right + 正方形</li>
+<li><input disabled="" type="checkbox"> L02：pencolor / fillcolor + 填充</li>
+<li><input disabled="" type="checkbox"> L03：循环画图（多边形 / 雪花 / 螺旋）</li>
+<li><input disabled="" type="checkbox"> 周末：画了一幅完整画作 + 签名</li>
+<li><input disabled="" type="checkbox"> 我能给家人解释「turtle = 程序画画的小海龟」</li>
+</ul>
+<p>W09 毕业 🎨 → 进入 W10「字典：名字 → 东西的魔法地图」。W06 学的列表用索引 <code>[0]</code>、<code>[1]</code>，字典用「名字」找东西——像查电话簿。</p>
+<h2>👀 C++ 认脸时刻（1 分钟 · 只看不敲）</h2>
+<p>C++ 的对应写法：</p>
+<pre><code class="language-cpp">#include &lt;iostream&gt;
+// 画图：模拟 turtle
+void circle(int r) { std::cout &lt;&lt; &quot;circle &quot; &lt;&lt; r &lt;&lt; std::endl; }
+int main() {
+    circle(50);  // 画脸
+    return 0;
+}
+</code></pre>
+<p>三个认脸：</p>
+<ol>
+<li><code>circle(50)</code> 画圆</li>
+<li>C++ 没 turtle，要用 graphics lib</li>
+<li>Python <code>t.circle(50)</code> 一行</li>
+</ol>
+<blockquote>
+<p>AI 营笔试的编程题用 C++ 出。不用会写，<strong>认得脸</strong>就行。</p>
+</blockquote>
+</div>
+</section>
+</div>
+</div>
+</body>
+</html>

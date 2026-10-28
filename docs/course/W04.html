@@ -1,0 +1,863 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>W04 · 让程序重复干活</title>
+<style>
+:root{--bg:#0f1420;--card:#171e2e;--card2:#1e2740;--border:#2a3550;--text:#e8ecf4;--text2:#8b96ad;--accent:#5b9dff;--ok:#3ecf8e}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+.wrap{max-width:900px;margin:0 auto;padding:28px 20px 60px}
+h1{font-size:1.5rem}
+.wk-meta{color:var(--text2);font-size:.85rem;margin:4px 0 20px}
+.lesson{border:1px solid var(--border);border-radius:12px;padding:16px 18px;margin-bottom:14px;background:var(--card2)}
+.lesson-head{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.lesson-head .lt{font-weight:700;font-size:1rem;flex:1}
+.md{font-size:.92rem;line-height:1.8;color:var(--text);overflow-wrap:break-word}
+.md h1,.md h2,.md h3{margin:14px 0 8px;font-size:1.05rem}
+.md p{margin:8px 0}
+.md code{background:rgba(91,157,255,.12);border-radius:5px;padding:2px 6px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.85em;color:#a8c8ff}
+.md pre{background:#0b0f18;border:1px solid var(--border);border-radius:10px;padding:12px 14px;overflow-x:auto;margin:10px 0}
+.md pre code{background:none;padding:0;color:#c9d7f0}
+.md ul,.md ol{margin:8px 0 8px 22px}
+.md blockquote{border-left:3px solid var(--accent);padding:4px 12px;color:var(--text2);margin:10px 0}
+.md a{color:var(--accent)}
+.md table{border-collapse:collapse;margin:10px 0;font-size:.85rem}
+.md td,.md th{border:1px solid var(--border);padding:6px 10px}
+.md input[type=checkbox]{width:15px;height:15px;accent-color:var(--ok);cursor:pointer;margin-right:6px;vertical-align:-2px}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+<h1 class="wk-title">让程序重复干活</h1>
+<div class="wk-meta">W04 · 6 课</div>
+</header>
+<div class="week-body" data-week="W04">
+<section class="lesson" data-lid="W04-S1">
+<div class="lesson-head"><span class="lt">for 初登场：程序学会重复</span></div>
+<div class="md" data-lid="W04-S1"><!-- slug: for-intro, type: base -->
+<h2>⓪ 🤖 课前 AI 一分钟 · 第 7 颗：AI 也会&quot;重复干活&quot;（3 分钟）</h2>
+<blockquote>
+<p><strong>第 7 颗</strong></p>
+</blockquote>
+<p>AI 训练 = 把数据&quot;喂&quot;给模型 1000 遍。Python 的 <code>for</code> = <strong>重复执行</strong>一段代码。</p>
+<p><strong>今日口诀</strong>：AI 训练 = 把数据&quot;喂&quot;给模型 1000 遍。</p>
+<p><strong>⚔️ 判一判</strong>（AI 营线上测评题型热身，先自己答再看答案）：</p>
+<blockquote>
+<ol>
+<li>for 循环是用来重复执行一段代码</li>
+<li>AI 训练就是把数据重复喂给模型</li>
+</ol>
+</blockquote>
+<details><summary>答案</summary>
+
+<p><strong>1.</strong> ✓ for i in range(10): 表示循环 10 次<br><strong>2.</strong> ✓ epoch 1000 就是喂 1000 遍</p>
+</details>
+
+<hr>
+<h1>W04-S1 · for 初登场：程序学会重复</h1>
+<blockquote>
+<p><strong>每日节奏（v1.9）：</strong> 本篇纯阅读 ≈10 分钟，读完做当天作业 ≈10 分钟，总共 ≤25 分钟
+<strong>不需要 Thonny</strong>（正文）——作业时间才开编辑器
+难度：⭐⭐ · 本篇是原 W04-L01 的前半（概念 + for 的样子）</p>
+</blockquote>
+<hr>
+<h2>一、概念：程序终于学会「重复」（3 分钟）</h2>
+<p>前三周的程序都是&quot;直线剧本&quot;——每行只做一次。但很多事是重复的：</p>
+<ul>
+<li>战士训练每天做 100 个俯卧撑</li>
+<li>商店货架每天补 30 件商品</li>
+<li>记账要数 12 个月的开销</li>
+</ul>
+<p><strong>for 循环</strong>让程序「把同一件事做 N 遍」。这一招是后面所有自动化程序的起点。</p>
+<h2>二、for 的样子（4 分钟）</h2>
+<pre><code class="language-python">for i in range(5):
+    print(&quot;Hello,&quot;, i)
+</code></pre>
+<p>输出：</p>
+<pre><code>Hello, 0
+Hello, 1
+Hello, 2
+Hello, 3
+Hello, 4
+</code></pre>
+<p><strong>关键观察：</strong> <code>i</code> 从 <strong>0</strong> 开始，不是 1；到 4 结束，一共 5 次。程序员的传统，记住就好。</p>
+<h2>三、逐字拆解：for 四件套（3 分钟）</h2>
+<table>
+<thead>
+<tr>
+<th>部件</th>
+<th>作用</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>for</code></td>
+<td>「为了」每个值，做下面的事</td>
+</tr>
+<tr>
+<td><code>i</code></td>
+<td>临时变量，每次循环换一个新值</td>
+</tr>
+<tr>
+<td><code>in range(5)</code></td>
+<td>从 0、1、2、3、4 里逐个取</td>
+</tr>
+<tr>
+<td><code>:</code> + 缩进</td>
+<td>冒号 =「那么」，缩进的行每次循环都跑</td>
+</tr>
+</tbody></table>
+<p>发现没有？四件套跟 if 一模一样——<strong>for 只是换了种&quot;手下干活&quot;的方式</strong>：if 是&quot;看情况干一次&quot;，for 是&quot;挨个干 N 次&quot;。</p>
+<p><strong>今日口诀：</strong> for、变量、in range、冒号缩进——重复从此不费手。</p>
+<hr>
+<h2>✅ 今天的阅读完成自查</h2>
+<ul>
+<li><input disabled="" type="checkbox"> 我能说出 for 四件套</li>
+<li><input disabled="" type="checkbox"> 我知道 <code>range(5)</code> 是 0 到 4，共 5 次，从 0 起步</li>
+<li><input disabled="" type="checkbox"> 我知道缩进里的行每轮循环都会跑一遍</li>
+</ul>
+<p>三格全勾 → 打开作业</p>
+<hr>
+<blockquote>
+<p><strong>📁 作业保存规则</strong>：本课课后练习写进一个文件 <code>W04-S1-homework.py</code>（存 <code>~/sand-hollow/&lt;你的学员ID&gt;/homework/</code>），每道题开头用刚学的备注分隔：<code># --- 题 1 ---</code>、<code># --- 题 2 ---</code>……<strong>交完作业要跟你的智能体说一声</strong>才会批改，评语出现在 <code>reviews/*.review.md</code>。<strong>回报触发词：交完作业或修完坑，都回一句「修完了」</strong>——不回这句 mentor 不知道，坑会一直挂着等。</p>
+</blockquote>
+<h2>📝 今日作业（≈10 分钟）</h2>
+<p>新建 <code>W04-S1-homework.py</code>，3 道题：</p>
+<ol>
+<li><strong>点名五连</strong>：把正文例子敲一遍，把 &quot;Hello,&quot; 改成你自己的打招呼语，注释里写：i 最后一次是几？</li>
+<li><strong>数到 10 关电视</strong>：<code>for second in range(1, 11):</code> 打 <code>second ...</code>，循环完打 &quot;Time&#39;s up! Turn off the TV&quot;</li>
+<li><strong>小目标计数器</strong>：今天要完成 5 件事，用 for 打出 &quot;Done 1/5&quot;、&quot;Done 2/5&quot; …到 &quot;Done 5/5&quot;（f-string 上场：<code>f&quot;Done {i}/5&quot;</code>）</li>
+</ol>
+<blockquote>
+<p>交完说「<strong>修完了</strong>」。明天 S2 讲 range 的三种玩法 🐾</p>
+</blockquote>
+<h2>👀 C++ 认脸时刻（1 分钟 · 只看不敲）</h2>
+<p>C++ 的对应写法：</p>
+<pre><code class="language-cpp">#include &lt;iostream&gt;
+int main() {
+    for (int i = 0; i &lt; 5; i++) {
+        std::cout &lt;&lt; &quot;hello&quot; &lt;&lt; std::endl;
+    }
+    return 0;
+}
+</code></pre>
+<p>三个认脸：</p>
+<ol>
+<li><code>for (int i = 0; i &lt; 5; i++)</code> 三段式：起点/条件/步长</li>
+<li>C++ <code>i++</code> = i = i + 1</li>
+<li>Python <code>for i in range(5):</code> 更简洁</li>
+</ol>
+<blockquote>
+<p>AI 营笔试的编程题用 C++ 出。不用会写，<strong>认得脸</strong>就行。</p>
+</blockquote>
+</div>
+</section>
+<section class="lesson" data-lid="W04-S2">
+<div class="lesson-head"><span class="lt">range 的三种玩法</span></div>
+<div class="md" data-lid="W04-S2"><!-- slug: for-range, type: base -->
+<h2>⓪ 🤖 课前 AI 一分钟 · 第 8 颗：AI 也用 range——批量数据（3 分钟）</h2>
+<blockquote>
+<p><strong>第 8 颗</strong></p>
+</blockquote>
+<p>AI 训练要给 1000 张图片标注，循环用 <code>range(1000)</code>——<strong>range = 数字范围</strong>。</p>
+<p><strong>今日口诀</strong>：AI 训练要给 1000 张图片标注，循环用 <code>range(1000)</code>——<strong>range = 数字范围</strong>。</p>
+<p><strong>⚔️ 判一判</strong>（AI 营线上测评题型热身，先自己答再看答案）：</p>
+<blockquote>
+<ol>
+<li>range(10) 生成 0-9 的数字</li>
+<li>range(1, 11) 生成 1-10</li>
+</ol>
+</blockquote>
+<details><summary>答案</summary>
+
+<p><strong>1.</strong> ✓ 含头不含尾<br><strong>2.</strong> ✓ 含头不含尾（11 不算）</p>
+</details>
+
+<hr>
+<h1>W04-S2 · range 的三种玩法</h1>
+<blockquote>
+<p><strong>每日节奏（v1.9）：</strong> 本篇纯阅读 ≈11 分钟，读完做当天作业 ≈10 分钟，总共 ≤25 分钟
+<strong>不需要 Thonny</strong>（正文）——作业时间才开编辑器
+难度：⭐⭐ · 本篇是原 W04-L01 的中段（range 三姿势 + 有用小事）</p>
+</blockquote>
+<hr>
+<h2>一、三种姿势一次看全（6 分钟）</h2>
+<pre><code class="language-python"># 姿势一：range(5) → 0,1,2,3,4（从 0 开始，到 N-1 收）
+for i in range(5):
+    print(i)
+
+# 姿势二：range(2, 7) → 2,3,4,5,6（从 2 开始，到 7 之前收）
+for i in range(2, 7):
+    print(i)
+
+# 姿势三：range(0, 10, 2) → 0,2,4,6,8（步长 2，跳着走）
+for i in range(0, 10, 2):
+    print(i)
+</code></pre>
+<p>想偷看 range 里装了什么？用 <code>list()</code> 照一照：</p>
+<pre><code class="language-python">print(list(range(1, 6)))     # [1, 2, 3, 4, 5]
+print(list(range(0, 20, 5))) # [0, 5, 10, 15]
+</code></pre>
+<h2>二、含头不含尾：range 唯一铁律（3 分钟）</h2>
+<ul>
+<li><code>range(5)</code> 给 0-4，<strong>不含 5</strong></li>
+<li><code>range(2, 7)</code> 给 2-6，<strong>不含 7</strong></li>
+</ul>
+<p><strong>记忆口诀：含头不含尾，永远差一个。</strong></p>
+<p>想数 1 到 10？<code>range(1, 11)</code>——尾巴多写一个，就是诀窍。</p>
+<h2>三、循环做点有用的（2 分钟）</h2>
+<p>9 的乘法表前 9 项，三行搞定：</p>
+<pre><code class="language-python">for n in range(1, 10):
+    print(f&quot;9 x {n} = {9 * n}&quot;)
+</code></pre>
+<p>f-string（W02 的老朋友）+ for（本周新朋友）= 自动化第一步。循环体里还能放 if——下一题作业你会用到。</p>
+<h2>四、步长为负：倒着走（2 分钟）</h2>
+<p>步长还能写<strong>负数</strong>——range 不光往前走，也能往回走。</p>
+<pre><code class="language-python">for n in range(5, 0, -1):
+    print(n)        # 5,4,3,2,1
+</code></pre>
+<p><strong>诀窍：</strong> 步长是 -1 时，range 从第一个参数<strong>往下数</strong>到第二个参数之前。第三个 -1 决定方向，正数往上、负数往下。想从 10 倒到 1？<code>range(10, 0, -1)</code>——含头不含尾的规矩没变，只是倒着数。</p>
+<p><strong>今日口诀：</strong> 一个 N 数到 N-1，两个数含头不含尾，三个数跳着走，步长为负是倒档。</p>
+<hr>
+<h2>✅ 今天的阅读完成自查</h2>
+<ul>
+<li><input disabled="" type="checkbox"> range(N) / range(a, b) / range(a, b, step) 三种姿势我都认得</li>
+<li><input disabled="" type="checkbox"> 我能说出「含头不含尾」并解释为什么数 1-10 要写 range(1, 11)</li>
+<li><input disabled="" type="checkbox"> 我知道步长可以是 -1（倒着数）</li>
+</ul>
+<p>三格全勾 → 打开作业</p>
+<hr>
+<blockquote>
+<p><strong>📁 作业保存规则</strong>：本课课后练习写进一个文件 <code>W04-S2-homework.py</code>（存 <code>~/sand-hollow/&lt;你的学员ID&gt;/homework/</code>），每道题开头用刚学的备注分隔：<code># --- 题 1 ---</code>、<code># --- 题 2 ---</code>……<strong>交完作业要跟你的智能体说一声</strong>才会批改，评语出现在 <code>reviews/*.review.md</code>。<strong>回报触发词：交完作业或修完坑，都回一句「修完了」</strong>——不回这句 mentor 不知道，坑会一直挂着等。</p>
+</blockquote>
+<h2>📝 今日作业（≈10 分钟）</h2>
+<p>新建 <code>W04-S2-homework.py</code>，3 道题：</p>
+<ol>
+<li><strong>数到 20</strong>：用 for + range 打 1 到 20，每行一个数</li>
+<li><strong>倒计时 10 秒</strong>：打 10, 9, 8, …, 1，最后打 &quot;Liftoff!&quot;（提示：<code>range(10, 0, -1)</code> 倒着走）</li>
+<li><strong>偶数清单</strong>：用 range 一步到位打 0 到 20 的所有偶数（不许用 if，就用步长！）</li>
+</ol>
+<blockquote>
+<p>交完说「<strong>修完了</strong>」。明天 S3 学累加器——循环真正的威力 🐾</p>
+</blockquote>
+<h2>👀 C++ 认脸时刻（1 分钟 · 只看不敲）</h2>
+<p>C++ 的对应写法：</p>
+<pre><code class="language-cpp">#include &lt;iostream&gt;
+int main() {
+    for (int i = 1; i &lt;= 10; i++) {
+        std::cout &lt;&lt; i &lt;&lt; std::endl;
+    }
+    return 0;
+}
+</code></pre>
+<p>三个认脸：</p>
+<ol>
+<li>C++ 是 <code>i &lt;= 10</code>（含头含尾）</li>
+<li>Python <code>range(1, 11)</code> 是 <code>i &lt; 11</code>（含头不含尾）</li>
+<li>C++ 没有 range，得手写三段式</li>
+</ol>
+<blockquote>
+<p>AI 营笔试的编程题用 C++ 出。不用会写，<strong>认得脸</strong>就行。</p>
+</blockquote>
+</div>
+</section>
+<section class="lesson" data-lid="W04-S3">
+<div class="lesson-head"><span class="lt">累加器·求和与计数</span></div>
+<div class="md" data-lid="W04-S3"><!-- slug: for-sum, type: base -->
+<h2>⓪ 🤖 课前 AI 一分钟 · 第 9 颗：AI 也会&quot;求和&quot;——累加器（3 分钟）</h2>
+<blockquote>
+<p><strong>第 9 颗</strong></p>
+</blockquote>
+<p>AI 算总损失 loss = 累加每个样本的误差——<strong>累加器是 AI 训练的核心</strong>。</p>
+<p><strong>今日口诀</strong>：AI 算总损失 loss = 累加每个样本的误差——<strong>累加器是 AI 训练的核心</strong>。</p>
+<p><strong>⚔️ 判一判</strong>（AI 营线上测评题型热身，先自己答再看答案）：</p>
+<blockquote>
+<ol>
+<li>AI 训练需要累加每个样本的损失</li>
+<li>sum = 0; for x in nums: sum += x 是累加器</li>
+</ol>
+</blockquote>
+<details><summary>答案</summary>
+
+<p><strong>1.</strong> ✓ loss = Σ (预测 - 真实)²<br><strong>2.</strong> ✓ 标准累加器模式</p>
+</details>
+
+<hr>
+<h1>W04-S3 · 累加器·求和与计数</h1>
+<blockquote>
+<p><strong>每日节奏（v1.9）：</strong> 本篇纯阅读 ≈12 分钟，读完做当天作业 ≈10 分钟，总共 ≤25 分钟
+<strong>不需要 Thonny</strong>（正文）——作业时间才开编辑器
+难度：⭐⭐ · 本篇是原 W04-L02 的前半（累加器四件套 + 求和 + 计数）</p>
+</blockquote>
+<hr>
+<h2>一、概念：循环真正的威力（3 分钟）</h2>
+<p>打 5 行 Hello 像玩具。for 循环真正的威力是「<strong>累加</strong>」——把一堆数压成一个数：</p>
+<ul>
+<li>算这个月花了多少钱（10 笔加一起）</li>
+<li>算全班平均分（30 个分数加完除以 30）</li>
+<li>盘点库存（50 件商品数件数）</li>
+</ul>
+<p>记住四个字：<strong>先建箱子，再往里扔</strong>。</p>
+<h2>二、第一招：求和（5 分钟）</h2>
+<pre><code class="language-python">total = 0
+for i in range(1, 11):
+    total = total + i
+print(&quot;Sum 1-10 =&quot;, total)
+</code></pre>
+<p>运行得 <code>Sum 1-10 = 55</code>（高斯 7 岁就算出来过，你也不差）。</p>
+<h3>累加器四件套</h3>
+<table>
+<thead>
+<tr>
+<th>部件</th>
+<th>作用</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>total = 0</code></td>
+<td><strong>建箱子</strong>：起手归零</td>
+</tr>
+<tr>
+<td><code>for i in range(...)</code></td>
+<td>循环：逐个取数</td>
+</tr>
+<tr>
+<td><code>total = total + i</code></td>
+<td><strong>往里扔</strong>：把当前数加进箱子</td>
+</tr>
+<tr>
+<td><code>print(...)</code></td>
+<td><strong>出箱子</strong>：循环结束看结果</td>
+</tr>
+</tbody></table>
+<p><code>total = total + i</code> 看着像&quot;自己等于自己&quot;，其实是<strong>先算右边、再装进左边</strong>：右边的 total 是老总和，左边是装上新值的箱子。每轮循环，箱子长大一圈。</p>
+<p><strong>简短写法：</strong> <code>total += i</code> 等价于 <code>total = total + i</code>，以后常用。</p>
+<h2>三、第二招：计数（4 分钟）</h2>
+<p>计数 = 每看到目标，箱子 +1：</p>
+<pre><code class="language-python">count = 0
+for i in range(1, 21):
+    if i % 2 == 0:
+        count += 1
+print(&quot;Even numbers in 1-20:&quot;, count)
+</code></pre>
+<ul>
+<li><code>count = 0</code>：建空计数器</li>
+<li><code>if i % 2 == 0</code>：是偶数吗（W03 的 if 在循环里上班了！）</li>
+<li><code>count += 1</code>：是的话计数器 +1</li>
+</ul>
+<p><strong>for 循环里放 if</strong>——两个老朋友合体，这是本周最重要的形态。</p>
+<p><strong>今日口诀：</strong> 建箱子、进循环、往里扔、出箱子。</p>
+<hr>
+<h2>✅ 今天的阅读完成自查</h2>
+<ul>
+<li><input disabled="" type="checkbox"> 我能说出累加器四件套</li>
+<li><input disabled="" type="checkbox"> 我能解释 <code>total = total + i</code> 为什么不是&quot;自己等于自己&quot;</li>
+<li><input disabled="" type="checkbox"> 我知道计数就是&quot;每看到目标 +1&quot;</li>
+</ul>
+<p>三格全勾 → 打开作业</p>
+<hr>
+<blockquote>
+<p><strong>📁 作业保存规则</strong>：本课课后练习写进一个文件 <code>W04-S3-homework.py</code>（存 <code>~/sand-hollow/&lt;你的学员ID&gt;/homework/</code>），每道题开头用刚学的备注分隔：<code># --- 题 1 ---</code>、<code># --- 题 2 ---</code>……<strong>交完作业要跟你的智能体说一声</strong>才会批改，评语出现在 <code>reviews/*.review.md</code>。<strong>回报触发词：交完作业或修完坑，都回一句「修完了」</strong>——不回这句 mentor 不知道，坑会一直挂着等。</p>
+</blockquote>
+<h2>📝 今日作业（≈10 分钟）</h2>
+<p>新建 <code>W04-S3-homework.py</code>，3 道题：</p>
+<ol>
+<li><strong>求和 1-100</strong>：累加器算 1+2+…+100。答案是 5050，运行验证</li>
+<li><strong>数 7 的倍数</strong>：1-100 里 7 的倍数有几个？（提示：<code>i % 7 == 0</code> + 计数器）</li>
+<li><strong>班级总分</strong>：<code>scores = [85, 92, 78, 95, 88]</code>，用 for 循环求总分和平均分（<code>len(scores)</code> 给个数）</li>
+</ol>
+<blockquote>
+<p>交完说「<strong>修完了</strong>」。明天 S4 学第三招找最大——擂台赛开打 🐾</p>
+</blockquote>
+<h2>👀 C++ 认脸时刻（1 分钟 · 只看不敲）</h2>
+<p>C++ 的对应写法：</p>
+<pre><code class="language-cpp">#include &lt;iostream&gt;
+int main() {
+    int sum = 0;
+    for (int i = 1; i &lt;= 10; i++) {
+        sum += i;
+    }
+    std::cout &lt;&lt; &quot;sum = &quot; &lt;&lt; sum &lt;&lt; std::endl;
+    return 0;
+}
+</code></pre>
+<p>三个认脸：</p>
+<ol>
+<li><code>int sum = 0;</code> 初始化累加器</li>
+<li><code>sum += i;</code> 累加（Python 一样）</li>
+<li><code>sum</code> 默认 int，C++ 必须声明类型</li>
+</ol>
+<blockquote>
+<p>AI 营笔试的编程题用 C++ 出。不用会写，<strong>认得脸</strong>就行。</p>
+</blockquote>
+</div>
+</section>
+<section class="lesson" data-lid="W04-S4">
+<div class="lesson-head"><span class="lt">累加器·找最大与三坑</span></div>
+<div class="md" data-lid="W04-S4"><!-- slug: for-max, type: base -->
+<h2>⓪ 🤖 课前 AI 一分钟 · 第 10 颗：AI 也会&quot;找最大&quot;（3 分钟）</h2>
+<blockquote>
+<p><strong>第 10 颗</strong></p>
+</blockquote>
+<p>AI 分类时找&quot;概率最大&quot;的类别——<strong>找最大</strong>。Python 的累加器模式 = 跟踪当前最大值。</p>
+<p><strong>今日口诀</strong>：AI 分类时找&quot;概率最大&quot;的类别——<strong>找最大</strong>。</p>
+<p><strong>⚔️ 判一判</strong>（AI 营线上测评题型热身，先自己答再看答案）：</p>
+<blockquote>
+<ol>
+<li>AI 分类找概率最大的类别</li>
+<li>max_val = nums[0]; for x in nums: if x &gt; max_val: max_val = x 是找最大</li>
+</ol>
+</blockquote>
+<details><summary>答案</summary>
+
+<p><strong>1.</strong> ✓ argmax 函数<br><strong>2.</strong> ✓ 标准找最大模式</p>
+</details>
+
+<hr>
+<h1>W04-S4 · 累加器·找最大与三坑</h1>
+<blockquote>
+<p><strong>每日节奏（v1.9）：</strong> 本篇纯阅读 ≈11 分钟，读完做当天作业 ≈10 分钟，总共 ≤25 分钟
+<strong>不需要 Thonny</strong>（正文）——作业时间才开编辑器
+难度：⭐⭐⭐ · 本篇是原 W04-L02 的后段（找最大 + 累加器三坑）</p>
+</blockquote>
+<hr>
+<h2>一、第三招：找最大——擂台赛（5 分钟）</h2>
+<p>不是把所有数加起来，而是<strong>留住最大的那个</strong>：</p>
+<pre><code class="language-python">nums = [3, 7, 2, 9, 4]
+biggest = nums[0]
+for n in nums:
+    if n &gt; biggest:
+        biggest = n
+print(&quot;The biggest is:&quot;, biggest)
+</code></pre>
+<p>得 <code>The biggest is: 9</code>。</p>
+<h3>擂台赛规则</h3>
+<ul>
+<li><code>nums = [3, 7, 2, 9, 4]</code>：一个列表（W06 正式学，今天先借用）</li>
+<li><code>biggest = nums[0]</code>：<strong>第一个数先当擂主</strong>（<code>nums[0]</code> 是列表第 1 个——Python 从 0 数起）</li>
+<li><code>if n &gt; biggest</code>：有人比擂主强？</li>
+<li><code>biggest = n</code>：是的话，换人当擂主</li>
+</ul>
+<h2>二、初值口诀（2 分钟）</h2>
+<table>
+<thead>
+<tr>
+<th>目标</th>
+<th>箱子初值</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>求和</td>
+<td><code>0</code></td>
+</tr>
+<tr>
+<td>计数</td>
+<td><code>0</code></td>
+</tr>
+<tr>
+<td>找最大 / 找最小</td>
+<td><strong>第一个数</strong>（不是 0！）</td>
+</tr>
+</tbody></table>
+<p>为什么找最大不能从 0 起手？想象列表全是负数 <code>[-5, -2, -9]</code>——0 谁都赢不了，最后打印 0，可 0 根本不在列表里。<strong>擂主必须从选手里产生。</strong></p>
+<h2>三、⚠️ 累加器三坑（4 分钟）</h2>
+<ol>
+<li><strong>忘建箱子</strong>：循环里 <code>total += i</code> 但 total 没先建 → <code>NameError: name &#39;total&#39; is not defined</code>。累加器必须<strong>先建再循环</strong>。</li>
+<li><strong>建错初值</strong>：找最大却 <code>biggest = 0</code> → 全负数列表全军覆没（见上）。</li>
+<li><strong><code>=</code> 与 <code>==</code> 混淆</strong>：<code>if n = biggest:</code> → SyntaxError。比较用 <code>==</code>（W03-S3 踩过的坑，穿越而来）。</li>
+</ol>
+<p><strong>今日口诀：</strong> 擂主从选手里产生——初值选错，满盘皆输。</p>
+<hr>
+<h2>✅ 今天的阅读完成自查</h2>
+<ul>
+<li><input disabled="" type="checkbox"> 我能说出擂台赛的规则：第一个当擂主，强的换上</li>
+<li><input disabled="" type="checkbox"> 我知道找最大/最小的初值 = 第一个数，不是 0</li>
+<li><input disabled="" type="checkbox"> 三坑我能对上号（NameError / 错初值 / = vs ==）</li>
+</ul>
+<p>三格全勾 → 打开作业</p>
+<hr>
+<blockquote>
+<p><strong>📁 作业保存规则</strong>：本课课后练习写进一个文件 <code>W04-S4-homework.py</code>（存 <code>~/sand-hollow/&lt;你的学员ID&gt;/homework/</code>），每道题开头用刚学的备注分隔：<code># --- 题 1 ---</code>、<code># --- 题 2 ---</code>……<strong>交完作业要跟你的智能体说一声</strong>才会批改，评语出现在 <code>reviews/*.review.md</code>。<strong>回报触发词：交完作业或修完坑，都回一句「修完了」</strong>——不回这句 mentor 不知道，坑会一直挂着等。</p>
+</blockquote>
+<h2>📝 今日作业（≈10 分钟）</h2>
+<p>新建 <code>W04-S4-homework.py</code>，3 道题：</p>
+<ol>
+<li><strong>找最大</strong>：<code>nums = [12, 45, 7, 23, 56, 89, 34]</code>，用擂台赛找出最大值</li>
+<li><strong>最大 + 最小双擂台</strong>：同一组数，两个累加器（biggest 和 smallest 同时开打）</li>
+<li><strong>存款复盘</strong>：<code>savings = [10, 20, 15, 30, 25, 50, 40]</code>，求总共存了多少 + 平均每天多少</li>
+</ol>
+<blockquote>
+<p>交完说「<strong>修完了</strong>」。明天 S5 是 W04 压轴——嵌套循环画图案 🐾</p>
+</blockquote>
+<h2>👀 C++ 认脸时刻（1 分钟 · 只看不敲）</h2>
+<p>C++ 的对应写法：</p>
+<pre><code class="language-cpp">#include &lt;iostream&gt;
+#include &lt;vector&gt;
+int main() {
+    std::vector&lt;int&gt; nums = {3, 7, 2, 9, 5};
+    int max_val = nums[0];
+    for (int x : nums) {
+        if (x &gt; max_val) max_val = x;
+    }
+    std::cout &lt;&lt; max_val &lt;&lt; std::endl;
+    return 0;
+}
+</code></pre>
+<p>三个认脸：</p>
+<ol>
+<li><code>std::vector&lt;int&gt;</code> 跟 Python list 类似</li>
+<li><code>for (int x : nums)</code> range-based for（C++11+）</li>
+<li>Python <code>max(nums)</code> 一行解决</li>
+</ol>
+<blockquote>
+<p>AI 营笔试的编程题用 C++ 出。不用会写，<strong>认得脸</strong>就行。</p>
+</blockquote>
+</div>
+</section>
+<section class="lesson" data-lid="W04-S5">
+<div class="lesson-head"><span class="lt">嵌套循环：图案魔法</span></div>
+<div class="md" data-lid="W04-S5"><!-- slug: for-nested, type: base -->
+<h2>⓪ 🤖 课前 AI 一分钟 · 第 11 颗：AI 也用&quot;嵌套循环&quot;（3 分钟）</h2>
+<blockquote>
+<p><strong>第 11 颗</strong></p>
+</blockquote>
+<p>AI 处理图片 = 嵌套循环（每个像素 × 每个像素 × 颜色通道）——<strong>嵌套循环是图像 AI 的基础</strong>。</p>
+<p><strong>今日口诀</strong>：AI 处理图片 = 嵌套循环（每个像素 × 每个像素 × 颜色通道）——<strong>嵌套循环是图像 AI 的基础</strong>。</p>
+<p><strong>⚔️ 判一判</strong>（AI 营线上测评题型热身，先自己答再看答案）：</p>
+<blockquote>
+<ol>
+<li>处理图片需要嵌套循环遍历像素</li>
+<li>Python 嵌套循环是 for 里套 for</li>
+</ol>
+</blockquote>
+<details><summary>答案</summary>
+
+<p><strong>1.</strong> ✓ for y in range(H): for x in range(W)<br><strong>2.</strong> ✓ 内层循环每轮都跑一遍外层</p>
+</details>
+
+<hr>
+<h1>W04-S5 · 嵌套循环：图案魔法</h1>
+<blockquote>
+<p><strong>每日节奏（v1.9）：</strong> 本篇纯阅读 ≈13 分钟，读完做当天作业 ≈12 分钟——今天稍满，累了就分两段
+<strong>不需要 Thonny</strong>（正文）——作业时间才开编辑器
+难度：⭐⭐⭐ · 本篇是原 W04-L03 的精华（嵌套三件套 + end + 楼梯 + 金字塔）</p>
+</blockquote>
+<hr>
+<h2>一、概念：循环里再放循环（2 分钟）</h2>
+<ul>
+<li>一个月 30 天，每天 24 小时</li>
+<li>乘法表：9 行，每行 9 个数</li>
+<li>棋盘：8 行 8 列</li>
+</ul>
+<p>「一层一层的事」用<strong>嵌套循环</strong>——循环里面再放循环。</p>
+<h2>二、第一招：3 排 5 列星星阵（5 分钟）</h2>
+<pre><code class="language-python">for row in range(3):
+    for col in range(5):
+        print(&quot;*&quot;, end=&quot; &quot;)
+    print()
+</code></pre>
+<p>输出：</p>
+<pre><code>* * * * *
+* * * * *
+* * * * *
+</code></pre>
+<h3>嵌套三件套</h3>
+<table>
+<thead>
+<tr>
+<th>部件</th>
+<th>作用</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>外层 <code>for row in range(3)</code></td>
+<td>管「行」：做 3 遍</td>
+</tr>
+<tr>
+<td>内层 <code>for col in range(5)</code></td>
+<td>管「列」：每行做 5 遍</td>
+</tr>
+<tr>
+<td><code>print()</code>（不缩进在内层里）</td>
+<td>一行画完，换行</td>
+</tr>
+</tbody></table>
+<p><strong>执行总数 = 外层次数 × 内层次数 = 3 × 5 = 15 次。</strong> 外层每走一步，内层走完一整轮。</p>
+<h3><code>end=&quot; &quot;</code> 是什么</h3>
+<p>print 默认每句结尾<strong>换行</strong>。<code>end=&quot; &quot;</code> 改成&quot;以空格结尾&quot;，星星才能横着排。记住：<code>end</code> 控制 print 句尾加什么。</p>
+<h2>三、第二招：直角楼梯（3 分钟）</h2>
+<pre><code class="language-python">for row in range(1, 6):
+    for col in range(row):
+        print(&quot;*&quot;, end=&quot; &quot;)
+    print()
+</code></pre>
+<pre><code>*
+* *
+* * *
+* * * *
+* * * * *
+</code></pre>
+<p><strong>关键：内层 <code>range(row)</code>——每行的星星数 = 行号。</strong> 这是嵌套循环最经典的形态：<strong>外层管行号，内层管每行宽度</strong>。</p>
+<h2>四、第三招：金字塔（3 分钟）</h2>
+<pre><code class="language-python">height = 5
+for row in range(1, height + 1):
+    for space in range(height - row):
+        print(&quot; &quot;, end=&quot;&quot;)
+    for star in range(2 * row - 1):
+        print(&quot;*&quot;, end=&quot;&quot;)
+    print()
+</code></pre>
+<pre><code>    *
+   ***
+  *****
+ *******
+*********
+</code></pre>
+<p>两个内层循环：先补空格（<code>height - row</code> 个），再打星星（<code>2 * row - 1</code> 个）。<strong>第 N 行星数 = 2N - 1</strong>——奇数序列，是数学规律不是死记。</p>
+<p><strong>今日口诀：</strong> 外层管行，内层管列；end 不换行，一行一 print()。</p>
+<hr>
+<h2>✅ 今天的阅读完成自查</h2>
+<ul>
+<li><input disabled="" type="checkbox"> 我能说出执行顺序：外层每走一次，内层走完一整轮</li>
+<li><input disabled="" type="checkbox"> 我知道 <code>end=&quot; &quot;</code> 让 print 不换行</li>
+<li><input disabled="" type="checkbox"> 楼梯的 <code>range(row)</code> 我能解释为什么每行星数递增</li>
+</ul>
+<p>三格全勾 → 打开作业（W04 最后一天！）</p>
+<hr>
+<blockquote>
+<p><strong>📁 作业保存规则</strong>：本课课后练习写进一个文件 <code>W04-S5-homework.py</code>（存 <code>~/sand-hollow/&lt;你的学员ID&gt;/homework/</code>），每道题开头用刚学的备注分隔：<code># --- 题 1 ---</code>、<code># --- 题 2 ---</code>……<strong>交完作业要跟你的智能体说一声</strong>才会批改，评语出现在 <code>reviews/*.review.md</code>。<strong>回报触发词：交完作业或修完坑，都回一句「修完了」</strong>——不回这句 mentor 不知道，坑会一直挂着等。</p>
+</blockquote>
+<h2>📝 今日作业（≈12 分钟）</h2>
+<p>新建 <code>W04-S5-homework.py</code>，3 道题：</p>
+<ol>
+<li><strong>2 排 10 列</strong>：用嵌套循环打一个 2×10 的星星方阵</li>
+<li><strong>倒楼梯</strong>：从 5 个星往下递减到 1 个（提示：外层 <code>range(5, 0, -1)</code> 倒着走）</li>
+<li><strong>九九乘法表</strong>：外层 i 从 1 到 9，内层 j 从 1 到 i，用 f-string 拼 <code>2 x 3 = 6</code> 横排（提示：<code>print(f&quot;{j}x{i}={i*j}&quot;, end=&quot;\t&quot;)</code>，Tab 键对齐）</li>
+</ol>
+<blockquote>
+<p>交完说「<strong>修完了</strong>」。W04 结业——周末项目「图案集」把你的星星排成画 🐾</p>
+</blockquote>
+<h2>👀 C++ 认脸时刻（1 分钟 · 只看不敲）</h2>
+<p>C++ 的对应写法：</p>
+<pre><code class="language-cpp">#include &lt;iostream&gt;
+int main() {
+    for (int y = 0; y &lt; 3; y++) {
+        for (int x = 0; x &lt; 3; x++) {
+            std::cout &lt;&lt; &quot;(&quot; &lt;&lt; y &lt;&lt; &quot;,&quot; &lt;&lt; x &lt;&lt; &quot;) &quot;;
+        }
+        std::cout &lt;&lt; std::endl;
+    }
+    return 0;
+}
+</code></pre>
+<p>三个认脸：</p>
+<ol>
+<li>外层 <code>for y</code> 内层 <code>for x</code>（图像遍历）</li>
+<li>内层每轮跑完输出换行</li>
+<li>Python 一样：<code>for y in range(3): for x in range(3):</code></li>
+</ol>
+<blockquote>
+<p>AI 营笔试的编程题用 C++ 出。不用会写，<strong>认得脸</strong>就行。</p>
+</blockquote>
+</div>
+</section>
+<section class="lesson" data-lid="W04-weekend">
+<div class="lesson-head"><span class="lt">图案集：楼梯 + 金字塔 + 九九乘法表</span></div>
+<div class="md" data-lid="W04-weekend"><!-- slug: pattern, type: project -->
+<h2>⓪ 🤖 课前 AI 一分钟 · 第 12 颗：AI 也会&quot;画图案&quot;（3 分钟）</h2>
+<blockquote>
+<p><strong>第 12 颗</strong></p>
+</blockquote>
+<p>AI 画图 = 几何变换（旋转/缩放/平移）。Python 画图案 = 嵌套循环 + 角度计算——<strong>跟 AI 画图同源</strong>。</p>
+<p><strong>今日口诀</strong>：AI 画图 = 几何变换（旋转/缩放/平移）。</p>
+<p><strong>⚔️ 判一判</strong>（AI 营线上测评题型热身，先自己答再看答案）：</p>
+<blockquote>
+<ol>
+<li>画图案 = 嵌套循环 + 角度</li>
+<li>AI 画图底层也是几何变换</li>
+</ol>
+</blockquote>
+<details><summary>答案</summary>
+
+<p><strong>1.</strong> ✓ turtle.forward + left(60) 画六边形<br><strong>2.</strong> ✓ Diffusion 模型的几何变换</p>
+</details>
+
+<hr>
+<h1>W04-weekend · 图案集：楼梯 + 金字塔 + 九九乘法表</h1>
+<blockquote>
+<p>用时：45-60 分钟 · 难度：⭐⭐⭐ · 前置：W04 三课</p>
+</blockquote>
+<hr>
+<h2>一、本周武功盘点（3 分钟）</h2>
+<ul>
+<li>for 循环 + range 三种姿势：<code>range(N)</code> / <code>range(a, b)</code> / <code>range(a, b, step)</code></li>
+<li>累加器四件套：建箱子 → 循环 → 往里扔 → 出箱子</li>
+<li>嵌套循环：外层管行，内层管每行的内容</li>
+<li><code>end=&quot;&quot;</code> 控制 print 不换行</li>
+</ul>
+<p>今天把它们全部组装成<strong>三个酷炫的图案</strong>——能分享给家人朋友那种。</p>
+<h2>二、项目 A：倒圣诞树（10 分钟）</h2>
+<blockquote>
+<p>📁 项目存 <code>~/sand-hollow/&lt;你的学员ID&gt;/homework/</code>，新建 <code>upside_down_tree.py</code>。</p>
+</blockquote>
+<p>需求：打一个倒过来的圣诞树（顶宽底尖），高度 5：</p>
+<pre><code>* * * * * 
+* * * * 
+* * * 
+* * 
+* 
+</code></pre>
+<p>参考实现：</p>
+<pre><code class="language-python">height = 5
+for row in range(height, 0, -1):
+    for col in range(row):
+        print(&quot;*&quot;, end=&quot; &quot;)
+    print()
+</code></pre>
+<h3>关键点</h3>
+<ul>
+<li>外层 <code>range(height, 0, -1)</code>：<strong>倒着走</strong>——从 5 到 1（注意「含头不含尾」末尾 0 不取）</li>
+<li>内层 <code>range(row)</code>：每行打 row 个星</li>
+<li>这是 W04-L03 倒楼梯的 5 倍升级版</li>
+</ul>
+<h3>升级挑战</h3>
+<ol>
+<li>把 <code>*</code> 换成 <code>🎄</code>（emoji 表情）——注意 emoji 在终端的宽度处理</li>
+<li>改成「正三角 + 树干」组合版（提示：先打上半部分，再单独打树干 <code>|</code>）</li>
+</ol>
+<h2>三、项目 B：镂空菱形（15 分钟）</h2>
+<blockquote>
+<p>📁 项目存 <code>~/sand-hollow/&lt;你的学员ID&gt;/homework/</code>，新建 <code>hollow_diamond.py</code>。</p>
+</blockquote>
+<p>需求：打一个空心的菱形（中间是空的），边长 5：</p>
+<pre><code>    *
+   * *
+  *   *
+ *     *
+*       *
+ *     *
+  *   *
+   * *
+    *
+</code></pre>
+<p>参考实现：</p>
+<pre><code class="language-python">size = 5
+# Top half (including middle row)
+for row in range(1, size + 1):
+    # Leading spaces
+    for s in range(size - row):
+        print(&quot; &quot;, end=&quot;&quot;)
+    # Left star
+    print(&quot;*&quot;, end=&quot;&quot;)
+    # Inside (hollow part)
+    if row &gt; 1:
+        for inner in range(2 * row - 3):
+            print(&quot; &quot;, end=&quot;&quot;)
+        # Right star
+        print(&quot;*&quot;, end=&quot;&quot;)
+    print()
+# Bottom half
+for row in range(size - 1, 0, -1):
+    for s in range(size - row):
+        print(&quot; &quot;, end=&quot;&quot;)
+    print(&quot;*&quot;, end=&quot;&quot;)
+    if row &gt; 1:
+        for inner in range(2 * row - 3):
+            print(&quot; &quot;, end=&quot;&quot;)
+        print(&quot;*&quot;, end=&quot;&quot;)
+    print()
+</code></pre>
+<h3>拆解</h3>
+<ul>
+<li>上半部分行数：<code>range(1, size + 1)</code> 从 1 到 size</li>
+<li>下半部分行数：<code>range(size - 1, 0, -1)</code> 从 size-1 到 1（不含中线）</li>
+<li>每行结构：左空格 → 左星 → 中间空格（行号 &gt; 1 才有）→ 右星 → 换行</li>
+<li><code>2 * row - 3</code>：中间空格的规律（W04-L03 练过，奇数序列 - 2）</li>
+</ul>
+<h3>升级挑战</h3>
+<ol>
+<li>改成「实心菱形」（中间不空，每行打满）</li>
+<li>改成「猫头」形状——上半菱形 + 下半 V 字耳朵</li>
+</ol>
+<h2>四、项目 C：九九乘法表（20 分钟）</h2>
+<blockquote>
+<p>📁 项目存 <code>~/sand-hollow/&lt;你的学员ID&gt;/homework/</code>，新建 <code>multiplication_table.py</code>。</p>
+</blockquote>
+<p>需求：打一个完整的九九乘法表（1×1 到 9×9）：</p>
+<pre><code>1 x 1 = 1	
+1 x 2 = 2	2 x 2 = 4	
+1 x 3 = 3	2 x 3 = 6	3 x 3 = 9	
+...
+</code></pre>
+<p>参考实现：</p>
+<pre><code class="language-python">print(&quot;=== Multiplication Table ===&quot;)
+for i in range(1, 10):
+    for j in range(1, i + 1):
+        print(f&quot;{j} x {i} = {i*j}&quot;, end=&quot;\t&quot;)
+    print()
+</code></pre>
+<h3>关键观察</h3>
+<ul>
+<li>外层 <code>i</code> 从 1 到 9：行号</li>
+<li>内层 <code>j</code> 从 1 到 <code>i+1</code>：每行的列数（<strong>第 i 行有 i 个算式</strong>）</li>
+<li><code>end=&quot;\t&quot;</code>：Tab 制表符，对齐列</li>
+<li><strong>不写「9×9 完整方阵」</strong>：因为 i 和 j 是 1-9 的话，会打出 81 个算式——传统九九表是「下三角」，所以 j ≤ i</li>
+</ul>
+<h3>升级挑战</h3>
+<ol>
+<li>打印<strong>完整方阵</strong>（包括 i &gt; j 的部分）：用 <code>print(f&quot;{j} x {i} = {i*j}&quot;, end=&quot;\t&quot;)</code> 即可，<strong>不用 j ≤ i 限制</strong></li>
+<li>加<strong>边框</strong>：每行前面打 <code>i |</code>，让每行更易识别</li>
+</ol>
+<h2>五、验收标准（自助验收）</h2>
+<ul>
+<li><input disabled="" type="checkbox"> 三个项目代码都亲手敲过、跑通</li>
+<li><input disabled="" type="checkbox"> 倒圣诞树高度可调（改 height 数字生效）</li>
+<li><input disabled="" type="checkbox"> 镂空菱形 size 改 7 也能跑（看尺寸变化）</li>
+<li><input disabled="" type="checkbox"> 九九乘法表能跑出 9 行、对齐整齐</li>
+<li><input disabled="" type="checkbox"> 至少做过一个升级挑战</li>
+</ul>
+<h2>六、皮肤题：选一个做（10 分钟）</h2>
+<p>按喜好选一个，自由发挥：</p>
+<ul>
+<li><strong>A. 棋盘格</strong>：打一个 8×8 的 <code>#</code> <code>.</code> 交错棋盘（提示：<code>(row + col) % 2</code> 决定打哪个）</li>
+<li><strong>B. ASCII 艺术</strong>：用 <code>print</code> 拼一个 emoji 或小猫脸（<code>/\_/\</code> <code>&gt; &lt;</code> 等组合）</li>
+<li><strong>C. 闪电形状</strong>：上下尖、中间宽的锯齿状</li>
+</ul>
+<p>完成后<strong>必须运行测试</strong>：换不同的输入（如 height=3 / size=10），看看代码是不是真的能适应。</p>
+<h2>七、W04 全周自查</h2>
+<ul>
+<li><input disabled="" type="checkbox"> L01：for + range 三种姿势张口就来，知道「含头不含尾」</li>
+<li><input disabled="" type="checkbox"> L02：累加器四件套会建会扔，求和 / 计数 / 找最大三招都会</li>
+<li><input disabled="" type="checkbox"> L03：嵌套循环能画方阵 / 楼梯 / 金字塔，知道 <code>end=&quot;&quot;</code> 控制不换行</li>
+<li><input disabled="" type="checkbox"> 周末：三个项目（倒树 / 镂空菱形 / 九九表）都跑通，至少做过一个升级 + 一个皮肤</li>
+<li><input disabled="" type="checkbox"> 我能给家人解释「外层管行，内层管每行内容」</li>
+</ul>
+<p>W04 毕业 🎓 → 进入 W05「直到……才停」。while 循环登场——程序不只是「数到 N 自动停」，还能「满足某个条件才停」，更灵活、更强大、也更容易踩死循环的坑。</p>
+<h2>👀 C++ 认脸时刻（1 分钟 · 只看不敲）</h2>
+<p>C++ 的对应写法：</p>
+<pre><code class="language-cpp">#include &lt;iostream&gt;
+int main() {
+    for (int i = 0; i &lt; 6; i++) {
+        std::cout &lt;&lt; &quot;forward 100&quot; &lt;&lt; std::endl;
+        std::cout &lt;&lt; &quot;left 60&quot; &lt;&lt; std::endl;
+    }
+    return 0;
+}
+</code></pre>
+<p>三个认脸：</p>
+<ol>
+<li>6 次循环画六边形</li>
+<li>每次：前进 + 转 60 度</li>
+<li>Python turtle 一样：for i in range(6): t.forward(100); t.left(60)</li>
+</ol>
+<blockquote>
+<p>AI 营笔试的编程题用 C++ 出。不用会写，<strong>认得脸</strong>就行。</p>
+</blockquote>
+</div>
+</section>
+</div>
+</div>
+</body>
+</html>
