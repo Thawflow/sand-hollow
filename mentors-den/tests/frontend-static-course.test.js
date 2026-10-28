@@ -157,8 +157,12 @@ test('前端：learning-pos 值带版本号，旧值作废', () => {
   assert.ok(/v\s*[:=]\s*2/.test(indexHtml), 'learning-pos 未见 v:2 版本标记');
 });
 
-test('sw.js：CACHE 版本已 bump 到 v4 且 SHELL 移除 marked', () => {
-  assert.ok(/sandy-hollow-v4/.test(swJs), 'CACHE 版本未 bump 到 v4');
+test('sw.js：CACHE 版本已 bump 且 SHELL 移除 marked', () => {
+  // ⚠️ 勿硬编码具体版本号（v4/v5…）：每次改 index.html 都要升 SW 版本，
+  //    硬编码会让「升版」这个正确动作变成测试失败。判据改为「版本号存在且 ≥ v2」。
+  const m = swJs.match(/sandy-hollow-v(\d+)/);
+  assert.ok(m, 'sw.js 未找到 CACHE 版本号（sandy-hollow-vN）');
+  assert.ok(Number(m[1]) >= 2, `CACHE 版本应 ≥ v2，实际 v${m[1]}`);
   assert.ok(!/marked\.min\.js/.test(swJs), 'sw.js SHELL 仍含 marked.min.js');
   assert.ok(/course\/index\.json/.test(swJs), 'sw.js SHELL 未含 course/index.json');
 });
