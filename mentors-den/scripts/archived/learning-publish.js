@@ -2,8 +2,22 @@
 /**
  * learning-publish.js — 发布某周课程到 TPG HQ KV
  *
+ * ⚠️ 【已归档 · 2026-10-28 沙坑静态化改造】
+ *   课程改为**静态化**：源 md → 构建脚本产 HTML → 提交进 git → GitHub Pages 自动发布。
+ *   本脚本走的是**旧链路**（md → POST /learning/publish → 写进 KV → 前端运行时拉 KV），
+ *   已被新链路取代，**不要再用它发布课程**。
+ *
+ *   新链路：
+ *     1. 改 mentors-den/course/*.md（唯一真值）
+ *     2. node mentors-den/scripts/build-course-html.js      ← 生成 docs/course/*.html
+ *     3. git add docs/course/ && git commit && git push      ← push 即上线
+ *
+ *   保留原因：① 留历史（万一要回滚回 KV 链路）；② 它里面的「周/课时标题体检闸」
+ *   已原样移植进 build-course-html.js（判据一字不改）。
+ *   Worker 侧的 POST /learning/publish 路由也保留一轮，作为回滚保险。
+ *
  * 用法（从 sand-hollow 仓根目录跑）：
- *   node mentors-den/scripts/learning-publish.js W01
+ *   node mentors-den/scripts/archived/learning-publish.js W01
  *   （凭据默认从 ~/.config/skyclan-chatroom/config.json 取；也可用 SKYCLAN_CONFIG=<路径> 覆盖）
  *
  * 数据源：mentors-den/course/<WEEK>-*.md（沙坑仓内自包含）

@@ -90,6 +90,48 @@
 
 **slug 命名约定**：见 [`mentors-den/slug-convention.md`](./mentors-den/slug-convention.md) v1.2（猴哥 10/19 指示"用 slug 标识基础 vs 加餐"）
 
+### 📦 课程怎么发布（静态化，2026-10-28 起）
+
+课程内容是**静态站**：`mentors-den/course/*.md` 是唯一真值，构建出的 HTML **提交进 git**，
+GitHub Pages 每次 push 自动构建发布到 `learning.thawflow.com`（CF Worker 不再参与课程内容分发）。
+
+**改课程 → 上线，三步**：
+
+```bash
+# 1. 改源（唯一真值）
+vim mentors-den/course/W09-S1.md
+
+# 2. 重建产物（生成 docs/course/*.html + index.json + syllabus.html）
+node mentors-den/scripts/build-course-html.js
+
+# 3. 产物入 git + push（push 即上线）
+git add docs/course/
+git commit -m "docs(course): 更新 W09-S1 课文"
+git push
+```
+
+**防漂移**：`git push` 时 `.githooks/pre-push` 会检查「源改了但产物没重建」并**拒绝推送**。
+克隆仓库后需要手动启用一次：
+
+```bash
+git config core.hooksPath .githooks && chmod +x .githooks/pre-push
+```
+
+**构建脚本的硬闸**：周标题 / 课时标题体检（占位符标题 → 退出码 2，不产出任何文件）；
+产物**确定性**（两次构建逐字节相同）；产物**不含时间戳**（避免每次构建都产生 diff）。
+
+**回归测试**：
+```bash
+node --test mentors-den/tests/build-course-html.test.js        # 构建脚本
+node --test mentors-den/tests/frontend-static-course.test.js   # 前端静态接线
+node --test mentors-den/tests/frontend-progress-sync.test.js   # 进度落库接线
+```
+
+> **旧链路已归档**：`mentors-den/scripts/archived/learning-publish.js`（md → POST /learning/publish → 写 KV）
+> 已被静态化取代，**不要再用它发布课程**。它里面的标题体检闸已原样移植进构建脚本。
+> Worker 侧 `POST /learning/publish` 与三个课程 GET 路由保留一轮，作回滚保险（静态化稳定后下线，
+> 届时 `learning:week:*` / `learning:index` / `learning:syllabus` 共 20 个 KV 键一并退役）。
+
 ---
 
 ## 参与者
@@ -174,7 +216,8 @@ sand-hollow/
 │   ├── slug-convention.md   ← 双层 ID 体系（slug + W##-S#/L# + type）
 │   ├── scripts/             ← 沙坑内部工具（完整性检查 v3 门禁）
 │   │   ├── check-course-completeness.py    ← 6 项检查门禁
-│   │   └── learning-publish.js            ← 发布周课程到 TPG HQ KV
+│   │   ├── build-course-html.js           ← 课程 md → 静态 HTML（唯一发布路径）
+│   │   └── archived/learning-publish.js   ← 【已归档】旧的 KV 发布脚本（勿用）
 │   ├── skills/              ← 沙坑内部 skills（mentor + developer 工作流）
 │   │   ├── README.md
 │   │   ├── sand-hollow-grading.SKILL.md
@@ -214,12 +257,16 @@ W01 仍是 3 节制 L01-L03（`W01-L01-homework.py` 等），W17 毕业项目 L0
 - mentor 双签规则 + 入职手册：`mentors-den/mentors-rules.md`（**让智能体（Hermes / OpenClaw / WorkBuddy 等）读这个 → 自动 review**）
 - 沙坑内部 skills：`mentors-den/skills/`（mentor 批改 + developer 课程编排）
 - 课程完整性检查 v3 门禁：`mentors-den/scripts/check-course-completeness.py`
-- 课程发布到 KV：`mentors-den/scripts/learning-publish.js`
-- KV 发布：`docs/index.html` 内嵌 JS + KV 内容 API（`https://tpg-hq.thawflow.com/learning/*`）
+- 课程静态化发布：`node mentors-den/scripts/build-course-html.js` → 产物入 git → push 即上线（见上文「课程怎么发布」）
+- 旧的 KV 发布脚本已归档：`mentors-den/scripts/archived/learning-publish.js`（勿用）
+- 动态接口（登录 / 存档 / 作业 / 进度落库）走 CF Worker：`docs/index.html` 内嵌 JS + API（`https://tpg-hq.thawflow.com/*`）
 
 ## 站点技术栈
 
-- 静态站：纯 HTML + 内嵌 JS（无构建步骤）
-- CDN：`learning.thawflow.com`（CDN 缓存 10min，sw.js 网络优先）
-- 内容 API：Cloudflare Worker `tpg-hq.thawflow.com/learning/*`（KV 存储，发布走同源 API）
-- 进度跟踪：localStorage（`learning-checks`）+ track.js 埋点（click:* 上报）
+- 静态站：纯 HTML + 内嵌 JS（**课程内容无构建步骤**——构建产物已入 git，Pages 直接发）
+- CDN：`learning.thawflow.com`（GitHub Pages，sw.js 网络优先 + 离线兜底）
+- **课程内容**：静态 HTML（`docs/course/*.html` + `index.json` + `syllabus.html`），源是 `mentors-den/course/*.md`；
+  运行时不再需要 markdown 渲染器（`marked` 已退役，由 `docs/course-dom.js` 纯函数提取器替代）
+- 动态接口：Cloudflare Worker `tpg-hq.thawflow.com/*`（KV 存储）——登录 / 游戏存档 / 好友 / 作业提交 /
+  **课程进度落库**（`POST /learning/progress/save|load` → KV `learning:prog:<id>`）
+- 进度跟踪：localStorage（`learning-checks` / `learning-pos`）为保底 + 云端进度跟随（登录时并集合并，勾选防抖同步）
