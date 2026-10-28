@@ -473,6 +473,7 @@ function renderWeek(w){
     },1000)},{passive:true});
   }catch(e){}
 }
+const CF_BASES=['https://tpg-hq.thawflow.com','https://tpg-hq.icepaw.workers.dev'];
 loadIndex();
 $('#bt').textContent=BUILD_TIME==='DEV'?'DEV build':'v'+BUILD_TIME;
 
@@ -486,7 +487,6 @@ $('#bt').textContent=BUILD_TIME==='DEV'?'DEV build':'v'+BUILD_TIME;
 //   → 结论：**不能把单机网络现象写成全局口径**。沙坑面向全家/学员用户，
 //   不同网络出口对两个域名的可达性不同 → 保留双域，主域失败时切备域（串行，不竞速）。
 //   （竞速的前提是两个域名都验证过可用；本机 workers.dev 不可用时竞速只会白等）
-const CF_BASES=['https://tpg-hq.thawflow.com','https://tpg-hq.icepaw.workers.dev'];
 const ACTIVE_KEY='thawpawActiveId';   // 与游戏小窝同一套 localStorage key
 const PLAYERS_KEY='thawpawPlayers';   // { id: {nickname, role, lastSeen} }
 const LEARN_KEY='learning-id';        // 沙坑课程进度用（与游戏 ID 同值）
