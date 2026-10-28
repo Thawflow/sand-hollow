@@ -1,6 +1,8 @@
-// 🏖️ 沙坑训练场 Service Worker v4 — 网络优先，离线兜底（外壳）
+// 🏖️ 沙坑训练场 Service Worker v5 — 网络优先，离线兜底（外壳）
 // v4（2026-10-28 P3 静态化）：移除 marked（运行时不再渲染）；SHELL 预缓存 course/index.json（首屏秒开）
-const CACHE = 'sandy-hollow-v4';
+// v5（2026-10-28 P6 进度落库）：index.html 改了（新增进度同步接线）→ 升版清旧缓存，
+//     否则老学员拿到的是 v4 的旧 JS（没有进度同步代码）。
+const CACHE = 'sandy-hollow-v5';
 const SHELL = ['./', './index.html', './course-dom.js', './course/index.json', './assets/favicon.svg', './assets/icon-192.png', './assets/icon-512.png'];
 
 self.addEventListener('install', e => {
