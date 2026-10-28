@@ -270,3 +270,12 @@ W01 仍是 3 节制 L01-L03（`W01-L01-homework.py` 等），W17 毕业项目 L0
 - 动态接口：Cloudflare Worker `tpg-hq.thawflow.com/*`（KV 存储）——登录 / 游戏存档 / 好友 / 作业提交 /
   **课程进度落库**（`POST /learning/progress/save|load` → KV `learning:prog:<id>`）
 - 进度跟踪：localStorage（`learning-checks` / `learning-pos`）为保底 + 云端进度跟随（登录时并集合并，勾选防抖同步）
+
+## 📚 依赖说明
+
+沙坑依赖什么、从哪来、坏了怎么隔离 → **[DEPENDENCIES.md](./DEPENDENCIES.md)**
+
+摘要：
+- **静态链**（课程内容）：`mentors-den/course/*.md` → 构建 → `docs/course/*.html` 入 git → GH Pages。**课程不走 Worker。**
+- **动态链**（登录 + 进度）：浏览器 → CF Worker `tpg-hq` → PostgREST → PG `kv_store`。
+  后端真源在 skyclan 私仓 `projects/cf-worker/`（**不是** CF 原生 KV）。
