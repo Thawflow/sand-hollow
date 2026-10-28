@@ -2,7 +2,8 @@
 // v4（2026-10-28 P3 静态化）：移除 marked（运行时不再渲染）；SHELL 预缓存 course/index.json（首屏秒开）
 // v5（2026-10-28 P6 进度落库）：index.html 改了（新增进度同步接线）→ 升版清旧缓存，
 //     否则老学员拿到的是 v4 的旧 JS（没有进度同步代码）。
-const CACHE = 'sandy-hollow-v5';
+// v6（2026-10-29 微服务拆分）：index.html 注释更新（Worker 真源路径 + 去掉会腐化的源码行号引用）→ 升版。
+const CACHE = 'sandy-hollow-v6';
 const SHELL = ['./', './index.html', './course-dom.js', './course/index.json', './assets/favicon.svg', './assets/icon-192.png', './assets/icon-512.png'];
 
 self.addEventListener('install', e => {

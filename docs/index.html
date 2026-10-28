@@ -691,13 +691,14 @@ function slowHint(on){
 // 故本版**移除 /load**，并在下面留注释写明条件：若将来真的接了 /load，
 // 必须先确认它是**只读**语义，一旦变成写接口，必须把它移出白名单。
 //
-// ⚠️ '/verify' 的零写入依据**已实测补证**（Worker 源码行号，第三方可核）：
-//   `cf-backend/src/index.js` L536 `if (path === 'verify' && method === 'POST')` 分支：
-//   L544 `kvGet(playerKey(id))`      → 读
-//   L554 `kvGet(chatroomMemberKey(id))` → 读
-//   L548 `identityFailure(...)` / L559 `identitySuccess(...)` → 纯内存计数
-//     （identityFailure L175-181 / identitySuccess L184-186：只动内存 Map `_identityHits`，
-//      无 kvPut）；`identityThrottled` L153-160 同理只读内存计数。
+// ⚠️ '/verify' 的零写入依据**已实测补证**（Worker 源码，第三方可核）：
+//   真源 = skyclan 私仓 `projects/cf-worker/worker/index.js` 的
+//   `if (path === 'verify' && method === 'POST')` 分支内：
+//   `kvGet(playerKey(id))`           → 只读
+//   `kvGet(chatroomMemberKey(id))`   → 只读
+//   `identityFailure(...)` / `identitySuccess(...)` → 纯内存计数
+//     （identityFailure / identitySuccess：只动内存 Map `_identityHits`，无 kvPut）；
+//     `identityThrottled` 同理只读内存计数。
 //   ⇒ 整个 POST /verify 分支**零 kvPut** → 回落备域 = 同字段读两次，不构成双写。
 // ⚠️ 但**这是「当前源码」的依据，不是「端点语义永久不变」的保证** —— 若将来 /verify
 // 加入 last_login/last_seen 之类落库，必须同时把本条移出白名单。
@@ -793,7 +794,7 @@ async function doLogin(){
       // 危害：① 任何有该号记录的人登录失败即回显真名；② /lookup 的 found 差异
       //   与 /verify 的「昵称不匹配」/「ID 不存在」文案差异**共同构成枚举 oracle**
       //   —— 可逐号爆破「这个号存不存在 + 昵称叫什么」，且**不需猜对密码**。
-      // 修法（只动我 owner 域的前端；后端 /verify 文案差异属 thawpaw-games 域，另立）：
+      // 修法（只动我 owner 域的前端；后端 /verify 文案差异属 cf-worker 域，另立）：
       //   ① 不再回显任何昵称（哪怕本机存过）；② 不再用不同文案区分「号不存在」
       //      与「名字不对」→ 统一为一句中性提示，避免存在性 oracle。
       lgMsg('❌ 名字不对或该号未注册 —— 请确认后重试','err');
