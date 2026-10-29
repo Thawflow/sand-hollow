@@ -150,7 +150,7 @@ for i in range(10):
     print(fib(i), end=&#39; &#39;)
 # 0 1 1 2 3 5 8 13 21 34
 </code></pre>
-<p><strong>简单但慢</strong>：<code>fib(40)</code> 要算 1 亿次（指数级）。W16-S3 会学优化。</p>
+<p><strong>简单但慢</strong>：<code>fib(40)</code> 要算 1 亿次（指数级）。W14-S3 会学优化。</p>
 <h2>五、深入了解：递归的历史八卦（3 分钟）</h2>
 <p><strong>递归 1958 年由 John McCarthy 在 LISP 里提出</strong>——他也是 AI 概念的发明人（&quot;人工智能&quot;这个词就是他 1956 年达特茅斯会议造的）。</p>
 <p><strong>LISP = List Processing</strong>——列表处理语言，递归是核心。Python 的 list 操作深受 LISP 影响。</p>
@@ -247,7 +247,7 @@ for i in range(10):
 <blockquote>
 <p><strong>每日节奏（v1.9）：</strong> 阅读 ≈10 分钟，作业 ≈15 分钟
 <strong>需要 Thonny</strong>
-难度：⭐⭐⭐ · W17 加餐④ 第 2 课（前置：W17-S1）</p>
+难度：⭐⭐⭐ · 本篇是加餐④ 递归的第 2 课（前置：W14-S1）</p>
 </blockquote>
 <hr>
 <blockquote>
@@ -447,7 +447,7 @@ except RecursionError as e:
 <blockquote>
 <p><strong>每日节奏（v1.9）：</strong> 阅读 ≈8 分钟，作业 ≈17 分钟，总共 ≤25 分钟
 <strong>需要 Thonny</strong> —— 看 + 写代码
-难度：⭐⭐⭐ · 本篇是加餐④ 递归的第 2 课（前置：W16-S1）</p>
+难度：⭐⭐⭐ · 本篇是加餐④ 递归的第 2 课（前置：W14-S1）</p>
 </blockquote>
 <hr>
 <blockquote>
@@ -649,7 +649,7 @@ def fib(n):
 <blockquote>
 <p><strong>每日节奏（v1.9）：</strong> 阅读 ≈8 分钟，作业 ≈17 分钟
 <strong>需要 Thonny</strong>
-难度：⭐⭐⭐ · W17 加餐④ 第 3 课（前置：W17-S1 + S2 + S3）</p>
+难度：⭐⭐⭐ · 本篇是加餐④ 递归的第 3 课（前置：W14-S1 + S2 + S3）</p>
 </blockquote>
 <hr>
 <blockquote>
@@ -769,7 +769,7 @@ cache = {}
 <ol>
 <li>跑 fib(35) 对比</li>
 <li>跑 fib(50) —— naive 跑不动</li>
-<li>用 <code>@lru_cache</code> 重写 W17-S1 的 factorial</li>
+<li>用 <code>@lru_cache</code> 重写 W14-S1 的 factorial</li>
 </ol>
 <h2>七、答案</h2>
 <pre><code class="language-python">import time
@@ -828,7 +828,7 @@ def factorial(n):
 <blockquote>
 <p><strong>每日节奏（v1.9）：</strong> 阅读 ≈8 分钟，作业 ≈17 分钟
 <strong>需要 Thonny</strong>
-难度：⭐⭐⭐ · W17 加餐④ 第 4 课（前置：W17-S1 ~ S4）</p>
+难度：⭐⭐⭐ · 本篇是加餐④ 递归的第 4 课（前置：W14-S1 ~ S4）</p>
 </blockquote>
 <hr>
 <blockquote>
@@ -1020,11 +1020,11 @@ print_maze_with_path(maze, result)
 <blockquote>
 <p>**每日节奏(v1.9): ** 周末项目 ≈60 分钟(纯动手, 没阅读)
 <strong>写代码时间</strong> —— 设计、写、调试
-难度: ⭐⭐⭐ · 前置: W16-S1 + W16-S3</p>
+难度: ⭐⭐⭐ · 前置: W14-S1 + W14-S3</p>
 </blockquote>
 <hr>
 <blockquote>
-<p><strong>📂 课前准备 · 随堂练习文件</strong>: 先在 Thonny <code>文件 → 新建</code>, 立刻 <code>文件 → 另存为...</code> 存为 <code>~/sand-hollow/&lt;你的学员ID&gt;/homework/W16-weekend-practice.py</code>.周末代码都写在这里.</p>
+<p><strong>📂 课前准备 · 随堂练习文件</strong>: 先在 Thonny <code>文件 → 新建</code>, 立刻 <code>文件 → 另存为...</code> 存为 <code>~/sand-hollow/&lt;你的学员ID&gt;/homework/W14-weekend-practice.py</code>.周末代码都写在这里.</p>
 </blockquote>
 <h2>⓪ 🤖 课前 AI 一分钟 · 第 39 颗: 递归 = 清晰, 迭代 = 性能(3 分钟)</h2>
 <p>今天的周末: 递归(清晰)和迭代(快)PK.</p>
@@ -1217,7 +1217,7 @@ for n in [10, 50, 100, 500, 1000]:
 </details>
 
 <h2>九、提交(5 分钟)</h2>
-<p>存到 <code>W16-weekend-practice.py</code>.跟 mentor 说&quot;<strong>修完了</strong>&quot;.</p>
+<p>存到 <code>W14-weekend-practice.py</code>.跟 mentor 说&quot;<strong>修完了</strong>&quot;.</p>
 <h2>十、反思(5 分钟)</h2>
 <ul>
 <li>递归: 清晰, 但慢(除非缓存)</li>
@@ -1230,9 +1230,9 @@ for n in [10, 50, 100, 500, 1000]:
 <li><input disabled="" type="checkbox"> 写好 4 对函数(递归/迭代各 4)</li>
 <li><input disabled="" type="checkbox"> 跑过 5 组测试, 看到差距</li>
 <li><input disabled="" type="checkbox"> 找到并修了 2 个 bug</li>
-<li><input disabled="" type="checkbox"> 存到 <code>W16-weekend-practice.py</code></li>
+<li><input disabled="" type="checkbox"> 存到 <code>W14-weekend-practice.py</code></li>
 </ul>
-<p>四格全勾 → 周末完成.W16 加餐④ 收官!</p>
+<p>四格全勾 → 周末完成.W14 加餐④ 收官!</p>
 <hr>
 <h2>👀 C++ 认脸时刻(1 分钟 · 只看不敲)</h2>
 <pre><code class="language-cpp">int fib_iterative(int n) {
