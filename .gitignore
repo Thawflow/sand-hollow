@@ -6,6 +6,18 @@ thawpaw/*
 # mentors-log/ 仍 ignore：mentor 晨会内部讨论，不入公开仓
 mentors-log/
 
+# v1.8 隐私补漏：学员作业目录一律不进公开仓 —— 8 位学员 ID / 学员英文名都是家庭内部标识，
+# 进公开仓 = 家庭内部 ID 外泄（公开仓红线：成员 ID / 真实昵称映射 / 家庭内部 ID 不外泄）。
+# 触发场景：README 让学员建「<你的学员ID>/homework/」（旧版写「<你的英文名>/」），目录名本身即泄露面，
+# 只 ignore thawpaw/ 挡不住。
+# 用 **/ 而非 */：挡住任意深度的 homework/reviews（含嵌套形态）。
+# tree/ 例外：Tree 学员已授权公开交作业 ⇒ 下面两行反向排除（tree/ 有 15+17 个 tracked 文件）。
+# 已跟踪文件不受 gitignore 影响（tree/ 存量照旧入库），仅挡新增。
+**/homework/
+**/reviews/
+!tree/homework/
+!tree/reviews/
+
 __pycache__/
 .githooks/commit-msg-patterns
 
