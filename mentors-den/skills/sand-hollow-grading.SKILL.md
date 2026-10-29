@@ -5,7 +5,7 @@ description: "判作业/批改W0X-L0X/沙坑作业检查:实跑验证→写revie
 
 # Sand Hollow 沙坑作业批改（判作业 → 发布 → chatroom review）
 
-沙坑 = `~/projects/sand-hollow`（远程 Thawflow/Sand-Hollow，main 分支）。学员目录：Tree（猴哥）= `tree/`（进 git，9/8 猴哥解 ignore）；Thawpaw = `thawpaw/`（gitignore 保护隐私）。
+沙坑 = `~/projects/sand-hollow`（mentor 机上的 canonical 路径；**学员机上是 `~/sand-hollow/`**，两种都指向同一仓 —— 远程 Thawflow/Sand-Hollow，main 分支）。学员目录：Tree（猴哥）= `tree/`（进 git，9/8 猴哥解 ignore）；Thawpaw = `thawpaw/`（gitignore 保护隐私）。
 
 ## 步骤
 

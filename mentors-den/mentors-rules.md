@@ -111,7 +111,7 @@
    cd ~ && git clone git@github.com:Thawflow/sand-hollow.git
    ```
 2. **建学员私有区**：在 `~/sand-hollow/<你的学员ID>/` 下建 `homework/` 和 `reviews/` 两个子目录（ID = 注册沙坑用的 8 位数字）。
-3. **配置 .gitignore**：确保 `thawpaw/` 整个不进 git（保护作业 + 评语隐私）。
+3. **配置 .gitignore**：确保 `**/homework/` 与 `**/reviews/` 整个不进 git（保护作业 + 评语隐私；仓根已预置这两条规则，学员 clone 后直接生效）。
 4. **配 cron 出勤采集**（5min 间隔，trigger 预检零成本）：
    ```bash
    # 关键参数：schedule.every=300000ms, sessionTarget=isolated,
