@@ -1,3 +1,7 @@
+> [历史归档 · 不再 apply] 本文件是课程路径标注的历史备审件（课程 3 节制时代的产物）。
+> 其中的 ~/Sand-Hollow/<你的学员名>/homework/ 与 ~/learning-homework/ 属旧形态，已被当前口径取代：
+> 现在唯一形态 = ~/sand-hollow/<你的学员ID>/homework/（见 README「首次搭环境」与 mentors-rules「一、首次搭环境」）。
+> 保留仅为审阅留档，不要再 apply —— git apply --check 已失败（多数目标文件随课程结构重构删除、余下行号已漂移）。
 diff --git a/mentors-den/course/W01-L01.md b/mentors-den/course/W01-L01.md
 index 6dfd275..5845ee8 100644
 --- a/mentors-den/course/W01-L01.md
