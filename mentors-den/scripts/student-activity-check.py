@@ -20,6 +20,17 @@
     内容只存在于作业落盘的那台 mentor 机 ⇒ 在别的 clone 上 B 会显示 never，
     不是学员真没交。权威判定请在作业落盘的机器上跑，或加 --git-only 只看 A。
 
+⚠️ 学员目录发现范围（仓外克隆根也要扫）：
+  旧版 REPO 取脚本所在仓根、发现只 `os.listdir(REPO)` ⇒ **只扫仓内根**。
+  但 README L72 / mentors-rules L113 教学员把仓克隆到 `~/sand-hollow/` 再建
+  `<学员ID>/homework/` ⇒ 那是**仓外克隆根** ⇒ 落在仓外的学员目录完全看不见。
+  现口径 = **仓内根 + 仓外克隆根都扫**：
+    · 仓外克隆根默认 `~/sand-hollow/`，可用环境变量 `SAND_HOLLOW_CLONE_ROOTS`
+      （冒号分隔绝对路径）覆盖；
+    · 仓外根不是 git 仓时判据 A **不适用**（不是「零」）⇒ 只按判据 B 判，
+      `--git-only` 下标「跳过(非git仓)」而不是误报零活跃；
+    · 根不存在 = 静默跳过（不是错）。
+
 设计约束：
   - 不硬编码任何学员目录名：动态发现「根目录下含 homework/ 或 reviews/ 子目录」的目录
   - 不联网、不改任何文件；红线安全：输出只有目录名与日期，无真名
@@ -38,38 +49,74 @@ SKIP_DIRS = {".git", ".githooks", "docs", "mentors-den", "mentors-log", "algoped
 WATCH_SUBDIRS = ("homework", "reviews")
 TZ = timezone(timedelta(hours=8))
 
+# 学员目录发现要覆盖「仓外克隆根」：仓外根不是 git 仓时判据 A 不适用，
+# 判据 B（文件 mtime）仍可判，与「仓内无记录」同义处理。
+# 覆盖：环境变量 SAND_HOLLOW_CLONE_ROOTS（冒号分隔的绝对路径）。
+DEFAULT_CLONE_ROOTS = ("~/sand-hollow",)
 
-def git_last_commit_date(rel_dir):
+
+def clone_roots():
+    """仓外克隆根列表：存在且不是仓自身才计入（不存在 = 静默跳过）。"""
+    raw = os.environ.get("SAND_HOLLOW_CLONE_ROOTS", "")
+    paths = [p for p in (raw.split(":") if raw else list(DEFAULT_CLONE_ROOTS)) if p.strip()]
+    out = []
+    for p in paths:
+        p = os.path.expanduser(p.strip())
+        if os.path.isdir(p) and os.path.abspath(p) != os.path.abspath(REPO):
+            out.append(p)
+    return out
+
+
+def candidate_roots():
+    """[(label, root_path)]：label = 'repo'（仓内根）/ 'clone'（仓外克隆根）。"""
+    roots = [("repo", REPO)]
+    for p in clone_roots():
+        roots.append(("clone", p))
+    return roots
+
+
+def is_git_root(root):
+    """该根是不是 git 仓工作区（判据 A 是否适用）。仓外克隆根常常不是。"""
+    return os.path.isdir(os.path.join(root, ".git"))
+
+
+def git_last_commit_date(root, rel_dir):
     """判据 A：目录末次 commit 日期（本地时间 YYYY-MM-DD），无记录返回 None。"""
     try:
         out = subprocess.run(
             ["git", "log", "-1", "--format=%cs", "--", rel_dir],
-            cwd=REPO, capture_output=True, text=True, timeout=30,
+            cwd=root, capture_output=True, text=True, timeout=30,
         ).stdout.strip()
         return out or None
     except (subprocess.TimeoutExpired, OSError):
         return None
 
 
-def newest_file_mtime(rel_dir):
-    """判据 B：homework/ + reviews/ 下最新文件 mtime → 本地日期，无文件返回 None。"""
+def newest_file_mtime_ts(root, rel_dir):
+    """判据 B 的原始值：homework/ + reviews/ 下最新文件 mtime（时间戳），无文件返回 None。"""
     latest = None
     for sub in WATCH_SUBDIRS:
-        base = os.path.join(REPO, rel_dir, sub)
+        base = os.path.join(root, rel_dir, sub)
         if not os.path.isdir(base):
             continue
-        for root, _dirs, files in os.walk(base):
+        for root_dir, _dirs, files in os.walk(base):
             for name in files:
-                path = os.path.join(root, name)
+                path = os.path.join(root_dir, name)
                 try:
-                    m = os.path.getmtime(path)
+                    latest_m = os.path.getmtime(path)
                 except OSError:
                     continue
-                if latest is None or m > latest:
-                    latest = m
-    if latest is None:
+                if latest is None or latest_m > latest:
+                    latest = latest_m
+    return latest
+
+
+def newest_file_mtime(root, rel_dir):
+    """判据 B：homework/ + reviews/ 下最新文件 mtime → 本地日期，无文件返回 None。"""
+    ts = newest_file_mtime_ts(root, rel_dir)
+    if ts is None:
         return None
-    return datetime.fromtimestamp(latest, TZ).strftime("%Y-%m-%d")
+    return datetime.fromtimestamp(ts, TZ).strftime("%Y-%m-%d")
 
 
 def days_since(date_str):
@@ -80,13 +127,38 @@ def days_since(date_str):
 
 
 def discover_students():
-    students = []
-    for name in sorted(os.listdir(REPO)):
-        if name.startswith(".") or name in SKIP_DIRS or not os.path.isdir(os.path.join(REPO, name)):
+    """返回 {student_dir: {label, root, git_root, mtime}}：按学员目录名**合并**多根。
+
+    同一个学员目录名可能同时出现在仓内根和仓外克隆根（如学员把整仓克隆到
+    ~/sand-hollow/ 后又在其中建自己的 <ID>/homework/）⇒ 按名字合并成**一条**，
+    否则同一个学员会被计两次且两次判定可能相反（仓内 git 判据 vs 仓外文件判据）。
+    合并口径：判据 A 取「是 git 仓的那个根」，判据 B 取各根里**最新**的文件 mtime。
+    """
+    merged = {}
+    for label, root in candidate_roots():
+        try:
+            names = sorted(os.listdir(root))
+        except OSError:
             continue
-        if any(os.path.isdir(os.path.join(REPO, name, s)) for s in WATCH_SUBDIRS):
-            students.append(name)
-    return students
+        git_root = is_git_root(root)
+        for name in names:
+            if name.startswith(".") or name in SKIP_DIRS or not os.path.isdir(os.path.join(root, name)):
+                continue
+            if not any(os.path.isdir(os.path.join(root, name, s)) for s in WATCH_SUBDIRS):
+                continue
+            mtime = newest_file_mtime_ts(root, name)
+            prev = merged.get(name)
+            if prev is None:
+                merged[name] = {"label": label, "root": root, "git_root": git_root, "mtime": mtime}
+                continue
+            # 已有同名学员：判据 A 优先取 git 仓的根；判据 B 取更新的 mtime。
+            if git_root and not prev["git_root"]:
+                prev["git_root"] = True
+                prev["root"] = root
+                prev["label"] = label
+            if prev["mtime"] is None or (mtime is not None and mtime > prev["mtime"]):
+                prev["mtime"] = mtime
+    return merged
 
 
 def main():
@@ -108,11 +180,25 @@ def main():
         print("⚠️ 判据 B=本机文件 mtime；homework/reviews 不入 git，跨机请用 --git-only 或在落盘机上跑\n")
 
     results, flagged = [], 0
-    for name in students:
-        a_date = git_last_commit_date(name)
-        b_date = None if args.git_only else newest_file_mtime(name)
+    for name in sorted(students):
+        info = students[name]
+        label, root, git_root = info["label"], info["root"], info["git_root"]
+        a_date = git_last_commit_date(root, name) if git_root else None
+        b_ts = None if args.git_only else info["mtime"]
+        b_date = (datetime.fromtimestamp(b_ts, TZ).strftime("%Y-%m-%d") if b_ts is not None else None)
         a_days, b_days = days_since(a_date), days_since(b_date)
-        if a_days is None and (args.git_only or b_days is None):
+        if not git_root:
+            # 仓外克隆根不是 git 仓 ⇒ 判据 A 不适用（不是「零」）⇒ 只看判据 B。
+            if args.git_only:
+                verdict = "跳过(非git仓)"
+            elif b_days is None:
+                verdict = "零活跃(全新)"  # 无文件 = 目录刚建或从未活动
+            elif b_days >= args.threshold:
+                verdict = f"零活跃>={args.threshold}天"
+                flagged += 1
+            else:
+                verdict = "活跃"
+        elif a_days is None and (args.git_only or b_days is None):
             verdict = "零活跃(全新)"  # 两维都无记录：目录刚建或从未活动
         elif (a_days is None or a_days >= args.threshold) and (args.git_only or b_days is None or b_days >= args.threshold):
             verdict = f"零活跃>={args.threshold}天" + ("(仅git判据)" if args.git_only else "")
@@ -123,6 +209,7 @@ def main():
             verdict = "活跃"
         results.append({
             "student_dir": name,
+            "root": label,
             "git_last": a_date, "git_idle_days": a_days,
             "file_last": b_date, "file_idle_days": b_days,
             "verdict": verdict,
@@ -130,7 +217,7 @@ def main():
         if not args.json:
             def fmt(d, n):
                 return f"{d}({n}天)" if d is not None else "never"
-            print(f"{name:<12} A=git:{fmt(a_date, a_days):<20} B=file:{fmt(b_date, b_days):<20} => {verdict}")
+            print(f"{name:<12} A=git:{fmt(a_date, a_days):<20} B=file:{fmt(b_date, b_days):<20} => {verdict}  [{label}]")
 
     if args.json:
         print(json.dumps({"threshold_days": args.threshold, "git_only": args.git_only,
