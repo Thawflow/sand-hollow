@@ -137,6 +137,27 @@ def git_last_content_commit_date(root, rel_dir):
         return None, None
 
 
+def student_dir_mtime_ts(root, rel_dir):
+    """学员「出现年龄」的本地证据（秒）：学员目录与其 homework/reviews 子目录里最新的 mtime。
+
+    ⚠️ 只作 **占位入库日缺失时**的兜底年龄信号，**不是活跃度**：
+      - git 仓根里 tracked 目录的 mtime = 本地 checkout 时间（每次 clone/pull 都变）
+        ⇒ 绝不能当活跃度；
+      - 只在【该目录从未被 commit 触碰】（git log 无记录）或【仓外克隆根（非 git 仓）】
+        时才用 —— 此时 mtime ≈ 目录在本机的创建时间 = 学员出现的年龄。
+    """
+    latest = None
+    for rel in (rel_dir,) + tuple(os.path.join(rel_dir, s) for s in WATCH_SUBDIRS):
+        path = os.path.join(root, rel)
+        try:
+            m = os.path.getmtime(path)
+        except OSError:
+            continue
+        if latest is None or m > latest:
+            latest = m
+    return latest
+
+
 def newest_file_mtime_ts(root, rel_dir):
     """判据 B 的原始值：homework/ + reviews/ 下最新文件 mtime（时间戳），无文件返回 None。"""
     latest = None
@@ -237,7 +258,16 @@ def main():
         b_ts = None if args.git_only else info["mtime"]
         b_date = (datetime.fromtimestamp(b_ts, TZ).strftime("%Y-%m-%d") if b_ts is not None else None)
         a_days, b_days = days_since(a_date), days_since(b_date)
+        # 占位入库日 = 该学员目录被 commit 触碰的日期（**不是**活跃度，见 git_last_commit_date）。
+        #   目录从未被 commit 触碰（未跟踪目录 / 仓外克隆根）⇒ 退回本机目录 mtime
+        #   （≈ 学员在本机「出现」的年龄）⇒ 只作宽限期年龄信号。
+        placeholder_days = days_since(dir_last) if dir_last else None
+        if placeholder_days is None:
+            ts = student_dir_mtime_ts(root, name)
+            placeholder_days = (int((datetime.now(TZ).timestamp() - ts) // 86400)
+                                if ts is not None else None)
         grace = False
+        grace_reason = None
         if not git_root:
             # 仓外克隆根不是 git 仓 ⇒ 判据 A 不适用（不是「零」）⇒ 只看判据 B。
             if args.git_only:
@@ -248,6 +278,11 @@ def main():
                 verdict = f"零活跃>={args.threshold}天"
             else:
                 verdict = "活跃"
+            # 新学员宽限期：仓外根的学员目录就是他自己建的
+            #   ⇒ 目录 mtime ≈ 他出现的年龄 ⇒ 出现未满阈值天且还没交作业 ⇒ 不告警。
+            if (b_days is None and placeholder_days is not None
+                    and placeholder_days < args.threshold):
+                grace, grace_reason = True, "新学员宽限期(占位入库未满阈值·B=never)"
         elif not a_applicable:
             # ★ 2026-10-31（洞一修复）：该学员目录没有任何 tracked 的作业/评语
             #   （仓根 .gitignore 挡 `**/homework/` `**/reviews/`，只放行 `!tree/homework/`）
@@ -260,10 +295,16 @@ def main():
                 verdict = f"零活跃>={args.threshold}天·A仅占位入库"
             else:
                 verdict = "活跃·A仅占位入库"
-            # 兜底口径：A 日期 = 目录入库日（占位）且 B 距今 < 阈值×2 ⇒ 不重复告警
+            # 兜底口径 ①：A 日期 = 目录入库日（占位）且 B 距今 < 阈值×2 ⇒ 不重复告警
             #   （学员刚被告知「那把尺子的读数错了」，别隔一天又拿同一把尺子的读数敲她）
             if b_days is not None and b_days < args.threshold * 2:
-                grace = True
+                grace, grace_reason = True, "A仅占位入库且B<阈值×2"
+            # 兜底口径 ②（新学员宽限期 · 洞一同一类病的另一头）：B=never（还没交过任何作业）
+            #   且占位入库未满阈值天 ⇒ 「今天刚建目录、还没交作业」的新学员**当天就该被点名**
+            #   是同一类病（工具看不见 ≠ 学员没动）⇒ 宽限期内不告警。
+            if (b_days is None and placeholder_days is not None
+                    and placeholder_days < args.threshold):
+                grace, grace_reason = True, "新学员宽限期(占位入库未满阈值·B=never)"
         elif a_days is None and (args.git_only or b_days is None):
             verdict = "零活跃(全新)"  # 两维都无记录：目录刚建或从未活动
         elif (a_days is None or a_days >= args.threshold) and (args.git_only or b_days is None or b_days >= args.threshold):
@@ -286,13 +327,15 @@ def main():
             "file_last": b_date, "file_idle_days": b_days,
             "days_reported": b_days if (not a_applicable and b_days is not None) else a_days,
             "grace": grace,
+            "grace_reason": grace_reason,
+            "placeholder_age_days": placeholder_days,
             "verdict": verdict,
         })
         if not args.json:
             def fmt(d, n):
                 return f"{d}({n}天)" if d is not None else "never"
             a_txt = fmt(a_date, a_days) if a_applicable else "—(仅占位入库)"
-            flag = " [兜底降级不告警]" if grace else ""
+            flag = (" [兜底降级不告警:%s]" % grace_reason) if grace else ""
             print(f"{name:<12} A=git:{a_txt:<22} B=file:{fmt(b_date, b_days):<20} => {verdict}{flag}  [{label}]")
 
     if args.json:
