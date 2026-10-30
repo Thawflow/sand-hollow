@@ -81,7 +81,11 @@ def is_git_root(root):
 
 
 def git_last_commit_date(root, rel_dir):
-    """判据 A：目录末次 commit 日期（本地时间 YYYY-MM-DD），无记录返回 None。"""
+    """目录末次 commit 日期（本地时间 YYYY-MM-DD），无记录返回 None。
+
+    ⚠️ 2026-10-31 起**只作占位入库日参考**（不再是活跃度）—— 见
+    `git_last_content_commit_date` 的说明。
+    """
     try:
         out = subprocess.run(
             ["git", "log", "-1", "--format=%cs", "--", rel_dir],
@@ -90,6 +94,47 @@ def git_last_commit_date(root, rel_dir):
         return out or None
     except (subprocess.TimeoutExpired, OSError):
         return None
+
+
+def git_tracked_content(root, rel_dir):
+    """该学员目录里【被 git 跟踪】的作业/评语文件（git ls-files，空 = 列表）。
+
+    仓根 .gitignore 默认挡掉 `**/homework/` 与 `**/reviews/`（只放行 `!tree/homework/`）
+    ⇒ 除 tree 外的学员目录里没有任何 tracked 作业 ⇒ 「目录末次 commit」只是
+    【占位入库日】，不是活跃度。
+    """
+    try:
+        out = subprocess.run(
+            ["git", "ls-files", "-z", "--",
+             f"{rel_dir}/homework", f"{rel_dir}/reviews"],
+            cwd=root, capture_output=True, text=True, timeout=30,
+        ).stdout
+    except (subprocess.TimeoutExpired, OSError):
+        return []
+    return [p for p in out.split("\0") if p]
+
+
+def git_last_content_commit_date(root, rel_dir):
+    """判据 A（2026-10-31 修订）：**只统计被跟踪的作业/评语**的末次 commit 日期。
+
+    返回 (date, note)：
+      date = "YYYY-MM-DD" 或 None；note = "仅占位入库" 表示该目录没有任何
+      tracked 作业/评语 ⇒ 判据 A 不适用（不是「零」）⇒ 对外报天数一律用判据 B。
+
+    ⚠️ 旧口径（目录末次 commit）会把「占位入库日」当成活跃度 ⇒ 报出
+    「61 天没动」这类架构性错标签（与学员真实活跃无关）。
+    """
+    if not git_tracked_content(root, rel_dir):
+        return None, "仅占位入库"
+    try:
+        out = subprocess.run(
+            ["git", "log", "-1", "--format=%cs", "--",
+             f"{rel_dir}/homework", f"{rel_dir}/reviews"],
+            cwd=root, capture_output=True, text=True, timeout=30,
+        ).stdout.strip()
+        return (out or None), None
+    except (subprocess.TimeoutExpired, OSError):
+        return None, None
 
 
 def newest_file_mtime_ts(root, rel_dir):
@@ -179,14 +224,20 @@ def main():
     if not args.git_only and not args.json:
         print("⚠️ 判据 B=本机文件 mtime；homework/reviews 不入 git，跨机请用 --git-only 或在落盘机上跑\n")
 
-    results, flagged = [], 0
+    results, flagged, flagged_raw = [], 0, 0
     for name in sorted(students):
         info = students[name]
         label, root, git_root = info["label"], info["root"], info["git_root"]
-        a_date = git_last_commit_date(root, name) if git_root else None
+        a_date, a_note, dir_last = None, None, None
+        a_applicable = False
+        if git_root:
+            a_date, a_note = git_last_content_commit_date(root, name)
+            a_applicable = a_note is None          # 有 tracked 作业/评语 ⇒ A 可用
+            dir_last = git_last_commit_date(root, name)   # 目录末次 commit（仅参考）
         b_ts = None if args.git_only else info["mtime"]
         b_date = (datetime.fromtimestamp(b_ts, TZ).strftime("%Y-%m-%d") if b_ts is not None else None)
         a_days, b_days = days_since(a_date), days_since(b_date)
+        grace = False
         if not git_root:
             # 仓外克隆根不是 git 仓 ⇒ 判据 A 不适用（不是「零」）⇒ 只看判据 B。
             if args.git_only:
@@ -195,38 +246,66 @@ def main():
                 verdict = "零活跃(全新)"  # 无文件 = 目录刚建或从未活动
             elif b_days >= args.threshold:
                 verdict = f"零活跃>={args.threshold}天"
-                flagged += 1
             else:
                 verdict = "活跃"
+        elif not a_applicable:
+            # ★ 2026-10-31（洞一修复）：该学员目录没有任何 tracked 的作业/评语
+            #   （仓根 .gitignore 挡 `**/homework/` `**/reviews/`，只放行 `!tree/homework/`）
+            #   ⇒ 判据 A **不适用**（不是「零」）⇒ 对外报天数一律用判据 B。
+            if args.git_only:
+                verdict = "跳过(A无tracked作业·仅占位入库)"
+            elif b_days is None:
+                verdict = "零活跃(全新)·A仅占位入库"
+            elif b_days >= args.threshold:
+                verdict = f"零活跃>={args.threshold}天·A仅占位入库"
+            else:
+                verdict = "活跃·A仅占位入库"
+            # 兜底口径：A 日期 = 目录入库日（占位）且 B 距今 < 阈值×2 ⇒ 不重复告警
+            #   （学员刚被告知「那把尺子的读数错了」，别隔一天又拿同一把尺子的读数敲她）
+            if b_days is not None and b_days < args.threshold * 2:
+                grace = True
         elif a_days is None and (args.git_only or b_days is None):
             verdict = "零活跃(全新)"  # 两维都无记录：目录刚建或从未活动
         elif (a_days is None or a_days >= args.threshold) and (args.git_only or b_days is None or b_days >= args.threshold):
             verdict = f"零活跃>={args.threshold}天" + ("(仅git判据)" if args.git_only else "")
-            flagged += 1
         elif a_days is None or b_days is None:
             verdict = "单维零(仅提示)"
         else:
             verdict = "活跃"
+        if verdict.startswith("零活跃"):
+            flagged_raw += 1
+            if not grace:
+                flagged += 1
         results.append({
             "student_dir": name,
             "root": label,
+            "a_applicable": a_applicable,
+            "a_note": a_note,
+            "placeholder_import": dir_last,
             "git_last": a_date, "git_idle_days": a_days,
             "file_last": b_date, "file_idle_days": b_days,
+            "days_reported": b_days if (not a_applicable and b_days is not None) else a_days,
+            "grace": grace,
             "verdict": verdict,
         })
         if not args.json:
             def fmt(d, n):
                 return f"{d}({n}天)" if d is not None else "never"
-            print(f"{name:<12} A=git:{fmt(a_date, a_days):<20} B=file:{fmt(b_date, b_days):<20} => {verdict}  [{label}]")
+            a_txt = fmt(a_date, a_days) if a_applicable else "—(仅占位入库)"
+            flag = " [兜底降级不告警]" if grace else ""
+            print(f"{name:<12} A=git:{a_txt:<22} B=file:{fmt(b_date, b_days):<20} => {verdict}{flag}  [{label}]")
 
     if args.json:
         print(json.dumps({"threshold_days": args.threshold, "git_only": args.git_only,
-                          "flagged": flagged, "students": results},
+                          "flagged": flagged, "flagged_raw": flagged_raw,
+                          "students": results},
                          ensure_ascii=False, indent=2))
     else:
         total = len(results)
-        mode = "仅判据A(git)" if args.git_only else "双判据(A=末次commit触碰目录, B=homework/reviews最新文件mtime; 双维同时零才算零活跃)"
-        print(f"\n共 {total} 个学员目录：零活跃 {flagged}，阈值 {args.threshold} 天（{mode}）")
+        mode = ("仅判据A(git·只算tracked作业/评语)" if args.git_only else
+                "双判据(A=tracked作业/评语的末次commit·无tracked则记「仅占位入库」并用B报天数; B=homework/reviews最新文件mtime)")
+        print(f"\n共 {total} 个学员目录：零活跃 {flagged}（原始命中 {flagged_raw}，兜底降级 {flagged_raw - flagged}），"
+              f"阈值 {args.threshold} 天（{mode}）")
     sys.exit(1 if flagged else 0)
 
 
