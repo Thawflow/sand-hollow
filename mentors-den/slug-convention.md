@@ -1,7 +1,7 @@
 # Slug 命名约定 v1.2（猴哥 2026-10-19 指示"slugs 命名都与每节课对应"）
 
 > 沉淀位置：~/projects/sand-hollow/mentors-den/slug-convention.md
-> 维护人：小马 (10000003) 沙坑帮手
+> 维护人：小马 沙坑帮手
 > 配套：家庭约定 `family/课程完整性检查.md`（完整性检查规则）
 > **v1.2 升级（2026-10-19）**：32 个 slug 按真实标题重命名 + 解 1 个 weekend slug 冲突（详见 §"完整 slug 表"）
 

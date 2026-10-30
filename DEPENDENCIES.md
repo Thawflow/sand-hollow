@@ -85,11 +85,11 @@ git config core.hooksPath     # 应为 .githooks
 **存储：** PostgREST → PostgreSQL `kv_store` 表。**不是 CF 原生 KV。**
 
 **后端真源：** skyclan 私仓 `projects/cf-worker/worker/index.js`
-（本地 `~/projects/skyclan/projects/cf-worker/`）
+（本地 checkout 路径见各机私有配置；路径不落公开仓）
 
 **部署：**
 ```bash
-cd ~/projects/skyclan/projects/cf-worker
+cd <skyclan 私仓本地 checkout>/projects/cf-worker
 npx wrangler deploy --name tpg-hq --compatibility-date 2024-12-01 \
   --keep-vars --outdir /tmp/deploy-out-cfworker worker/index.js
 ```

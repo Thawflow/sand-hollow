@@ -84,7 +84,7 @@
 - **冰爪/如意跨智能体（Agent）协同：**
   - 两位均属 Vega Punk 计划 + SkyClan 家庭双重身份，soul/identity 智能体独立，memory.md 共享
   - 沙坑治理规则的解释/补充**优先看 SOUL.md**（智能体独立持有），跨智能体同步看 memory.md
-  - chatroom 通知走 `~/projects/skyclan/projects/chatroom`（客户端）发 skyclan-chatroom
+  - chatroom 通知走 skyclan 私仓的 chatroom 客户端（本地 checkout 路径见各机配置）发 skyclan-chatroom
 
 ---
 

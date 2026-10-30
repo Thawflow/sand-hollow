@@ -52,7 +52,7 @@ if (!WEEK) {
 const COURSE_DIR = path.join(__dirname, '..', 'course');
 
 // 凭据走环境变量（不存公开仓）：SKYCLAN_CONFIG 指向 config.json
-// ★ 修：默认路径原本写死 `~/projects/skyclan/projects/chatroom/config.json`，
+// ★ 修：默认路径原本写死 skyclan 私仓 chatroom 的 config.json，
 //   但那个文件已随运行时迁到 XDG 家（仓内只留 placeholder）→ 默认路径**指向不存在的文件**，
 //   脚本在没设 SKYCLAN_CONFIG 时直接退 1「找不到 config.json」（沙坑 skill 文档也记着这条：
 //   「脚本内默认 config 路径已失效」）。此处补 XDG 回落链，与 skyclan 侧 v1.6 同款。

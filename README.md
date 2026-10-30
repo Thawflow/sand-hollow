@@ -146,7 +146,7 @@ node --test mentors-den/tests/frontend-progress-sync.test.js   # 进度落库接
 
 ## 迭代参与
 
-如希望参与项目迭代（添加新学员 / 调整课程结构 / 改进 mentor 流程 / 投稿新主题），请联系 IcePaw（10000002）或 Tree：`wangjieqi@brandct.com`。
+如希望参与项目迭代（添加新学员 / 调整课程结构 / 改进 mentor 流程 / 投稿新主题），请联系 IcePaw 或 Tree：`wangjieqi@brandct.com`。
 
 ## 仓库使用指南（团队协作）
 

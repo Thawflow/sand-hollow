@@ -17,12 +17,12 @@ description: "判作业/批改W0X-L0X/沙坑作业检查:实跑验证→写revie
    - commit 格式 `[小马] homework: ...`，一主题一 commit。
    - append `.gitignore` 前先 `tail -c 1 <file>` 确认末行有 newline——末行无 newline 时 `echo >>` 会粘连致规则失效（9/13 实踩）；append 后必 `git check-ignore <路径>` 命中才算成。
    - 推送需猴哥明文批准（「推送」「你提交，推送」均算）；执行 `git pull --rebase origin main && git push origin main`，rebase 常带入如意新 commit，属正常。
-6. **chatroom @如意 review（v1.8）**：`cd ~/projects/skyclan/projects/chatroom/client && node skyclan-send.js --to all --mentions 10000001 -m "@10000001 review 请求：…"`。如意 member_id=10000001（真相源 `~/projects/skyclan/family/identity-tree.md`，小马机本地位置；勿写进公开仓）。消息含：分数星级、学员本人修复的验证结果、commit hash、顺手归位动作、评语路径。
+6. **chatroom @如意 review（v1.8）**：在自家 chatroom 客户端目录执行 `node skyclan-send.js --to all --mentions <如意成员号> -m "@如意 review 请求：…"`。成员号真相源在各机私有档案（不落公开仓；公开仓只写「@如意」称谓 + 相对路径 `client/`）。消息含：分数星级、学员本人修复的验证结果、commit hash、顺手归位动作、评语路径。
 7. **向猴哥汇报**：①做了什么 ②为什么 ③影响范围，附 commit hash 与 chatroom msg_id。
 
 ## 边界
 
 - 勿改 course/ 课程内容与 mentors-rules 本体（修改走 v1.8：改 → push → chatroom @review）。
 - Thawpaw 目录内容不进任何公开 commit；评语与公开仓内只写白名单称呼（Thawpaw / Tree / 猴哥）。
-- 路由区分（2026-10-06 猴哥指示）：批改 review 仍 chatroom @如意（v1.8，10000001）；沙坑**迭代/管理/交接**类事项总负责人是 IcePaw，调研与建议 DM 给她（10000002），不经如意。交接前先清自身欠账（未推的判改 commit 推掉，仓库干净再交接）。
+- 路由区分（2026-10-06 猴哥指示）：批改 review 仍 chatroom @如意（v1.8）；沙坑**迭代/管理/交接**类事项总负责人是 IcePaw，调研与建议 DM 给她，不经如意。交接前先清自身欠账（未推的判改 commit 推掉，仓库干净再交接）。
 - **仓内字面批量替换的范围门禁**（2026-10-07 猴哥纠正后立）：`sed`/`find | xargs sed` 横扫多文件改字面前，先确认意图是**通用措辞**还是**本机偏好**——仓库路径、用户名、IDE 配置、本地 clone 位置等本机设置**绝不进仓**。规则"批量替换前问一句：这是不是本机偏好"。本机设置若要持久化，去 `~/.openclaw/workspace/SOUL.md` / 各机本地配置更新，不动仓内字面。仓库是面向所有人的，本机自己管本机。
