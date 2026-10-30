@@ -48,8 +48,21 @@ if (!WEEK) {
   process.exit(1);
 }
 
-// 沙坑仓自包含：COURSE_DIR 相对本脚本位置（mentors-den/scripts/ → ../course）
-const COURSE_DIR = path.join(__dirname, '..', 'course');
+// 沙坑仓自包含：COURSE_DIR 相对本脚本位置。
+// ⚠️ 本脚本曾在 mentors-den/scripts/ 下（COURSE_DIR = scripts/../course = mentors-den/course），
+//   后被归档到 mentors-den/scripts/archived/ ⇒ 同样的相对路径变成 archived/../course
+//   = mentors-den/scripts/course（**不存在**）⇒ 脚本一跑就 ENOENT 崩掉。
+//   修法：按候选列表回落到真实目录，找不到才报错（保留自包含 = 不写死绝对路径）。
+const COURSE_DIR_CANDIDATES = [
+  path.join(__dirname, '..', 'course'),        // archived/ → mentors-den/scripts/course（旧假设）
+  path.join(__dirname, '..', '..', 'course'),   // archived/ → mentors-den/course ✅ 真实位置
+  path.join(__dirname, 'course'),
+];
+const COURSE_DIR = COURSE_DIR_CANDIDATES.find(p => fs.existsSync(p));
+if (!COURSE_DIR) {
+  console.error('❌ 找不到课程目录。试过：\n' + COURSE_DIR_CANDIDATES.map(p => '  - ' + p).join('\n'));
+  process.exit(1);
+}
 
 // 凭据走环境变量（不存公开仓）：SKYCLAN_CONFIG 指向 config.json
 // ★ 修：默认路径原本写死 skyclan 私仓 chatroom 的 config.json，

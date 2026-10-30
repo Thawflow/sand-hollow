@@ -121,10 +121,37 @@ npx wrangler deploy --name tpg-hq --compatibility-date 2024-12-01 \
 | `/verify` | 登录门 |
 | `/learning/progress/save` | 进度写入 |
 | `/learning/progress/load` | 进度读取 |
-| `/learning/weeks` `/learning/week/:id` `/learning/syllabus` | **静态链的回滚路径**，必须保持 200 |
+| `/learning/weeks` `/learning/week/:id` `/learning/syllabus` | **静态链的回滚路径**，必须保持 200 —— ⚠️ 但**内容是静态化之前的旧稿**（见下方警告） |
 
 > 后三个课程读路由虽已静态化，**必须保持可用**——静态站出问题时是回滚路径。
 > `worker/tests/progress-endpoints.test.js` 里有对应断言。
+>
+> ### ⚠️ 回滚路径自带已知串号（回滚前必须先刷新 KV）
+>
+> 这三条路由读的是 KV 里的**旧稿**（静态化之前的发布内容），**不是** `docs/course/*.html`。
+> 旧稿里有**跨周作业文件名串号**（某周的正文引用了别周的 `W##-S#-homework.py`）——
+> 也就是说：**直接回滚会把串号带回学员面前**（静态链已修好的病灶，走回滚路径就复发）。
+>
+> **回滚前必须先刷新 KV**，否则「回滚」=「把病灶带回去」。刷新方式见 §4.1。
+>
+> 现状（实测）：`/learning/week/:id` 17 周里有 **9 周**含跨周作业文件名串号；
+> 同一周的 `/course/W##.html`（静态链）**全部干净** ⇒ 病灶只在 KV 旧稿里，不在真源。
+> 真源（`mentors-den/course/*.md`）跨周串号 = **0 命中** ⇒ 刷新即可消除，不需要改课文。
+
+### 4.1 回滚前刷新 KV（消除旧稿串号）
+
+```bash
+# 单周刷新（读 mentors-den/course/<WEEK>-*.md → POST /learning/publish → 写 KV）
+node mentors-den/scripts/archived/learning-publish.js W12
+# 对账不发布（先看清楚要写什么）：
+node mentors-den/scripts/archived/learning-publish.js W12 --check-only
+```
+
+> 刷新是**覆盖写**（`kvPut('learning:week:' + week_id, week)`）⇒ 写前先 `--check-only` 对账。
+> 凭据取自 `~/.config/skyclan-chatroom/config.json`（与聊天室同一套 Bearer token），
+> 也可用 `SKYCLAN_CONFIG=<路径>` 覆盖。
+> ⚠️ 该脚本在 `archived/` 下（旧 md → KV 发布链路），但 Worker 的 `POST /learning/publish`
+> 路由**仍在**（= 回滚保险的一部分）⇒ **回滚场景用它是对的**，日常发布链路已改静态化。
 
 ---
 
