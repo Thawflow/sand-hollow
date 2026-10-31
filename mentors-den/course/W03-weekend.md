@@ -94,7 +94,7 @@ else:
 **常见翻车点：**
 
 - import random 忘写或没放第一行 → `NameError: name 'random' is not defined`
-- 输入的不是数字（手滑敲了字母）→ `ValueError`——W02-L01 的老坑，正常，重新 Run
+- 输入的不是数字（手滑敲了字母）→ `ValueError`——W02-S1 的老坑，正常，重新 Run
 - 改范围时只改了一个 100 忘了另一个 → 谜题范围和提示语对不上
 
 **改造练习（自己动手）：**
