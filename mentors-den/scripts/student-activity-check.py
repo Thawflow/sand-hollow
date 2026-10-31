@@ -63,6 +63,25 @@ TZ = timezone(timedelta(hours=8))
 PROBE_DIR_RE = re.compile(r"^(probe|tmp|temp|scratch)([-_.].*)?$", re.IGNORECASE)
 PROBE_FILE_RE = re.compile(r"^probe([-_.].*)?$", re.IGNORECASE)
 PROBE_MARKERS = (".probe", "PROBE.md", ".probe-marker")
+# 2026-11-01 修（冰爪）：标记文件**放在 homework/ 或 reviews/ 里面**时旧判据漏判。
+#   病：旧判据只看「学员目录根的 entries」⇒ 标记在子目录里时：① 标记文件本身被算进判据 B
+#   的 mtime（假活跃）② 整棵探针树没被排除 ⇒ 同目录里任何**非 probe*.py** 的探针文件
+#   （check.py / sanity.py …）照样算学员练习。
+#   实测复现（隔离根）：`66666666/homework/.probe` ⇒ 该目录被判「活跃」（file_last=今天）。
+#   ⇒ 标记在哪一层都算标记（根 or 被监听的子目录），且标记文件本身永不计入判据 B。
+def is_probe_marker(name):
+    return name in PROBE_MARKERS
+
+
+def probe_reason(dir_name, root_entries, sub_entries):
+    """这个学员目录是不是探针？返回原因串或 None（纯函数，供 --selftest）。"""
+    if PROBE_DIR_RE.match(dir_name):
+        return "dirname"
+    if any(m in root_entries for m in PROBE_MARKERS):
+        return "marker-root"
+    if any(is_probe_marker(e) for e in sub_entries):
+        return "marker-sub"
+    return None
 
 # 学员目录发现要覆盖「仓外克隆根」：仓外根不是 git 仓时判据 A 不适用，
 # 判据 B（文件 mtime）仍可判，与「仓内无记录」同义处理。
@@ -177,6 +196,9 @@ def newest_file_mtime_ts(root, rel_dir):
     """判据 B 的原始值：homework/ + reviews/ 下最新文件 mtime（时间戳），无文件返回 None。
 
     ⚠️ 探针文件（文件名命中 PROBE_FILE_RE）不计入 —— 它不是学员练习。
+    ⚠️ 探针标记文件（.probe / PROBE.md / .probe-marker）也不计入（11-01 修）：
+      标记文件放在 homework/ 里时，它自己的 mtime = 标记创建时刻 ⇒ 会把
+      「今天建了标记的探针目录」报成「学员今天有活动」（假活跃）。
     """
     latest = None
     for sub in WATCH_SUBDIRS:
@@ -186,6 +208,8 @@ def newest_file_mtime_ts(root, rel_dir):
         for root_dir, _dirs, files in os.walk(base):
             for name in files:
                 if PROBE_FILE_RE.match(name):
+                    continue
+                if is_probe_marker(name):
                     continue
                 path = os.path.join(root_dir, name)
                 try:
@@ -234,11 +258,18 @@ def discover_students():
             if PROBE_DIR_RE.match(name):
                 continue
             # 带探针标记文件 ⇒ 整棵不采（真学员目录名 = 8 位数字，跟测试 ID 长得一样，靠名字分不出）
+            # ⚠️ 标记文件可能放在 homework/ 或 reviews/ **里面** ⇒ 根 + 子目录都查（11-01 修）
             try:
                 entries = set(os.listdir(os.path.join(root, name)))
             except OSError:
                 entries = set()
-            if any(m in entries for m in PROBE_MARKERS):
+            sub_entries = set()
+            for s in WATCH_SUBDIRS:
+                try:
+                    sub_entries.update(os.listdir(os.path.join(root, name, s)))
+                except OSError:
+                    pass
+            if probe_reason(name, entries, sub_entries):
                 continue
             if not any(os.path.isdir(os.path.join(root, name, s)) for s in WATCH_SUBDIRS):
                 continue
@@ -262,7 +293,32 @@ def main():
     ap.add_argument("--threshold", type=int, default=7, help="零活跃阈值天数（默认 7）")
     ap.add_argument("--git-only", action="store_true", help="只用判据 A（git），适合非落盘机运行")
     ap.add_argument("--json", action="store_true", help="输出 JSON（供 cron 消费）")
+    ap.add_argument("--selftest", action="store_true", help="跑探针判据单测（无网络无副作用）")
     args = ap.parse_args()
+
+    if args.selftest:
+        cases = [
+            # (dir_name, root_entries, sub_entries, expect)
+            ("probe-tmp", {"homework"}, set(), "dirname"),
+            ("tmp-x", {"homework"}, set(), "dirname"),
+            ("12345678", {"homework", ".probe"}, set(), "marker-root"),
+            ("12345678", {"homework", "PROBE.md"}, set(), "marker-root"),
+            ("12345678", {"homework"}, {".probe"}, "marker-sub"),
+            ("12345678", {"homework"}, {"PROBE.md"}, "marker-sub"),
+            ("12345678", {"homework"}, {".probe-marker"}, "marker-sub"),
+            ("12345678", {"homework"}, {"real.py"}, None),
+            ("12345678", {"homework", "reviews"}, {"w02-s5.py"}, None),
+        ]
+        fails = []
+        for d, root, sub, want in cases:
+            got = probe_reason(d, root, sub)
+            if got != want:
+                fails.append((d, root, sub, want, got))
+        for d, root, sub, want, got in fails:
+            print("FAIL dir=%s root=%s sub=%s expect=%s got=%s" % (d, root, sub, want, got))
+        print("SELFTEST PASS" if not fails else "SELFTEST FAIL (%d)" % len(fails))
+        sys.exit(0 if not fails else 1)
+
     if args.threshold < 1:
         print("ERROR: --threshold 必须 >= 1", file=sys.stderr)
         sys.exit(2)
