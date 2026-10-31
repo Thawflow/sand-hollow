@@ -39,6 +39,7 @@
 import argparse
 import json
 import os
+import re
 import subprocess
 import sys
 import time
@@ -48,6 +49,20 @@ REPO = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)
 SKIP_DIRS = {".git", ".githooks", "docs", "mentors-den", "mentors-log", "algopedia"}
 WATCH_SUBDIRS = ("homework", "reviews")
 TZ = timezone(timedelta(hours=8))
+
+# 2026-10-31 修（冰爪）：**探针/测试产物不是学员** ⇒ 零活跃检查器也必须排除。
+#   病：仓外克隆根 `~/sand-hollow/probe-tmp/homework/probe.py`（我自己的诊断探针）
+#   ⇒ discover_students() 把它当成一个「学员目录」（判据 B = 今天 0 天活跃）
+#   ⇒ 学员名单里凭空多一个人 + 零活跃计数被污染。
+#   实测（修前）：造 `~/sand-hollow/probe-tmp/homework/probe.py` ⇒ students 里有 'probe-tmp'，
+#   flagged_raw 多 1 条。修后同场景 = 该目录整棵不采。
+#   三层排除（与 tracker.js 同款口径，防「真学员目录名长得像测试 ID」）：
+#     ① 目录名命中探针正则 ⇒ 整棵不采
+#     ② 目录内含探针标记文件 ⇒ 整棵不采（真学员目录名 = 8 位数字，靠名字分不出来）
+#     ③ 文件名命中探针正则 ⇒ 该文件不计入判据 B 的 mtime
+PROBE_DIR_RE = re.compile(r"^(probe|tmp|temp|scratch)([-_.].*)?$", re.IGNORECASE)
+PROBE_FILE_RE = re.compile(r"^probe([-_.].*)?$", re.IGNORECASE)
+PROBE_MARKERS = (".probe", "PROBE.md", ".probe-marker")
 
 # 学员目录发现要覆盖「仓外克隆根」：仓外根不是 git 仓时判据 A 不适用，
 # 判据 B（文件 mtime）仍可判，与「仓内无记录」同义处理。
@@ -159,7 +174,10 @@ def student_dir_mtime_ts(root, rel_dir):
 
 
 def newest_file_mtime_ts(root, rel_dir):
-    """判据 B 的原始值：homework/ + reviews/ 下最新文件 mtime（时间戳），无文件返回 None。"""
+    """判据 B 的原始值：homework/ + reviews/ 下最新文件 mtime（时间戳），无文件返回 None。
+
+    ⚠️ 探针文件（文件名命中 PROBE_FILE_RE）不计入 —— 它不是学员练习。
+    """
     latest = None
     for sub in WATCH_SUBDIRS:
         base = os.path.join(root, rel_dir, sub)
@@ -167,6 +185,8 @@ def newest_file_mtime_ts(root, rel_dir):
             continue
         for root_dir, _dirs, files in os.walk(base):
             for name in files:
+                if PROBE_FILE_RE.match(name):
+                    continue
                 path = os.path.join(root_dir, name)
                 try:
                     latest_m = os.path.getmtime(path)
@@ -209,6 +229,16 @@ def discover_students():
         git_root = is_git_root(root)
         for name in names:
             if name.startswith(".") or name in SKIP_DIRS or not os.path.isdir(os.path.join(root, name)):
+                continue
+            # 探针目录整棵不采（否则探针文件 mtime = 假学员 + 假活跃）
+            if PROBE_DIR_RE.match(name):
+                continue
+            # 带探针标记文件 ⇒ 整棵不采（真学员目录名 = 8 位数字，跟测试 ID 长得一样，靠名字分不出）
+            try:
+                entries = set(os.listdir(os.path.join(root, name)))
+            except OSError:
+                entries = set()
+            if any(m in entries for m in PROBE_MARKERS):
                 continue
             if not any(os.path.isdir(os.path.join(root, name, s)) for s in WATCH_SUBDIRS):
                 continue
