@@ -105,13 +105,27 @@ DEFAULT_CLONE_ROOTS = ("~/sand-hollow",)
 
 def clone_roots():
     """仓外克隆根列表：存在且不是仓自身才计入（不存在 = 静默跳过）。"""
-    raw = os.environ.get("SAND_HOLLOW_CLONE_ROOTS", "")
-    paths = [p for p in (raw.split(":") if raw else list(DEFAULT_CLONE_ROOTS)) if p.strip()]
+    raw = os.environ.get("SAND_HOLLOW_CLONE_ROOTS")
+    # ⚠️ 必须用 `is None` 判空：旧判据 `if raw else 默认` 把**空串**当「未设置」
+    #   ⇒ 静默回落 DEFAULT_CLONE_ROOTS ⇒ 想隔离却扫到了本机旧 clone ⇒ 验证结论假一致。
+    paths = (list(DEFAULT_CLONE_ROOTS) if raw is None
+             else [p for p in raw.split(":") if p.strip()])
     out = []
     for p in paths:
         p = os.path.expanduser(p.strip())
-        if os.path.isdir(p) and os.path.abspath(p) != os.path.abspath(REPO):
-            out.append(p)
+        if not os.path.isdir(p):
+            continue
+        # ⚠️ 大小写不敏感 FS（macOS APFS 默认）：`~/sand-hollow` 与 `~/Sand-Hollow`
+        #   是**同一个物理目录**（samefile=True）但 abspath 字符串不等 ⇒ 旧判据排除失败
+        #   ⇒ 仓自身被当成「仓外克隆根」再扫一遍 ⇒ 同一学员被算两次。
+        #   ⇒ 必须用 samefile 比，不能用 abspath 字符串比。
+        try:
+            if os.path.samefile(p, REPO):
+                continue
+        except OSError:
+            if os.path.abspath(p) == os.path.abspath(REPO):
+                continue
+        out.append(p)
     return out
 
 
