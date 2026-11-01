@@ -290,7 +290,7 @@ test('★ mtime ≈ checkout 时刻的未跟踪文件 ⇒ 标「不可判」（�
 });
 
 // ─────────────────────────────────────────────────────────────
-// 4. ★★ clone_roots() 两洞（11-01 · 如意 review 报出，我侧独立复现成立）
+// 4. ★★ clone_roots() 两洞（review 报出，我侧独立复现成立）
 //
 //    洞1：排除仓自身用 `os.path.abspath()` **字符串**比较
 //      ⇒ 大小写不敏感 FS（macOS APFS 默认）上 `~/sand-hollow` 与 `~/Sand-Hollow`
