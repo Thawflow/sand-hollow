@@ -42,6 +42,21 @@ fi
 # git push 传的 $1=远端名、$2=远端 URL，都不是被推的 ref ⇒ 只能用 HEAD 作代理。
 # 已知边界：push 非当前 HEAD 分支时按 HEAD 判（错判窗口）；本仓惯例 push 当前分支。
 PUSH_REF=HEAD
+# ★ 修正（2026-11-01 冰爪）：git push 传给本钩子的 $1/$2 = 远端名 + 远端 URL，
+#   **不是被推的 ref** ⇒ 旧写法拿 HEAD 当「被推的那一份」的代理 ⇒
+#   在干净 main 上推一个漂移的 feature 分支时闸判 main ⇒ 放行 ⇒ 漂移分支进仓。
+#   真正被推的 ref 在 **stdin**（<local ref> <local sha> <remote ref> <remote sha>）。
+#   ⚠️ 循环里必须 </dev/null：否则 git 的 stdin 被吃掉 ⇒ 判定失败 ⇒ 静默回落 HEAD。
+PUSH_SHA=""
+while read -r _lref lsha _rref _rsha; do
+  [ -n "${lsha:-}" ] || continue
+  if git rev-parse --verify --quiet "${lsha}^{commit}" </dev/null >/dev/null 2>&1; then
+    PUSH_SHA="$lsha"
+  fi
+done
+if [ -n "$PUSH_SHA" ]; then
+  PUSH_REF="$PUSH_SHA"
+fi
 if ! git rev-parse --verify --quiet "${PUSH_REF}^{commit}" >/dev/null 2>&1; then
   echo "⚠️  pre-push：${PUSH_REF} 还不是一个可解析的 commit（仓库还没有任何提交？）→ 无可推内容，放行"
   exit 0
