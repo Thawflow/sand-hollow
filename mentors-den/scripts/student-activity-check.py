@@ -14,11 +14,17 @@
   <dir>  A=git:<date|never>(N天)  B=file:<date|never>(N天)  => 零活跃/活跃/单维零
 退出码：0 = 无零活跃；1 = 有学员双判据零活跃（供 cron 判别）；2 = 参数错误。
 
-⚠️ 口径边界（2026-10-30 实测踩到）：
+⚠️ 口径边界（2026-10-30 实测踩到 · 2026-11-01 修订）：
   - 判据 A（git commit 日期）跨机器客观，任何 clone 上跑结果一致；
-  - 判据 B（文件 mtime）是【本机】维度：homework/reviews 被 gitignore，
-    内容只存在于作业落盘的那台 mentor 机 ⇒ 在别的 clone 上 B 会显示 never，
-    不是学员真没交。权威判定请在作业落盘的机器上跑，或加 --git-only 只看 A。
+  - 判据 B（文件 mtime）是【本机】维度，且**只采信未被 git 跟踪的文件**：
+    被跟踪的作业/评语（例：`tree/`，33 个 tracked 文件）它的 mtime = 本机
+    checkout/pull 时刻 ⇒ clone 会把它重写成「今天」⇒ 假活跃。
+    实测（11-01）：本机 `tree` B=2026-10-07(25天)=零活跃；
+    全新 clone 同一脚本 B=2026-11-01(0天)=**活跃（假绿）**。
+  - ⇒ **被跟踪的作业/评语一律走判据 A**（git 末次 commit 日，跨机一致）；
+    **未跟踪的文件**才走判据 B（学员本地交作业的真实落盘证据）。
+  - mtime ≈ checkout 时刻 ⇒ 标「不可判」（既不报绿也不报红）。
+  - 权威判定请在作业落盘的机器上跑，或加 --git-only 只看 A。
 
 ⚠️ 学员目录发现范围（仓外克隆根也要扫）：
   旧版 REPO 取脚本所在仓根、发现只 `os.listdir(REPO)` ⇒ **只扫仓内根**。
@@ -34,7 +40,8 @@
 设计约束：
   - 不硬编码任何学员目录名：动态发现「根目录下含 homework/ 或 reviews/ 子目录」的目录
   - 不联网、不改任何文件；红线安全：输出只有目录名与日期，无真名
-  - mtime 用本地文件系统（untracked 也算——学员本地交作业不走 git）
+  - mtime 用本地文件系统，且**只采信未被 git 跟踪的文件**——被跟踪的作业/评语
+    它的 mtime = checkout 时刻 ⇒ clone 会重写成「今天」⇒ 假活跃（11-01 实测）
 """
 import argparse
 import json
@@ -49,6 +56,13 @@ REPO = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)
 SKIP_DIRS = {".git", ".githooks", "docs", "mentors-den", "mentors-log", "algopedia"}
 WATCH_SUBDIRS = ("homework", "reviews")
 TZ = timezone(timedelta(hours=8))
+
+# 被跟踪文件路径缓存（每个 git 根一份）—— 避免逐学员多次 `git ls-files`。
+_TRACKED_CACHE = {}
+
+# 「mtime ≈ checkout 时刻」的容差窗口（秒）。checkout 物化出来的文件，其 mtime
+# 与 `.git/index` 的 mtime 几乎同时（同一秒级操作）⇒ 判为可疑证据，标「不可判」。
+CHECKOUT_SUSPECT_WINDOW = 300
 
 # 2026-10-31 修（冰爪）：**探针/测试产物不是学员** ⇒ 零活跃检查器也必须排除。
 #   病：仓外克隆根 `~/sand-hollow/probe-tmp/homework/probe.py`（我自己的诊断探针）
@@ -137,15 +151,36 @@ def git_tracked_content(root, rel_dir):
     ⇒ 除 tree 外的学员目录里没有任何 tracked 作业 ⇒ 「目录末次 commit」只是
     【占位入库日】，不是活跃度。
     """
-    try:
-        out = subprocess.run(
-            ["git", "ls-files", "-z", "--",
-             f"{rel_dir}/homework", f"{rel_dir}/reviews"],
-            cwd=root, capture_output=True, text=True, timeout=30,
-        ).stdout
-    except (subprocess.TimeoutExpired, OSError):
-        return []
-    return [p for p in out.split("\0") if p]
+    return sorted(git_tracked_paths(root, rel_dir))
+
+
+def git_tracked_paths(root, rel_dir, tracked_global=None):
+    """该学员目录下被跟踪的作业/评语（**仓根相对路径**集合，空 = set）。
+
+    ⚠️ 11-01 修订：判据 B 只采信【未跟踪】的文件 —— 被跟踪文件的 mtime =
+    checkout 时刻 ⇒ clone 会重写成「今天」⇒ 假活跃（实测：tree/ 33 个 tracked
+    文件 ⇒ 全新 clone 上 B 从 25 天变 0 天，零活跃变「活跃」）。
+    ⇒ 这套路径集合同时用于「A 适用性」和「B 排除」两处，必须按仓根相对路径算
+    （同相对路径在仓外克隆根里也是被跟踪的同一份文件）。
+    """
+    tracked = tracked_global if tracked_global is not None else git_tracked_paths_all(root)
+    prefixes = (f"{rel_dir}/homework/", f"{rel_dir}/reviews/")
+    return {p for p in tracked if p.startswith(prefixes)}
+
+
+def git_tracked_paths_all(root):
+    """该 git 仓所有被跟踪的文件（仓根相对路径）—— 缓存，避免逐学员多次 git 调用。"""
+    key = os.path.abspath(root)
+    if key not in _TRACKED_CACHE:
+        try:
+            out = subprocess.run(
+                ["git", "ls-files", "-z"],
+                cwd=root, capture_output=True, text=True, timeout=60,
+            ).stdout
+            _TRACKED_CACHE[key] = {p for p in out.split("\0") if p}
+        except (subprocess.TimeoutExpired, OSError):
+            _TRACKED_CACHE[key] = set()
+    return _TRACKED_CACHE[key]
 
 
 def git_last_content_commit_date(root, rel_dir):
@@ -192,15 +227,64 @@ def student_dir_mtime_ts(root, rel_dir):
     return latest
 
 
-def newest_file_mtime_ts(root, rel_dir):
-    """判据 B 的原始值：homework/ + reviews/ 下最新文件 mtime（时间戳），无文件返回 None。
+def checkout_cohort_ts(root, rel_dir, tracked=None):
+    """「checkout 物化时刻」的参考锚点（秒）。
+
+    ⚠️ 用途：识别「mtime ≈ checkout 时刻」的**可疑证据** —— 这类文件不是学员
+    亲手写的（是 checkout 物化出来的），不能拿来判活跃，否则跨机假绿。
+
+    锚点取法（优先级）：
+      ① 该学员目录下**被跟踪文件**的最新 mtime —— 全新 clone 上这些文件全被
+         重写成 checkout 时刻 ⇒ 锚点 ≈ checkout 时刻；
+      ② 该学员目录没有任何被跟踪文件 ⇒ 退回 `.git/index` 的 mtime（最近一次
+         git 操作时刻）。
+
+    ⚠️ 不用「index mtime」当唯一锚点：任何 git 写操作（commit/add）都会刷新
+    index mtime ⇒ 会把「刚 commit 完就写的作业」误判成 checkout 物化。
+    """
+    tracked = tracked if tracked is not None else git_tracked_paths(root, rel_dir)
+    latest = None
+    for rel in tracked:
+        try:
+            m = os.path.getmtime(os.path.join(root, rel))
+        except OSError:
+            continue
+        if latest is None or m > latest:
+            latest = m
+    if latest is not None:
+        return latest
+    try:
+        return os.path.getmtime(os.path.join(root, ".git", "index"))
+    except OSError:
+        return None
+
+
+def newest_file_mtime_ts(root, rel_dir, tracked_global=None):
+    """判据 B 的原始值：homework/ + reviews/ 下最新【可信】文件 mtime（时间戳）。
+
+    返回 (ts, suspect_ts)：
+      ts        = 可信证据的最新 mtime（无可信文件 ⇒ None）
+      suspect_ts = 被判为「checkout 物化」的可疑 mtime（无可疑文件 ⇒ None）
 
     ⚠️ 探针文件（文件名命中 PROBE_FILE_RE）不计入 —— 它不是学员练习。
     ⚠️ 探针标记文件（.probe / PROBE.md / .probe-marker）也不计入（11-01 修）：
       标记文件放在 homework/ 里时，它自己的 mtime = 标记创建时刻 ⇒ 会把
       「今天建了标记的探针目录」报成「学员今天有活动」（假活跃）。
+    ⚠️ **被 git 跟踪的文件也不计入**（11-01 修 · review 报出的洞）：
+      被跟踪文件的 mtime = checkout/pull 时刻 ⇒ 全新 clone 上被重写成「今天」
+      ⇒ 零活跃学员在 clone 上被误报成「活跃」（假绿）。
+      实测（11-01，`tree/` 33 个 tracked 文件）：本机 B=2026-10-07(25天)=零活跃；
+      全新 clone 同一脚本 B=2026-11-01(0天)=活跃 ⇒ 假绿。
+      ⇒ 被跟踪的作业/评语一律走判据 A（git 末次 commit 日，跨机一致）。
+    ⚠️ **mtime ≈ checkout 时刻的文件也不算**（11-01 修 · review 建议③）：
+      这类文件是 checkout 物化出来的，不是学员写的 ⇒ 标「不可判」，不报绿。
     """
     latest = None
+    suspect = None
+    tracked = tracked_global
+    if tracked is None:
+        tracked = git_tracked_paths(root, rel_dir) if is_git_root(root) else set()
+    ref = checkout_cohort_ts(root, rel_dir, tracked)
     for sub in WATCH_SUBDIRS:
         base = os.path.join(root, rel_dir, sub)
         if not os.path.isdir(base):
@@ -213,17 +297,29 @@ def newest_file_mtime_ts(root, rel_dir):
                     continue
                 path = os.path.join(root_dir, name)
                 try:
-                    latest_m = os.path.getmtime(path)
+                    m = os.path.getmtime(path)
                 except OSError:
                     continue
-                if latest is None or latest_m > latest:
-                    latest = latest_m
-    return latest
+                # 被跟踪的文件 ⇒ mtime 不可信（= checkout 时刻）⇒ 不计入判据 B
+                try:
+                    rel_path = os.path.relpath(path, root)
+                except ValueError:
+                    rel_path = name
+                if rel_path in tracked:
+                    continue
+                # mtime ≈ checkout 物化时刻 ⇒ 疑似 checkout 物化 ⇒ 标不可判，不采信
+                if ref is not None and abs(m - ref) <= CHECKOUT_SUSPECT_WINDOW:
+                    if suspect is None or m > suspect:
+                        suspect = m
+                    continue
+                if latest is None or m > latest:
+                    latest = m
+    return latest, suspect
 
 
 def newest_file_mtime(root, rel_dir):
-    """判据 B：homework/ + reviews/ 下最新文件 mtime → 本地日期，无文件返回 None。"""
-    ts = newest_file_mtime_ts(root, rel_dir)
+    """判据 B：homework/ + reviews/ 下最新【可信】文件 mtime → 本地日期，无文件返回 None。"""
+    ts, _suspect = newest_file_mtime_ts(root, rel_dir)
     if ts is None:
         return None
     return datetime.fromtimestamp(ts, TZ).strftime("%Y-%m-%d")
@@ -237,12 +333,16 @@ def days_since(date_str):
 
 
 def discover_students():
-    """返回 {student_dir: {label, root, git_root, mtime}}：按学员目录名**合并**多根。
+    """返回 {student_dir: {label, root, git_root, mtime, suspect, tracked}}：按学员目录名**合并**多根。
 
     同一个学员目录名可能同时出现在仓内根和仓外克隆根（如学员把整仓克隆到
     ~/sand-hollow/ 后又在其中建自己的 <ID>/homework/）⇒ 按名字合并成**一条**，
     否则同一个学员会被计两次且两次判定可能相反（仓内 git 判据 vs 仓外文件判据）。
-    合并口径：判据 A 取「是 git 仓的那个根」，判据 B 取各根里**最新**的文件 mtime。
+    合并口径：判据 A 取「是 git 仓的那个根」，判据 B 取各根里**最新**的可信 mtime。
+
+    ⚠️ 11-01：mtime 字段拆成两个 ——
+      mtime   = 可信证据（未被跟踪、且 mtime 不 ≈ checkout 时刻）的最新 mtime
+      suspect = 被判为「checkout 物化」的可疑 mtime（有值 ⇒ 判据 B 不可判）
     """
     merged = {}
     for label, root in candidate_roots():
@@ -251,6 +351,7 @@ def discover_students():
         except OSError:
             continue
         git_root = is_git_root(root)
+        tracked_all = git_tracked_paths_all(root) if git_root else set()
         for name in names:
             if name.startswith(".") or name in SKIP_DIRS or not os.path.isdir(os.path.join(root, name)):
                 continue
@@ -273,18 +374,23 @@ def discover_students():
                 continue
             if not any(os.path.isdir(os.path.join(root, name, s)) for s in WATCH_SUBDIRS):
                 continue
-            mtime = newest_file_mtime_ts(root, name)
+            tracked = git_tracked_paths(root, name, tracked_all)
+            mtime, suspect = newest_file_mtime_ts(root, name, tracked)
             prev = merged.get(name)
             if prev is None:
-                merged[name] = {"label": label, "root": root, "git_root": git_root, "mtime": mtime}
+                merged[name] = {"label": label, "root": root, "git_root": git_root,
+                                "mtime": mtime, "suspect": suspect, "tracked": tracked}
                 continue
             # 已有同名学员：判据 A 优先取 git 仓的根；判据 B 取更新的 mtime。
             if git_root and not prev["git_root"]:
                 prev["git_root"] = True
                 prev["root"] = root
                 prev["label"] = label
+                prev["tracked"] = tracked
             if prev["mtime"] is None or (mtime is not None and mtime > prev["mtime"]):
                 prev["mtime"] = mtime
+            if prev["suspect"] is None or (suspect is not None and suspect > prev["suspect"]):
+                prev["suspect"] = suspect
     return merged
 
 
@@ -342,7 +448,12 @@ def main():
             a_applicable = a_note is None          # 有 tracked 作业/评语 ⇒ A 可用
             dir_last = git_last_commit_date(root, name)   # 目录末次 commit（仅参考）
         b_ts = None if args.git_only else info["mtime"]
+        b_suspect = None if args.git_only else info.get("suspect")
         b_date = (datetime.fromtimestamp(b_ts, TZ).strftime("%Y-%m-%d") if b_ts is not None else None)
+        # ★ 11-01（review 报出的洞）：有可疑证据（mtime ≈ checkout 时刻）但没有可信证据
+        #   ⇒ 判据 B **不可判**（既不报绿也不报红）——「checkout 物化出来的文件」
+        #   不是学员写的，不能拿来判活跃。
+        b_undetermined = (b_ts is None and b_suspect is not None)
         a_days, b_days = days_since(a_date), days_since(b_date)
         # 占位入库日 = 该学员目录被 commit 触碰的日期（**不是**活跃度，见 git_last_commit_date）。
         #   目录从未被 commit 触碰（未跟踪目录 / 仓外克隆根）⇒ 退回本机目录 mtime
@@ -358,6 +469,9 @@ def main():
             # 仓外克隆根不是 git 仓 ⇒ 判据 A 不适用（不是「零」）⇒ 只看判据 B。
             if args.git_only:
                 verdict = "跳过(非git仓)"
+            elif b_undetermined:
+                # ★ 11-01：mtime ≈ checkout 时刻 ⇒ 不可判（不报绿也不报红）
+                verdict = "不可判(B证据≈checkout时刻)"
             elif b_days is None:
                 verdict = "零活跃(全新)"  # 无文件 = 目录刚建或从未活动
             elif b_days >= args.threshold:
@@ -375,6 +489,9 @@ def main():
             #   ⇒ 判据 A **不适用**（不是「零」）⇒ 对外报天数一律用判据 B。
             if args.git_only:
                 verdict = "跳过(A无tracked作业·仅占位入库)"
+            elif b_undetermined:
+                # ★ 11-01：B 证据全是 checkout 物化 ⇒ 不可判
+                verdict = "不可判(B证据≈checkout时刻)·A仅占位入库"
             elif b_days is None:
                 verdict = "零活跃(全新)·A仅占位入库"
             elif b_days >= args.threshold:
@@ -391,6 +508,15 @@ def main():
             if (b_days is None and placeholder_days is not None
                     and placeholder_days < args.threshold):
                 grace, grace_reason = True, "新学员宽限期(占位入库未满阈值·B=never)"
+        elif b_undetermined:
+            # ★ 11-01：A 可用（tracked 作业）但 B 证据 ≈ checkout 时刻 ⇒
+            #   判据 B 不可判 ⇒ 一律以判据 A（跨机一致）为准。
+            if a_days is None:
+                verdict = "零活跃(全新)·B不可判"
+            elif a_days >= args.threshold:
+                verdict = f"零活跃>={args.threshold}天·B不可判"
+            else:
+                verdict = "活跃·B不可判"
         elif a_days is None and (args.git_only or b_days is None):
             verdict = "零活跃(全新)"  # 两维都无记录：目录刚建或从未活动
         elif (a_days is None or a_days >= args.threshold) and (args.git_only or b_days is None or b_days >= args.threshold):
@@ -411,6 +537,9 @@ def main():
             "placeholder_import": dir_last,
             "git_last": a_date, "git_idle_days": a_days,
             "file_last": b_date, "file_idle_days": b_days,
+            "file_undetermined": b_undetermined,
+            "file_suspect_ts": b_suspect,
+            "tracked_count": len(info.get("tracked") or ()),
             "days_reported": b_days if (not a_applicable and b_days is not None) else a_days,
             "grace": grace,
             "grace_reason": grace_reason,
@@ -422,7 +551,10 @@ def main():
                 return f"{d}({n}天)" if d is not None else "never"
             a_txt = fmt(a_date, a_days) if a_applicable else "—(仅占位入库)"
             flag = (" [兜底降级不告警:%s]" % grace_reason) if grace else ""
-            print(f"{name:<12} A=git:{a_txt:<22} B=file:{fmt(b_date, b_days):<20} => {verdict}{flag}  [{label}]")
+            b_txt = fmt(b_date, b_days)
+            if b_undetermined:
+                b_txt = "不可判(≈checkout时刻)"
+            print(f"{name:<12} A=git:{a_txt:<22} B=file:{b_txt:<24} => {verdict}{flag}  [{label}]")
 
     if args.json:
         print(json.dumps({"threshold_days": args.threshold, "git_only": args.git_only,

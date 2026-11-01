@@ -141,3 +141,150 @@ test('标记与真练习并存于根层 ⇒ 仍整棵不采（标记优先）', 
   const j = runChecker(root);
   assert.ok(!j.students.some((x) => x.student_dir === '13579246'), '根层标记应优先于真练习');
 });
+
+// ─────────────────────────────────────────────────────────────
+// 3. ★ 跨机失真洞（11-01 · review 报出）
+//    病：判据 B（文件 mtime）把**被 git 跟踪**的作业/评语也算进去
+//      ⇒ 全新 clone 上这些文件的 mtime = checkout 时刻 ⇒ 读成「今天」
+//      ⇒ 零活跃学员在 clone 上被误报成「活跃」（假绿）。
+//    实测（11-01）：本机 tree B=2026-10-07(25天)=零活跃；
+//      全新 clone 同一脚本 B=2026-11-01(0天)=活跃。
+//    修：① B 只采信【未被跟踪】的文件 ② 被跟踪的一律走 A ③ mtime≈checkout ⇒ 不可判
+//
+//    ⚠️ 测法注意：检查器的 REPO 取自脚本自身位置（`__file__` 上溯三级），
+//    不是 cwd ⇒ 要让检查器扫一个临时 git 仓，必须把脚本**复制进那个仓**
+//    （仓根 = <tmp>/mentors-den/scripts/student-activity-check.py ⇒ REPO = <tmp>）。
+// ─────────────────────────────────────────────────────────────
+
+// 把检查器脚本复制进给定仓根，让它把该仓当自己的仓来扫。
+function installChecker(root) {
+  const dir = path.join(root, 'mentors-den', 'scripts');
+  fs.mkdirSync(dir, { recursive: true });
+  const dst = path.join(dir, 'student-activity-check.py');
+  fs.copyFileSync(SCRIPT, dst);
+  return dst;
+}
+
+// 在给定仓根里跑检查器（JSON），并把仓外克隆根指向不存在的路径（只扫本仓）。
+function runCheckerInRepo(root, extraArgs = []) {
+  const script = installChecker(root);
+  const r = spawnSync('python3', [script, '--json', ...extraArgs], {
+    cwd: root,
+    env: { ...process.env, SAND_HOLLOW_CLONE_ROOTS: path.join(root, '__no_such_clone__') },
+    encoding: 'utf8',
+  });
+  assert.ok(r.stdout.trim(), `检查器无输出：\n${r.stderr}`);
+  return JSON.parse(r.stdout);
+}
+
+function gitIn(root, args) {
+  return spawnSync('git', args, { cwd: root, encoding: 'utf8' });
+}
+
+test('★ 被 git 跟踪的作业文件 ⇒ 判据 B 不采信（走判据 A）', () => {
+  // 造一个真 git 仓：tracked 作业 + 未跟踪作业各一
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'sac-git-'));
+  const student = '24602243';
+  fs.mkdirSync(path.join(root, student, 'homework'), { recursive: true });
+  const tracked = path.join(root, student, 'homework', 'tracked.py');
+  const untracked = path.join(root, student, 'homework', 'untracked.py');
+  fs.writeFileSync(tracked, 'print(1)\n');
+  fs.writeFileSync(untracked, 'print(2)\n');
+  gitIn(root, ['init', '-q']);
+  gitIn(root, ['config', 'user.email', 't@t.local']);
+  gitIn(root, ['config', 'user.name', 'T']);
+  gitIn(root, ['add', '-f', `${student}/homework/tracked.py`]);
+  gitIn(root, ['commit', '-q', '-m', 'add tracked']);
+  // 两个文件 mtime 拉开 10 天（都远晚于 checkout 时刻）⇒ 不触发「checkout 物化」规则
+  const now = Date.now() / 1000;
+  fs.utimesSync(tracked, now - 40 * 86400, now - 40 * 86400);
+  fs.utimesSync(untracked, now - 30 * 86400, now - 30 * 86400);
+
+  const j = runCheckerInRepo(root);
+  const s = j.students.find((x) => x.student_dir === student);
+  assert.ok(s, `学员目录应被发现：${JSON.stringify(j.students.map((x) => x.student_dir))}`);
+  assert.strictEqual(s.tracked_count, 1, `tracked_count 应为 1，实际 ${s.tracked_count}`);
+  // tracked 文件被排除 ⇒ 判据 B 只看 untracked.py
+  assert.ok(s.file_last, 'untracked 文件应仍能算出 file_last');
+  const d = new Date(s.file_last + 'T00:00:00Z').getTime() / 1000;
+  assert.ok(
+    Math.abs(d - (now - 30 * 86400)) < 86400,
+    `file_last 应指向未跟踪文件（30 天前），实际 ${s.file_last}`
+  );
+});
+
+test('★ 全部作业都被跟踪 ⇒ 判据 B = never（不报假绿）', () => {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'sac-git2-'));
+  const student = '13579246';
+  fs.mkdirSync(path.join(root, student, 'homework'), { recursive: true });
+  fs.writeFileSync(path.join(root, student, 'homework', 'tracked.py'), 'print(1)\n');
+  gitIn(root, ['init', '-q']);
+  gitIn(root, ['config', 'user.email', 't@t.local']);
+  gitIn(root, ['config', 'user.name', 'T']);
+  gitIn(root, ['add', '-f', `${student}/homework/tracked.py`]);
+  gitIn(root, ['commit', '-q', '-m', 'add tracked']);
+
+  const j = runCheckerInRepo(root);
+  const s = j.students.find((x) => x.student_dir === student);
+  assert.ok(s, '学员目录应被发现');
+  assert.strictEqual(s.file_last, null, `tracked 文件被算进 B ⇒ file_last=${s.file_last}`);
+  assert.strictEqual(s.file_undetermined, false, '没有可疑证据 ⇒ 不该标不可判');
+});
+
+test('★ 全新 clone 上判据 B 不再读成「今天」（跨机假绿洞的回归网）', () => {
+  const src = fs.mkdtempSync(path.join(os.tmpdir(), 'sac-src-'));
+  const student = '24602243';
+  fs.mkdirSync(path.join(src, student, 'homework'), { recursive: true });
+  fs.writeFileSync(path.join(src, student, 'homework', 'hw.py'), 'print(1)\n');
+  gitIn(src, ['init', '-q']);
+  gitIn(src, ['config', 'user.email', 't@t.local']);
+  gitIn(src, ['config', 'user.name', 'T']);
+  gitIn(src, ['add', '-f', `${student}/homework/hw.py`]);
+  gitIn(src, ['commit', '-q', '-m', 'add']);
+
+  const clone = fs.mkdtempSync(path.join(os.tmpdir(), 'sac-clone-'));
+  const c = spawnSync('git', ['clone', '-q', src, clone], { encoding: 'utf8' });
+  assert.strictEqual(c.status, 0, `clone 失败：${c.stderr}`);
+
+  // clone 出来的文件 mtime = checkout 时刻 ⇒ 旧口径会读成「今天」
+  const st = fs.statSync(path.join(clone, student, 'homework', 'hw.py'));
+  const idx = fs.statSync(path.join(clone, '.git', 'index'));
+  assert.ok(
+    Math.abs(st.mtimeMs - idx.mtimeMs) < 300000,
+    '前提不成立：clone 文件的 mtime 应 ≈ checkout 时刻'
+  );
+
+  const j = runCheckerInRepo(clone);
+  const s = j.students.find((x) => x.student_dir === student);
+  assert.ok(s, '学员目录应被发现');
+  assert.strictEqual(
+    s.file_last, null,
+    `clone 上 tracked 文件被算进 B ⇒ 假绿：file_last=${s.file_last}`
+  );
+});
+
+test('★ mtime ≈ checkout 时刻的未跟踪文件 ⇒ 标「不可判」（不报绿不报红）', () => {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'sac-git3-'));
+  const student = '13579246';
+  fs.mkdirSync(path.join(root, student, 'homework'), { recursive: true });
+  fs.writeFileSync(path.join(root, student, 'homework', 'hw.py'), 'print(1)\n');
+  gitIn(root, ['init', '-q']);
+  gitIn(root, ['config', 'user.email', 't@t.local']);
+  gitIn(root, ['config', 'user.name', 'T']);
+  gitIn(root, ['commit', '-q', '--allow-empty', '-m', 'init']);
+
+  // 未跟踪文件，但 mtime 手工设成 .git/index 时刻（模拟 checkout 物化）
+  const idx = fs.statSync(path.join(root, '.git', 'index'));
+  const t = idx.mtimeMs / 1000;
+  fs.utimesSync(path.join(root, student, 'homework', 'hw.py'), t, t);
+
+  const j = runCheckerInRepo(root);
+  const s = j.students.find((x) => x.student_dir === student);
+  assert.ok(s, '学员目录应被发现');
+  assert.strictEqual(s.file_last, null, `可疑证据不该被采信：file_last=${s.file_last}`);
+  assert.strictEqual(s.file_undetermined, true, '应标 file_undetermined=true');
+  assert.ok(
+    String(s.verdict).includes('不可判'),
+    `判定应含「不可判」，实际 verdict=${s.verdict}`
+  );
+});
