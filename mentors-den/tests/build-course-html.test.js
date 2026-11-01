@@ -264,6 +264,53 @@ test('闸·课时标题裸周号：# W01-S1 · W01 → rc=2 且零产出', () =>
   assertGateRejects(courseDir, outDir);
 });
 
+// ── 串号闸（作业文件名周号必须 = 本课周号）────────────────────────
+// 背景：10-19 加餐前插把 W12/W14 从 W16 位置切出，正文残留 W16-weekend-practice.py，
+// 学员在 W12 周末课把作业存成 W16 文件名，批改对不上号（2026-10-27 复盘，46 处债残余 6 处）。
+// ⚠️ 静态化后 KV 发布脚本 learning-publish.js 已归档 ⇒ 闸若只活在归档脚本里 = 事实上失效，
+//    故 build-course-html.js（静态构建入口）自建一道，pre-push 钩子重建时自动继承。
+function assertWeekRefGateRejects(courseDir, outDir) {
+  const r = runCli(['--course-dir', courseDir, '--out-dir', outDir]);
+  assert.strictEqual(r.status, 3, '期望退出码 3，实际 ' + r.status + '\nstdout: ' + r.stdout + '\nstderr: ' + r.stderr);
+  const produced = fs.existsSync(outDir) ? fs.readdirSync(outDir) : [];
+  assert.deepStrictEqual(produced, [], '闸没过却产出了文件：' + produced.join(', '));
+  return r;
+}
+
+// 往课时正文里塞一行 .py 文件名引用
+function addPyRef(courseDir, file, token) {
+  const p = path.join(courseDir, file);
+  fs.writeFileSync(p, fs.readFileSync(p, 'utf8').replace(/\n?$/, '\n\n存为 ' + token + '\n'));
+}
+
+test('闸·串号：W01 课时写 W02-weekend-practice.py → rc=3 且零产出', () => {
+  const courseDir = copyFixtureCourse('gate-weekref');
+  addPyRef(courseDir, 'W01-S1.md', 'W02-weekend-practice.py');
+  const outDir = path.join(tmpDir('gate-weekref-out'), 'out');
+  const r = assertWeekRefGateRejects(courseDir, outDir);
+  assert.ok(r.stderr.includes('作业文件名串号体检未通过'), 'stderr 没说明是串号体检没过');
+  assert.ok(r.stderr.includes('W02-weekend-practice.py'), 'stderr 没点名是哪个文件名');
+  assert.ok(r.stderr.includes('W01-S1.md'), 'stderr 没点名是哪个课时文件');
+});
+
+test('闸·串号：本课自己的 .py 文件名放行（不误伤）', () => {
+  const courseDir = copyFixtureCourse('gate-weekref-ok');
+  addPyRef(courseDir, 'W01-S1.md', 'W01-S1-homework.py');
+  const outDir = path.join(tmpDir('gate-weekref-ok-out'), 'out');
+  const r = runCli(['--course-dir', courseDir, '--out-dir', outDir]);
+  assert.strictEqual(r.status, 0, '本周文件名被误拦，stderr: ' + r.stderr);
+  assert.ok(fs.existsSync(path.join(outDir, 'W01.html')), '放行后没有产出 W01.html');
+});
+
+test('闸·串号：逃生阀 --allow-week-refs 显式放行（须留痕）', () => {
+  const courseDir = copyFixtureCourse('gate-weekref-esc');
+  addPyRef(courseDir, 'W01-S1.md', 'W02-weekend-practice.py');
+  const outDir = path.join(tmpDir('gate-weekref-esc-out'), 'out');
+  const r = runCli(['--course-dir', courseDir, '--out-dir', outDir, '--allow-week-refs']);
+  assert.strictEqual(r.status, 0, '逃生阀没放行，stderr: ' + r.stderr);
+  assert.ok(fs.existsSync(path.join(outDir, 'W01.html')), '逃生阀放行后没有产出 W01.html');
+});
+
 test('闸·课时标题过短：# W02-S1 · ab → rc=2 且零产出', () => {
   const courseDir = copyFixtureCourse('gate-short');
   setLessonTitle(courseDir, 'W02-S1.md', '# W02-S1 · ab');

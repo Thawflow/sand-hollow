@@ -117,6 +117,14 @@ function escapeHtml(s) {
 
 // 课时文件名 = WXX-*.md；周号从文件名头部取
 const LESSON_FILE_RE = /^(W\d\d)-.+\.md$/;
+// ── 作业文件名串号闸 ────────────────────────────────────────────
+// 判据（与 mentors-den/scripts/scan-week-refs.py、archived/learning-publish.js 同一套）：
+// 课时正文里出现的 `W\d\d-*.py` 文件名，其周号必须 = 本课自己的周号。
+// 病灶：加餐前插把 W12/W14 从 W16 位置切出，正文残留 W16-weekend-practice.py 等串号。
+// ⚠️ 静态化后 KV 发布脚本（learning-publish.js）已归档 ⇒ 闸若只活在归档脚本里 = 事实上失效；
+//    故在**静态构建入口**（本脚本）再设一道：构建期拒绝产出（一个文件都不写）。
+//    pre-push 钩子本来就调本脚本重建再比对 ⇒ 本闸自动接入 push 闸。
+const WEEK_REF_RE = /W\d\d-[A-Za-z0-9-]*\.py/g;
 // SYLLABUS 里的周标题行：### WXX · 标题
 const WEEK_HEADING_RE = /^### (W\d\d) · (.+)$/;
 
@@ -185,10 +193,10 @@ function renderSyllabusPage(syllabusMd, weekCount) {
  * 构建全部静态产物。
  * 闸没过时**不写任何文件**，抛出的 Error 带 exitCode=2 与 problems 数组（逐条问题）。
  * 读不到源文件时抛 exitCode=1 的 Error。
- * @param {{courseDir: string, outDir: string}} opts
+ * @param {{courseDir: string, outDir: string, allowWeekRefs?: boolean}} opts
  * @returns {{weeks: Array<{id: string, title: string, current: boolean, lesson_count: number}>, files: string[]}}
  */
-function buildCourse({ courseDir, outDir }) {
+function buildCourse({ courseDir, outDir, allowWeekRefs }) {
   const dir = path.resolve(courseDir);
   const out = path.resolve(outDir);
 
@@ -212,10 +220,20 @@ function buildCourse({ courseDir, outDir }) {
   // ── 标题体检闸 ────────────────────────────────────────────────
   // 覆盖 ① 每个周标题 ② 每个课时标题。任一不过 → 抛错，**一个文件都不写**。
   const problems = [];
+  const weekRefProblems = [];
   const lessonsByWeek = new Map();
   for (const f of lessonFiles) {
     const weekId = f.match(LESSON_FILE_RE)[1];
     const md = fs.readFileSync(path.join(dir, f), 'utf8');
+    // 作业文件名串号：本课正文里的 .py 文件名周号 ≠ 本课周号
+    const refRe = new RegExp(WEEK_REF_RE.source, 'g');
+    let rm;
+    while ((rm = refRe.exec(md)) !== null) {
+      const tok = rm[0];
+      if (tok.slice(0, 3) !== weekId) {
+        weekRefProblems.push(f + '：' + tok + '（本课周=' + weekId + '）');
+      }
+    }
     const title = parseLessonTitle(md, weekId);
     if (title === null) {
       problems.push(f + '：没有 `# ` 标题行');
@@ -239,6 +257,9 @@ function buildCourse({ courseDir, outDir }) {
   }
   if (problems.length) {
     throw buildError('标题体检未通过 —— 拒绝产出', 2, problems);
+  }
+  if (weekRefProblems.length && !allowWeekRefs) {
+    throw buildError('作业文件名串号体检未通过 —— 拒绝产出', 3, weekRefProblems);
   }
 
   // ── 落盘 ─────────────────────────────────────────────────────
@@ -281,16 +302,22 @@ function buildCourse({ courseDir, outDir }) {
 }
 
 // ── CLI ────────────────────────────────────────────────────────
-const USAGE = '用法: node build-course-html.js [--course-dir DIR] [--out-dir DIR]';
+const USAGE = '用法: node build-course-html.js [--course-dir DIR] [--out-dir DIR] [--allow-week-refs]';
 
 function parseCliArgs(argv) {
   const opts = {
     // 默认值按仓库根解析 → 脚本从任意 cwd 跑结果都一样
     courseDir: path.join(REPO_ROOT, 'mentors-den', 'course'),
     outDir: path.join(REPO_ROOT, 'docs', 'course'),
+    // 逃生阀：合法跨周 .py 引用确属有意时显式开（须留痕），默认关
+    allowWeekRefs: false,
   };
   for (let i = 0; i < argv.length; i++) {
     const a = argv[i];
+    if (a === '--allow-week-refs') {
+      opts.allowWeekRefs = true;
+      continue;
+    }
     if (a === '--course-dir' || a === '--out-dir') {
       const v = argv[++i];
       if (!v) throw buildError(USAGE + '\n' + a + ' 后面缺目录参数', 1);
@@ -329,6 +356,13 @@ function main(argv) {
       for (const p of err.problems || []) console.error('   - ' + p);
       console.error('   修法：把对应标题改成正式标题再构建（占位符标题会直接显示给学员）。');
       return 2;
+    }
+    if (err.exitCode === 3) {
+      console.error('❌ 作业文件名串号体检未通过 —— 拒绝产出（一个文件都不写）');
+      for (const p of err.problems || []) console.error('   - ' + p);
+      console.error('   修法：把文件名改成对应课自己的周号再构建；全仓复查：');
+      console.error('     python3 mentors-den/scripts/scan-week-refs.py');
+      return 3;
     }
     console.error('❌ ' + err.message);
     return 1;
