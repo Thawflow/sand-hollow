@@ -59,53 +59,53 @@ test('selftest: 探针判据单测通过（目录名 / 标记根 / 标记子目�
 test('探针目录（名字命中）不出现在学员名单里', () => {
   const root = makeCloneRoot({
     'probe-tmp/homework/probe.py': '# probe\n',
-    '24602243/homework/w02-s5.py': 'print(1)\n',
+    '12345678/homework/w02-s5.py': 'print(1)\n',
   });
   const j = runChecker(root);
   const names = j.students.map((s) => s.student_dir);
   assert.ok(!names.includes('probe-tmp'), `探针目录被当成学员：${names.join(',')}`);
-  assert.ok(names.includes('24602243'), `真学员被漏掉：${names.join(',')}`);
+  assert.ok(names.includes('12345678'), `真学员被漏掉：${names.join(',')}`);
 });
 
 test('8 位数字目录里的 probe.py 不算学员练习（文件名层）', () => {
   const root = makeCloneRoot({
-    '13579246/homework/probe.py': '# probe\n',
+    '87654321/homework/probe.py': '# probe\n',
   });
   const j = runChecker(root);
-  const s = j.students.find((x) => x.student_dir === '13579246');
+  const s = j.students.find((x) => x.student_dir === '87654321');
   assert.ok(s, '学员目录应存在（目录本身是真学员形态）');
   assert.strictEqual(s.file_last, null, `probe.py 的 mtime 被算成活跃：file_last=${s.file_last}`);
 });
 
 test('标记文件放在学员目录根 ⇒ 整棵不采', () => {
   const root = makeCloneRoot({
-    '13579246/.probe': 'x\n',
-    '13579246/homework/real.py': 'print(1)\n',
+    '87654321/.probe': 'x\n',
+    '87654321/homework/real.py': 'print(1)\n',
   });
   const j = runChecker(root);
-  assert.ok(!j.students.some((x) => x.student_dir === '13579246'), '带标记的学员目录应被排除');
+  assert.ok(!j.students.some((x) => x.student_dir === '87654321'), '带标记的学员目录应被排除');
 });
 
 test('★ 标记文件放在 homework/ 里面 ⇒ 整棵不采（11-01 修的洞）', () => {
   const root = makeCloneRoot({
-    '13579246/homework/.probe': 'x\n',
-    '13579246/homework/real.py': 'print(1)\n',
+    '87654321/homework/.probe': 'x\n',
+    '87654321/homework/real.py': 'print(1)\n',
   });
   const j = runChecker(root);
   assert.ok(
-    !j.students.some((x) => x.student_dir === '13579246'),
+    !j.students.some((x) => x.student_dir === '87654321'),
     '标记在 homework/ 里时整棵探针树应被排除'
   );
 });
 
 test('★ 标记文件放在 reviews/ 里面 ⇒ 整棵不采', () => {
   const root = makeCloneRoot({
-    '13579246/reviews/PROBE.md': 'x\n',
-    '13579246/reviews/notes.md': 'hi\n',
+    '87654321/reviews/PROBE.md': 'x\n',
+    '87654321/reviews/notes.md': 'hi\n',
   });
   const j = runChecker(root);
   assert.ok(
-    !j.students.some((x) => x.student_dir === '13579246'),
+    !j.students.some((x) => x.student_dir === '87654321'),
     '标记在 reviews/ 里时整棵探针树应被排除'
   );
 });
@@ -113,10 +113,10 @@ test('★ 标记文件放在 reviews/ 里面 ⇒ 整棵不采', () => {
 test('★ 标记文件放在 homework/ 里 ⇒ 标记自身 mtime 不算活跃', () => {
   // 只有标记文件、没有真练习 ⇒ 判据 B 应为「无」
   const root = makeCloneRoot({
-    '13579246/homework/.probe': 'x\n',
+    '87654321/homework/.probe': 'x\n',
   });
   const j = runChecker(root);
-  const s = j.students.find((x) => x.student_dir === '13579246');
+  const s = j.students.find((x) => x.student_dir === '87654321');
   if (s) {
     assert.strictEqual(s.file_last, null, `标记自身 mtime 被算成活跃：file_last=${s.file_last}`);
   }
@@ -124,22 +124,22 @@ test('★ 标记文件放在 homework/ 里 ⇒ 标记自身 mtime 不算活跃',
 
 test('真学员不被误杀（无标记 ⇒ 照常出现且算得出活跃日）', () => {
   const root = makeCloneRoot({
-    '24602243/homework/w02-s5.py': 'print(1)\n',
-    '24602243/reviews/r1.md': '# review\n',
+    '12345678/homework/w02-s5.py': 'print(1)\n',
+    '12345678/reviews/r1.md': '# review\n',
   });
   const j = runChecker(root);
-  const s = j.students.find((x) => x.student_dir === '24602243');
+  const s = j.students.find((x) => x.student_dir === '12345678');
   assert.ok(s, '真学员应出现在名单里');
   assert.ok(s.file_last, '真学员应有 file_last');
 });
 
 test('标记与真练习并存于根层 ⇒ 仍整棵不采（标记优先）', () => {
   const root = makeCloneRoot({
-    '13579246/.probe-marker': 'x\n',
-    '13579246/homework/real.py': 'print(1)\n',
+    '87654321/.probe-marker': 'x\n',
+    '87654321/homework/real.py': 'print(1)\n',
   });
   const j = runChecker(root);
-  assert.ok(!j.students.some((x) => x.student_dir === '13579246'), '根层标记应优先于真练习');
+  assert.ok(!j.students.some((x) => x.student_dir === '87654321'), '根层标记应优先于真练习');
 });
 
 // ─────────────────────────────────────────────────────────────
@@ -184,7 +184,7 @@ function gitIn(root, args) {
 test('★ 被 git 跟踪的作业文件 ⇒ 判据 B 不采信（走判据 A）', () => {
   // 造一个真 git 仓：tracked 作业 + 未跟踪作业各一
   const root = fs.mkdtempSync(path.join(os.tmpdir(), 'sac-git-'));
-  const student = '24602243';
+  const student = '12345678';
   fs.mkdirSync(path.join(root, student, 'homework'), { recursive: true });
   const tracked = path.join(root, student, 'homework', 'tracked.py');
   const untracked = path.join(root, student, 'homework', 'untracked.py');
@@ -215,7 +215,7 @@ test('★ 被 git 跟踪的作业文件 ⇒ 判据 B 不采信（走判据 A）'
 
 test('★ 全部作业都被跟踪 ⇒ 判据 B = never（不报假绿）', () => {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), 'sac-git2-'));
-  const student = '13579246';
+  const student = '87654321';
   fs.mkdirSync(path.join(root, student, 'homework'), { recursive: true });
   fs.writeFileSync(path.join(root, student, 'homework', 'tracked.py'), 'print(1)\n');
   gitIn(root, ['init', '-q']);
@@ -233,7 +233,7 @@ test('★ 全部作业都被跟踪 ⇒ 判据 B = never（不报假绿）', () =
 
 test('★ 全新 clone 上判据 B 不再读成「今天」（跨机假绿洞的回归网）', () => {
   const src = fs.mkdtempSync(path.join(os.tmpdir(), 'sac-src-'));
-  const student = '24602243';
+  const student = '12345678';
   fs.mkdirSync(path.join(src, student, 'homework'), { recursive: true });
   fs.writeFileSync(path.join(src, student, 'homework', 'hw.py'), 'print(1)\n');
   gitIn(src, ['init', '-q']);
@@ -265,7 +265,7 @@ test('★ 全新 clone 上判据 B 不再读成「今天」（跨机假绿洞的
 
 test('★ mtime ≈ checkout 时刻的未跟踪文件 ⇒ 标「不可判」（不报绿不报红）', () => {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), 'sac-git3-'));
-  const student = '13579246';
+  const student = '87654321';
   fs.mkdirSync(path.join(root, student, 'homework'), { recursive: true });
   fs.writeFileSync(path.join(root, student, 'homework', 'hw.py'), 'print(1)\n');
   gitIn(root, ['init', '-q']);
