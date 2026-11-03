@@ -1,15 +1,21 @@
 .DS_Store
 # v1.2 ⑧：作业目录分家 homework/ + reviews/，均不进 git（ThawPaw 8/30 立，如意 20:26 签认）
-thawpaw/*
-!thawpaw/.gitkeep
-# v1.7.1 ⑧' 2026-09-08 Tree 授权：tree/ 解 gitignore（学员本人自主决定公开作业），thawpaw/ 保持 ignore 保护Thawpaw学员隐私
+# 学员目录（目录名 = 沙坑登录用的 8 位学员 ID）一律不入公开仓。
+# ⚠️ 目录名本身即内部标识 ⇒ **不能用具体 ID 字面量写进本文件**（.gitignore 会被提交 = 泄漏）。
+# ⇒ 用 8 位数字通配匹配任意学员目录；下方 **/homework/ + **/reviews/ 是第二层兜底。
+[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]/*
+# 2026-11-03：Thonny 编辑器缓冲仍持改名前的旧路径 thawpaw/（进程未重启），
+# 保存/运行报 FileNotFoundError ⇒ 建 symlink thawpaw → 学员目录 兜住。
+# symlink 本身是仓内文件（git 当文件跟踪），必须显式 ignore，否则会被 push 进公开仓。
+thawpaw
+# v1.7.1 ⑧' 2026-09-08 Tree 授权：tree/ 解 gitignore（学员本人自主决定公开作业），学员目录保持 ignore 保护学员隐私
 # mentors-log/ 仍 ignore：mentor 晨会内部讨论，不入公开仓
 mentors-log/
 
 # v1.8 隐私补漏：学员作业目录一律不进公开仓 —— 8 位学员 ID / 学员英文名都是家庭内部标识，
 # 进公开仓 = 家庭内部 ID 外泄（公开仓红线：成员 ID / 真实昵称映射 / 家庭内部 ID 不外泄）。
 # 触发场景：README 让学员建「<你的学员ID>/homework/」（旧版写「<你的英文名>/」），目录名本身即泄露面，
-# 只 ignore thawpaw/ 挡不住。
+# 只 ignore 单个学员目录挡不住。
 # 用 **/ 而非 */：挡住任意深度的 homework/reviews（含嵌套形态）。
 # tree/ 例外：Tree 学员已授权公开交作业 ⇒ 下面两行反向排除（tree/ 有 15+17 个 tracked 文件）。
 # 已跟踪文件不受 gitignore 影响（tree/ 存量照旧入库），仅挡新增。
