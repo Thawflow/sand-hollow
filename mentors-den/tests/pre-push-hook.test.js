@@ -80,6 +80,9 @@ function makeRepo(tag, hookBody) {
     path.join(repo, 'mentors-den', 'scripts', 'build-course-html.js'));
   fs.copyFileSync(path.join(REPO_ROOT, 'mentors-den', 'scripts', 'scan-week-refs.py'),
     path.join(repo, 'mentors-den', 'scripts', 'scan-week-refs.py'));
+  // 隐私字段闸依赖（pre-push 第 4 闸会调它）
+  fs.copyFileSync(path.join(REPO_ROOT, 'mentors-den', 'scripts', 'scan-private-fields.py'),
+    path.join(repo, 'mentors-den', 'scripts', 'scan-private-fields.py'));
   fs.copyFileSync(path.join(REPO_ROOT, 'docs', 'vendor', 'marked.min.js'),
     path.join(repo, 'docs', 'vendor', 'marked.min.js'));
   fs.writeFileSync(path.join(repo, '.githooks', 'pre-push'), hookBody);
