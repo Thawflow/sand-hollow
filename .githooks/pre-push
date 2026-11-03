@@ -58,7 +58,7 @@ run_scan() {
   if [ "$rc" -ne 0 ]; then
     echo ""
     if [ "$rc" -eq 2 ]; then
-      echo "🚫 pre-push 拒绝：串号扫描器**读不到 / 扫 0 个文件**（rc=2）—— 没验到 ≠ 没问题，不放行（$label）"
+      echo "🚫 pre-push 拒绝：串号扫描器**读不到 / 扫 0 个文件**（rc=2）—— 没验到 ≠ 没问题，不放行（${label}）"
     else
       echo "🚫 pre-push 拒绝：$label 存在作业文件名串号 / 悬空课时 ID"
     fi
@@ -114,5 +114,47 @@ if [ -n "$DIFF_OUT" ]; then
   exit 1
 fi
 
-echo "✅ 被推那一份（${PUSH_REF}）：串号 0 处 + 产物与源一致"
+# ── 4) 家人隐私字段闸（新增）──────────────────────────────────
+# 判据：被推那一份（HEAD）相对**远端基线**的新增行里，不得含家人隐私字段
+#      （手机 / 身份证 / 生日 / 住址）。
+# 代号（小马 / 如意 / 冰爪 / 龙井 / 猴哥 / ThawPaw / Tree）**不拦** ——
+#      家庭口径已定：代号可公开，隐私字段才拦。
+# 口径与 commit-msg 一致：只看新增行（+），存量不追溯。
+#
+# 远端基线解析（fail-safe）：
+#   优先 origin/<当前分支>；取不到 → 退到 merge-base；再取不到 → **全树扫**。
+#   首推（无远端分支）也走全树扫 —— 此时没有"存量"，全树都是本次引入。
+REMOTE_BASE=""
+REMOTE_REF=""
+CUR_BRANCH="$(git rev-parse --abbrev-ref HEAD 2>/dev/null)"
+if [ -n "$CUR_BRANCH" ] && [ "$CUR_BRANCH" != "HEAD" ]; then
+  REMOTE_REF="origin/${CUR_BRANCH}"
+fi
+if [ -n "$REMOTE_REF" ] && git rev-parse --verify --quiet "${REMOTE_REF}^{commit}" >/dev/null 2>&1; then
+  REMOTE_BASE="$(git merge-base "$REMOTE_REF" "$PUSH_REF" 2>/dev/null)"
+  [ -z "$REMOTE_BASE" ] && REMOTE_BASE="$REMOTE_REF"
+fi
+if [ -n "$REMOTE_BASE" ]; then
+  PRIV_OUT=$(python3 mentors-den/scripts/scan-private-fields.py --diff-range "$REMOTE_BASE" "$PUSH_REF" 2>&1)
+  PRIV_RC=$?
+  PRIV_WHERE="${REMOTE_BASE}..${PUSH_REF}"
+else
+  # 无远端基线（首推 / 新分支）→ 全树扫 HEAD
+  PRIV_OUT=$(python3 mentors-den/scripts/scan-private-fields.py --tree "$PUSH_REF" 2>&1)
+  PRIV_RC=$?
+  PRIV_WHERE="全树 ${PUSH_REF}"
+fi
+# ⚠️ PRIV_RC 必须在 if/else **块内**取 —— 放到 fi 之后拿到的是 if 语句自身的
+#    退出码（恒 0）⇒ 闸永远放行（这正是初版 bug，测试抓出来的）。
+if [ "$PRIV_RC" -ne 0 ]; then
+  echo ""
+  echo "$PRIV_OUT"
+  echo ""
+  echo "🚫 pre-push 拒绝：被推的那一份（${PRIV_WHERE}）含家人隐私字段"
+  echo "   私人信息不进公开仓 —— 换成占位值或代号后重试"
+  echo "   （代号与邮箱可公开：ThawPaw / Tree / IcePaw / 如意 / 小马 / 龙井）"
+  exit 1
+fi
+
+echo "✅ 被推那一份（${PUSH_REF}）：串号 0 处 + 产物与源一致 + 隐私字段 0 处"
 exit 0
