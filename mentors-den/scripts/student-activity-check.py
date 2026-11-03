@@ -369,6 +369,11 @@ def discover_students():
         for name in names:
             if name.startswith(".") or name in SKIP_DIRS or not os.path.isdir(os.path.join(root, name)):
                 continue
+            # 2026-11-03：跳过**符号链接**学员目录。
+            # 学员目录改名后，旧名建了 symlink → 学员目录 兜住 Thonny 等未重启的编辑器缓存。
+            # 若不跳过，同一个学员会被算成两条（目录名 + 旧名）⇒ 学员名单虚增 + 计数双倍。
+            if os.path.islink(os.path.join(root, name)):
+                continue
             # 探针目录整棵不采（否则探针文件 mtime = 假学员 + 假活跃）
             if PROBE_DIR_RE.match(name):
                 continue
