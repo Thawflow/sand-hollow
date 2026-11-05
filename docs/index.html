@@ -651,11 +651,11 @@ function slowHint(on){
 // 实测（10-26）：主域 /verify 首字节 4.2-13.9s，6 次里 2 次超 8s + 1 次握手超时；
 // 备域 6/6 全 200（1.1-2.7s）。旧逻辑主域一超时就直接抛「提交超时」，
 // 学员明明有号有正确昵称却登不进来（学员端实测报障）。
-// ⚠️ 白名单**只放只读 POST**：/register /track /friends/add /learning/progress/save
+// ⚠️ 白名单**只放只读 POST**：/register /track /learning/progress/save
 // 等真写路径仍保持「超时即抛、不回落、不重试」（防双写，14ff6ce 的初衷不变）。
 //
 // 2026-10-26 起：白名单收紧 —— **只留当前真实调用到的只读 POST**。
-// 原白名单含 '/load'，但**本站全站 cfPost 只有 /verify /register /track /friends/add /
+// 原白名单含 '/load'，但**本站全站 cfPost 只有 /verify /register /track /
 // learning/progress/save /learning/progress/load**（逐点 grep 核对）→ '/load' 是死条目，
 // 本站永不调用。留着它有隐患：将来若把 '/load' 接成「存读档」写接口，白名单就等于给双写开了口子。
 // 故本版**移除 /load**，并在下面留注释写明条件：若将来真的接了 /load，
@@ -734,17 +734,12 @@ function acceptLogin(id,nickname,role){
   badge.classList.add('ok');
   $('#login-gate').classList.add('hidden');
   try{trackLogin(id)}catch(e){}
-  try{ensureMentorFriend(id,nickname)}catch(e){}
   try{loadProgressFromCloud()}catch(e){}   // P6：登录后拉一次云端进度并与本机合并
 }
-// 确保跟沙坑 mentor 门牌号是好友（否则 DM 发不出去）——失败不阻塞
-async function ensureMentorFriend(id,nickname){
-  try{
-    const fr=await cfPost('/friends/add',{id:id,nickname:nickname,targetId:'94568945'});
-    // 已被接受过 = 已是好友，直接返回；若是「好友请求已发送」= mentor 侧还需接受
-    if(fr&&fr.ok)return;
-  }catch(e){/* 静默 */}
-}
+// ⚠️ 2026-11-05 猴哥拍板：沙坑作业流程 = 学员写作业进本地目录 → 本机 agent 按 mentor 规则
+//    批改 → 评语直接反馈学员 + 沉淀进沙坑仓库上传。**全程无网页 DM / 无加好友**。
+//    旧版登录时自动加 mentor 好友的 ensureMentorFriend 已删（评语 DM 通道 10-29 随
+//    网页交作业一起退役，此函数成为死代码，且曾把 mentor 门牌号暴露在公开前端）。
 async function trackLogin(id){
   try{await cfPost('/track',{id:id,event:'login'})}catch(e){}
 }
@@ -822,7 +817,7 @@ function initLoginGate(){
     $('#login-gate').classList.add('hidden');
     // P6：已登录态（刷新页面恢复）也要拉一次云端进度并与本机合并 ——
     //   学员的常态是「刷新后继续学」，不是每次重新登录。
-    //   不走 acceptLogin（那会把 trackLogin/friends 之类的副作用也重跑一遍）。
+    //   不走 acceptLogin（那会把 trackLogin 之类的副作用也重跑一遍）。
     try{loadProgressFromCloud()}catch(e){}
   }else{
     $('#login-gate').classList.remove('hidden');
