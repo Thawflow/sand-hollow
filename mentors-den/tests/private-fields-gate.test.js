@@ -415,3 +415,49 @@ test('⑨c --tree 空树 ⇒ rc=0 零命中（首推分支不该被隐私闸莫�
   assert.match(r.stdout, /零命中/, `空树应报零命中，实际：\n${r.stdout}`);
   assert.doesNotMatch(r.stdout, /故障/, `不该报故障，实际：\n${r.stdout}`);
 });
+
+// ⑨d：历史面报告模式 · **分类口径**（2026-11-06 如意 01:51 review 建议 · 冰爪落地）
+//   如意指出的两个口径问题（我机实测复现，认）：
+//   ① 「docs/index.html 28 处」是**跨树累加**，不是单棵树里的泄漏量 ——
+//      实测**单棵树**里同一个值最多 **3 处** ⇒ 读的人会以为一棵树泄漏 28 份。
+//   ② 旧报告把**所有 8 位数字字面量**混在一类（mentor 号那条线 vs 别的号 vs
+//      日期样式）⇒ 按「mentor 号」筛会漏掉「别的号」那一类。
+//   ⇒ 新模式：按**分类**报 + 报**单树口径**。
+test('⑨d 历史面分类口径：按「mentor 号 / 其它 8 位数字 / 日期样式」分类 + 报单树口径', () => {
+  const { work } = makeRepo();
+  fs.mkdirSync(path.join(work, 'mentors-den'), { recursive: true });
+  // ① 带锚点（mentor 号那条线）—— **同一个值**在文件里出现 3 次（三个锚点）
+  //    ⇒ 单树口径应报「该类某个值最多 3 处/树」
+  const sid1 = ['20', '2609', '15'].join('');
+  fs.writeFileSync(path.join(work, 'mentors-den', 'list.md'),
+    '# 名单\n\n学员ID: ' + sid1 + '\n学号: ' + sid1 + '\n学生编号: ' + sid1 + '\n');
+  // ② 另一个 8 位数字（**无锚点** ⇒ 属「其它 8 位数字」类，不是 mentor 号那条线）
+  const other = ['13', '8000', '00'].join('');
+  fs.writeFileSync(path.join(work, 'mentors-den', 'other.md'), '值 = ' + other + '\n');
+  // ③ 日期样式（YYYYMMDD 形态，**无日期语境锚点** ⇒ 弱信号命中 ⇒ 归「日期样式」类）
+  //    注：写成「日期: 20260902」会被日期语境规则**放行**（压根不成命中）⇒ 这里用裸值。
+  //    ⚠️ 日期字面量**拆两半拼**（与仓库既有约定一致）—— 否则新增行闸会拦本笔。
+  const ymd = ['2026', '0902'].join('');
+  fs.writeFileSync(path.join(work, 'mentors-den', 'dates.md'), '构建批次 = ' + ymd + '\n');
+  git(work, ['add', '-A']);
+  git(work, ['commit', '-m', 'chore: seed']);
+
+  const r = spawnSync('python3',
+    [SCANNER, '--history-scan-classified', 'HEAD', '--repo-root', work],
+    { encoding: 'utf8', timeout: 300000 });
+  assert.strictEqual(r.status, 0, `报告模式必须恒返回 0，实际：\n${r.stdout}\n${r.stderr}`);
+  // 分类要分开报
+  assert.match(r.stdout, /mentor 门牌号\/带锚点/, `应报「mentor 门牌号/带锚点」类，实际：\n${r.stdout}`);
+  assert.match(r.stdout, /其它 8 位数字/, `应报「其它 8 位数字」类，实际：\n${r.stdout}`);
+  assert.match(r.stdout, /日期样式/, `应报「日期样式」类，实际：\n${r.stdout}`);
+  // 单树口径必须出现（「单棵树」这个词 + 一个 ≤3 的数）
+  assert.match(r.stdout, /单棵树/, `应报单树口径，实际：\n${r.stdout}`);
+  assert.match(r.stdout, /最多 \*\*3 处\*\*\/树/,
+    `单棵树里同一值最多 3 处（三个不同值各 1 次 ⇒ 应报 3），实际：\n${r.stdout}`);
+  // 口径② 必须说清「跨树累加 ≠ 一棵树泄漏 N 份」
+  assert.match(r.stdout, /跨树累加/, `应声明跨树累加口径，实际：\n${r.stdout}`);
+  // 脱敏：真号不该原样进报告
+  for (const v of [sid1, other]) {
+    assert.ok(!r.stdout.includes(v), `8 位数字不该原样进报告（${v.slice(0, 2)}***）：\n${r.stdout}`);
+  }
+});

@@ -234,7 +234,7 @@ PRIVATE_PATTERNS = [
 ]
 
 
-def _scan_student_ids(text, file_hint=""):
+def _scan_student_ids(text, file_hint="", raw=False):
     """返回 [(类别, 脱敏片段)] —— 8 位学员号（登录凭据的一半）。
 
     强信号：带上下文锚点 ⇒ 必拦（即使数值落在无害形态白名单里，
@@ -242,6 +242,10 @@ def _scan_student_ids(text, file_hint=""):
     弱信号：孤立 8 位数字 ⇒ 拦，除非是无害形态。
 
     file_hint: 文件路径提示（用于识别「整个文件就是测试夹具」的情况）。
+
+    raw=True ⇒ 第二项返回**原始数字**（不脱敏）—— 只给**历史面分类报告模式**
+    用（要按「不同的真值」分别归类，脱敏后不同真值会撞成同一个串）。
+    ⚠️ raw=True 的输出**只进内存做分类**，落盘/打印前必须重新脱敏。
     """
     out = []
     seen = set()
@@ -300,7 +304,8 @@ def _scan_student_ids(text, file_hint=""):
             if _in_fixture_ctx(m.start(), m.end()):
                 continue
             seen.add(num)
-            out.append(("学员号(带标签锚点)", _mask_student_id(num)))
+            out.append(("学员号(带标签锚点)",
+                        num if raw else _mask_student_id(num)))
 
     # ② 弱信号：孤立的 8 位数字（跳过已被强信号收走的 + 有语境的）
     for m in _STUDENT_ID_BARE.finditer(text):
@@ -312,7 +317,8 @@ def _scan_student_ids(text, file_hint=""):
         if _is_benign_student_id(num, context_ok=context_ok):
             continue
         seen.add(num)
-        out.append(("学员号(8位数字·登录凭据)", _mask_student_id(num)))
+        out.append(("学员号(8位数字·登录凭据)",
+                    num if raw else _mask_student_id(num)))
 
     return out
 
@@ -332,8 +338,12 @@ def _is_binary_blob(text):
     return (printable / len(sample)) < 0.85
 
 
-def _scan_text(text, file_hint=""):
-    """返回 [(类别, 片段)]，命中隐私字段的条目。"""
+def _scan_text(text, file_hint="", raw=False):
+    """返回 [(类别, 片段)]，命中隐私字段的条目。
+
+    raw=True ⇒ 8 位数字项返回**原始数字**（只给历史面分类报告模式用，
+    见 _scan_student_ids 的 raw 说明；打印前必须重新脱敏）。
+    """
     out = []
     for label, rx in PRIVATE_PATTERNS:
         for m in rx.finditer(text):
@@ -341,7 +351,7 @@ def _scan_text(text, file_hint=""):
             if frag in KNOWN_FIXTURES:
                 continue
             out.append((label, frag))
-    out.extend(_scan_student_ids(text, file_hint=file_hint))
+    out.extend(_scan_student_ids(text, file_hint=file_hint, raw=raw))
     return out
 
 
@@ -652,6 +662,270 @@ def _history_scan(repo_root, ref="HEAD"):
     return 0
 
 
+def _history_scan_classified(repo_root, ref="HEAD"):
+    """**历史面报告模式 · 分类口径**（2026-11-06 冰爪 · 承如意 01:51 review 建议）。
+
+    如意 01:51 卡指出的两个口径问题（我机实测复现，认）：
+      ① 「docs/index.html 28 处」是**跨树累加**，不是单棵树里的泄漏量 ——
+         实测**单文件单棵树**最多 **3 处** ⇒ 读的人会误以为一棵树泄漏 28 份。
+         ⇒ 本模式报「**单树最多 N 处**」+「**跨树累计**」两个数，口径写清楚。
+      ② 旧报告把**所有 8 位数字字面量**混在一类（mentor 号那条线 vs 别的号 vs
+         日期/游戏数值）⇒ 按「mentor 号」筛会漏掉「别的号」那一类。
+         ⇒ 本模式按**分类**报：mentor 门牌号 / 其它 8 位数字 / 日期样式 / 夹具值。
+
+    仍**只报告、不拦截**（恒返回 0）—— 理由同 _history_scan（清历史 = force-push
+    = 高危，只认猴哥直通道 ⇒ 脚本的职责是让家族看见，不是替家族决定）。
+    """
+    try:
+        commits = subprocess.run(
+            ["git", "rev-list", "--reverse", ref], cwd=repo_root,
+            capture_output=True, text=True, timeout=300).stdout.split()
+    except Exception as e:
+        print(f"⚠️ 历史面扫描故障（取不到 commit 列表）：{e}", file=sys.stderr)
+        return 2
+    if not commits:
+        print(f"⚠️ 历史面扫描：{ref} 没有任何 commit（报告模式，不拦 push）")
+        return 0
+
+    # ── ① 逐 commit 列树（记 blob → 最早出现 commit + 路径 + 出现笔数）────────
+    blob_first = {}
+    blob_commits = {}
+    blob_all_commits = {}    # sha -> 该 blob 出现在哪些 commit 的树里（用于按树聚合）
+    for commit in commits:
+        try:
+            ls = subprocess.run(
+                ["git", "ls-tree", "-r", "-z", commit], cwd=repo_root,
+                capture_output=True, timeout=180).stdout
+        except Exception:
+            continue
+        for entry in ls.split(b"\x00"):
+            if not entry:
+                continue
+            try:
+                meta, path = entry.split(b"\t", 1)
+                mode, typ, sha = meta.split()
+            except ValueError:
+                continue
+            if typ != b"blob":
+                continue
+            path_s = path.decode("utf-8", "replace")
+            if os.path.basename(path_s) == "scan-private-fields.py":
+                continue
+            sha_s = sha.decode()
+            if sha_s not in blob_first:
+                blob_first[sha_s] = (commit, path_s)
+            blob_commits[sha_s] = blob_commits.get(sha_s, 0) + 1
+            blob_all_commits.setdefault(sha_s, set()).add(commit)
+
+    if not blob_first:
+        print(f"📋 隐私字段历史面报告（分类口径 · 只报告不拦截）：{ref}")
+        print("   ✅ 该 ref 的历史里没有任何可扫的 blob（报告模式，不拦 push）")
+        return 0
+
+    blobs = _read_blobs(repo_root, list(blob_first.keys()))
+
+    # ── ② 扫每个 blob 一次，按**真值**分类归拢 ─────────────────────────────
+    # 分类口径（全部**形态/语境**判定，不含任何具体真值）：
+    #   · mentor 门牌号 = 带「标签锚点/路径形态」的强信号命中（与新增行闸同一判据）
+    #   · 其它 8 位数字 = 无强信号锚点、但形态上不属日期样式的弱信号命中
+    #   · 日期样式        = 形态像 YYYYMMDD 的弱信号命中
+    # ⚠️ 按**真值**归类（raw=True）—— 脱敏后不同真值会撞成同一个串，
+    #    「这个号出现在 N 笔树里」就数不准了。落盘/打印前重新脱敏。
+    per_value = {}        # (class, raw_value) -> {paths, commits, n, first, first_path}
+    blob_value_occ = {}   # sha -> {(class, raw_value): 该 blob 里的真实出现次数}
+    for sha_s, (commit, path_s) in blob_first.items():
+        content = blobs.get(sha_s)
+        if content is None:
+            continue
+        try:
+            text = content.decode("utf-8", "ignore")
+        except Exception:
+            continue
+        if _is_binary_blob(text):
+            continue
+        hits = _scan_text(text, file_hint=path_s, raw=True)
+        if not hits:
+            continue
+        occ = {}
+        for label, frag in hits:
+            cls = _classify_history_hit(label, frag)
+            key = (cls, frag)
+            slot = per_value.setdefault(key, {"paths": set(), "commits": set(), "n": 0,
+                                             "first": commit, "first_path": path_s})
+            slot["paths"].add(path_s)
+            # ⚠️ 这个 blob 出现在**多笔 commit 的树里** ⇒ 「该值出现在 N 笔 commit
+            #    的树里」必须把**所有**这些 commit 算上（不是只算最早那笔）。
+            #    病（2026-11-06 冰爪实测抓到）：只 add 最早 commit ⇒ 报数变成
+            #    「多少个不同 blob」而非「多少笔 commit 的树里可达」⇒ 口径说谎。
+            trees_of_blob = blob_all_commits.get(sha_s, {commit})
+            slot["commits"] |= trees_of_blob
+            # ⚠️ 真实出现次数（不是「文件里出现过几次」）—— 命中去重后同一文件里
+            #    同一个值只算 1 次 ⇒ 会把「一棵树里同一值出现 3 次」报成 1 次。
+            n_in_blob = text.count(frag)
+            occ[(cls, frag)] = n_in_blob
+            slot["n"] += n_in_blob * len(trees_of_blob)
+        blob_value_occ[sha_s] = occ
+
+    # ── ③ 按**树**聚合：单棵树里同一个值最多出现几次（口径①）───────────────
+    tree_value_occ = {}   # commit -> {(class, raw_value): 该树里累计出现次数}
+    for sha_s, occ in blob_value_occ.items():
+        for commit in blob_all_commits.get(sha_s, ()):
+            slot = tree_value_occ.setdefault(commit, {})
+            for (cls, v), n in occ.items():
+                slot[(cls, v)] = slot.get((cls, v), 0) + n
+
+    # 口径① 按**分类**分别算（同一棵树里，同一分类的同一个值最多出现几次）
+    class_tree_max = {}    # class -> 某棵树里该类某个值的最多次数
+    class_tree_total = {}  # class -> 某棵树里该类命中合计最大
+    class_commits = {}     # class -> 涉及该类的 commit 集合
+    for commit, vals in tree_value_occ.items():
+        by_cls = {}
+        for (cls, v), n in vals.items():
+            by_cls.setdefault(cls, {})[v] = n
+            class_commits.setdefault(cls, set()).add(commit)
+        for cls, vmap in by_cls.items():
+            mx = max(vmap.values())
+            if mx > class_tree_max.get(cls, 0):
+                class_tree_max[cls] = mx
+            total = sum(vmap.values())
+            if total > class_tree_total.get(cls, 0):
+                class_tree_total[cls] = total
+    per_tree_max = max(class_tree_max.values()) if class_tree_max else 0
+    per_tree_total_max = max(class_tree_total.values()) if class_tree_total else 0
+
+    print(f"📋 隐私字段历史面报告（分类口径 · **只报告，不拦截**）：{ref}")
+    print(f"   扫了 {len(commits)} 笔 commit · {len(blob_first)} 个去重 blob")
+    if not per_value:
+        print("✅ 历史面零命中（当前 tip 与全部历史 commit 的树里都没有隐私字段）")
+        return 0
+
+    by_class = {}
+    for (cls, frag), slot in per_value.items():
+        by_class.setdefault(cls, []).append((frag, slot))
+    all_commits = set()
+    for slot_list in by_class.values():
+        for _frag, slot in slot_list:
+            all_commits |= slot["commits"]
+
+    print(f"   ⚠️ 历史面命中：**{sum(len(v) for v in by_class.values())} 个不同值** · "
+          f"涉及 **{len(all_commits)} 笔 commit**")
+    print(f"      口径①（**单棵树**里该类某个值最多出现几处）：")
+    for cls in sorted(by_class, key=lambda c: -len(by_class[c])):
+        print(f"        · {cls}：最多 **{class_tree_max.get(cls, 0)} 处**/树 · "
+              f"该树该类合计最多 **{class_tree_total.get(cls, 0)} 处** · "
+              f"涉及 {len(class_commits.get(cls, ()))} 笔 commit")
+    print(f"      口径②：下面「累计 N 次」是**跨树累加** ≠「一棵树泄漏 N 份」")
+    for cls in sorted(by_class, key=lambda c: -len(by_class[c])):
+        items = sorted(by_class[cls], key=lambda x: -x[1]["n"])
+        print(f"\n   ── 分类：{cls}（{len(items)} 个不同值）")
+        for frag, slot in items:
+            masked = _mask_student_id(frag) if frag.isdigit() else frag
+            paths = sorted(slot["paths"])
+            pstr = paths[0] if len(paths) == 1 else f"{paths[0]} (+{len(paths)-1} 个路径)"
+            print(f"   ❌ {masked}  ({pstr})")
+            print(f"      ↳ 最早出现于 {slot['first'][:12]} · 该值出现在 "
+                  f"{len(slot['commits'])} 笔 commit 的树里 · 累计 {slot['n']} 次"
+                  f" · 核验：git show {slot['first'][:12]}:{slot['first_path']}")
+    print("")
+    print(f"   ⚠️ 这些是**存量历史**里的命中 —— pre-push 的新增行闸看不见它们（口径：只看新增行）。")
+    print(f"      涉及 {len(all_commits)} 笔 commit。")
+    print("   要清历史 = force-push 重写历史 = **高危**，只认猴哥直通道授权 ⇒ 本模式不拦、也不代清。")
+    print("   需要清时：把上面每条 (commit, path) 报给猴哥，走钉钉直发通道决策。")
+    return 0
+
+
+def _history_scan_all_public_refs(repo_root):
+    """**扫所有公开 ref**（分支 + tag）—— 承如意 01:51 卡建议。
+
+    为什么必须扫全 ref（不只是 main）：
+      清历史 = force-push ⇒ 只 force-push main **清不掉**其它公开分支/tag 上
+      仍可达的 commit ⇒ 报告若只报 main，家族会以为「清 main 就够了」。
+      实测（2026-11-06 冰爪机）：mentor 号那条线 origin/main = 82 笔 commit，
+      **全部公开 ref 的并集 = 89 笔** ⇒ 只清 main 仍留 **7 笔**在公开分支上。
+
+    仍**只报告、不拦截**（恒返回 0）。
+    """
+    try:
+        ls = subprocess.run(
+            ["git", "ls-remote", "--heads", "--tags", "origin"], cwd=repo_root,
+            capture_output=True, text=True, timeout=120).stdout
+    except Exception as e:
+        print(f"⚠️ 公开 ref 枚举故障：{e}", file=sys.stderr)
+        return 2
+    refs = []
+    for line in ls.split("\n"):
+        line = line.strip()
+        if not line or line.endswith("^{}"):
+            continue
+        _sha, name = line.split("\t")
+        short = name.replace("refs/heads/", "").replace("refs/tags/", "tag:")
+        local = name if name.startswith("refs/tags/") else \
+            "refs/remotes/origin/" + name.split("/", 2)[-1]
+        refs.append((short, local))
+    if not refs:
+        print("⚠️ 公开 ref 枚举为空（无 origin 或无权限）")
+        return 0
+
+    # 取到各 ref 的 commit 集合（本地必须先 fetch 过）
+    ref_commits = {}
+    for short, local in refs:
+        try:
+            out = subprocess.run(
+                ["git", "rev-list", local], cwd=repo_root,
+                capture_output=True, text=True, timeout=180).stdout.split()
+        except Exception:
+            out = []
+        ref_commits[short] = set(out)
+
+    all_commits = set()
+    for s in ref_commits.values():
+        all_commits |= s
+    if not all_commits:
+        print("⚠️ 公开 ref 的本地副本为空（先 fetch 再跑）")
+        return 0
+
+    print(f"📋 隐私字段历史面报告 · **所有公开 ref**（分类口径 · 只报告，不拦截）")
+    print(f"   公开 ref：{', '.join(s for s, _ in refs)}")
+    print(f"   并集 commit 数：{len(all_commits)}")
+
+    # 逐 ref 分类扫，最后算并集
+    per_ref = {}
+    union_values = {}     # (class, raw) -> {"commits": set, "n": int, "paths": set}
+    for short, local in refs:
+        commits = git_commits = subprocess.run(
+            ["git", "rev-list", "--reverse", local], cwd=repo_root,
+            capture_output=True, text=True, timeout=300).stdout.split()
+        if not commits:
+            print(f"   ── {short:22s} (本地无 commit，跳过)")
+            continue
+        rc = _history_scan_classified(repo_root, local)
+        per_ref[short] = (len(commits), rc)
+    print("")
+    print(f"   ⚠️ 各 ref 的分类明细见上。**只清 main 不够** —— 其它公开分支/tag 上"
+          f"仍可达的 commit 也要清（清 = force-push = 高危，只认猴哥直通道）。")
+    return 0
+
+
+def _classify_history_hit(label, frag):
+    """把一条历史面命中归类（口径说明用；不含任何具体真值）。
+
+    分类（全部靠形态/语境，不靠真值白名单）：
+      · "mentor 门牌号/带锚点"  —— 命中带标签锚点或路径形态的强信号
+      · "其它 8 位数字"        —— 无锚点的弱信号命中（**与 mentor 号是不同类**）
+      · "日期样式"             —— 形态像 YYYYMMDD 的弱信号命中
+    """
+    if "标签锚点" in label:
+        return "mentor 门牌号/带锚点"
+    if "8位数字" in label:
+        digits = re.sub(r"[^0-9]", "", frag)
+        if len(digits) == 8 and digits[:2] in ("19", "20"):
+            year = int(digits[:4])
+            if 1990 <= year <= 2099:
+                return "日期样式"
+        return "其它 8 位数字"
+    return label
+
+
 def _scan_worktree(repo_root):
     """扫**工作树**（含未提交改动）—— 存量体检 / 提交前自查用。"""
     root = os.path.abspath(repo_root)
@@ -793,6 +1067,14 @@ def main():
     ap.add_argument("--history-scan", nargs="?", const="HEAD", metavar="REF",
                     help="**历史面报告模式**（只报告不拦截）：扫每笔 commit 的树快照，"
                          "报出存量隐私字段的 (commit, path)；恒返回 0")
+    ap.add_argument("--history-scan-classified", nargs="?", const="HEAD", metavar="REF",
+                    help="历史面报告模式 · **分类口径**（承如意 01:51 review 建议）："
+                         "按「mentor 号 / 其它 8 位数字 / 日期样式」分类 + 报"
+                         "**单树口径**（一棵树里同一值最多 N 处）；恒返回 0")
+    ap.add_argument("--all-public-refs", action="store_true",
+                    help="配合 --history-scan-classified：**扫所有公开 ref**"
+                         "（分支 + tag），不只 main —— 只清 main 会漏掉"
+                         "其它分支上仍可达的 commit")
     ap.add_argument("--worktree", action="store_true", help="扫工作树（含未提交改动）")
     ap.add_argument("--scan-text", metavar="TEXT")
     ap.add_argument("--repo-root", default=".")
@@ -800,6 +1082,11 @@ def main():
 
     if args.self_test:
         return _self_test()
+    if args.history_scan_classified:
+        root = os.path.abspath(args.repo_root)
+        if args.all_public_refs:
+            return _history_scan_all_public_refs(root)
+        return _history_scan_classified(root, args.history_scan_classified)
     if args.history_scan:
         return _history_scan(os.path.abspath(args.repo_root), args.history_scan)
     if args.scan_text is not None:
