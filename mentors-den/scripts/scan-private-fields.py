@@ -47,13 +47,28 @@ ThawPaw / Tree）按家庭口径是**可以公开的**，不属于隐私。
 
 学员号命中**脱敏输出**（只给首 2 + 尾 2）—— 它是凭据，不该进终端日志。
 
+口径修订三：历史面 = **报告模式**，不是拦截模式（2026-11-05 如意 review 建议 · 冰爪落地）
+──────────────────────────────────────────────────────────────────────────────────
+pre-push 的隐私闸按「只看新增行」判定 ⇒ **存量历史不追溯**：
+某次 push 之前就已经躺在历史树里的隐私字段，闸看不见（这是口径，不是漏洞）。
+但「看不见」不等于「不用管」—— 如意见：闸若要覆盖历史面需另加一条
+「全树扫 + 报告」模式（**非拦截**）。
+
+理由（为什么是报告而不是拦截）：
+  · 拦截历史面 = 必须 force-push 重写历史 = **高危**，只认猴哥直通道授权
+  · 本脚本**不能**自己改历史 ⇒ 它的正确职责是**把历史面的命中如实报出来**，
+    让家族看得见，再由家族决定要不要清（清 = force-push = 走猴哥通道）
+  · 所以本模式**永远返回 0**（不拦 push），只出报告
+
 用法：
     python3 mentors-den/scripts/scan-private-fields.py --self-test
     python3 mentors-den/scripts/scan-private-fields.py --diff-only
     python3 mentors-den/scripts/scan-private-fields.py --diff-range <base> <ref>
     python3 mentors-den/scripts/scan-private-fields.py --scan-text "<文本>"
+    python3 mentors-den/scripts/scan-private-fields.py --history-scan [REF]
 
 退出码：0 = 零命中放行；1 = 有命中拒；2 = 自身故障（读不到 ≠ 没变）
+（--history-scan 例外：报告模式恒返回 0，见上）
 """
 
 import argparse
@@ -416,37 +431,101 @@ def _scan_diff_range(repo_root, base, ref):
     return _report(_added_lines_skipping_scanner(diff.stdout), f"{base}..{ref} 新增行")
 
 
-def _scan_tree(repo_root, ref):
-    """全树扫（git archive 提取后逐文件扫）。首推/新分支无 base 时用。"""
-    import tempfile, tarfile, io, pathlib
+def _read_blobs(repo_root, shas):
+    """一次 `git cat-file --batch` 批量取多个 blob 的内容。
+
+    返回 {sha: bytes}。读不到就返回已取到的部分（调用方按缺失处理）。
+    ⚠️ 为什么用 batch 而不是每个 blob 一次 subprocess：1000+ 次 fork 在大仓上
+       要一分钟；一次 batch 几秒。
+    """
+    out = {}
+    if not shas:
+        return out
     try:
-        arch = subprocess.run(["git", "archive", ref], cwd=repo_root,
-                              capture_output=True, timeout=180)
-        if arch.returncode != 0:
-            print(f"⚠️ git archive {ref} 失败（不等于没变）", file=sys.stderr)
-            return 2
-        allhits = []
-        with tempfile.TemporaryDirectory() as td:
-            with tarfile.open(fileobj=io.BytesIO(arch.stdout)) as tf:
-                tf.extractall(td)
-            for f in pathlib.Path(td).rglob("*"):
-                if not f.is_file():
-                    continue
-                # 扫描器自身 = 规则代码，不是数据 ⇒ 跳过（否则白名单字面量自触发）
-                if f.name == "scan-private-fields.py":
-                    continue
-                try:
-                    text = f.read_text(errors="ignore")
-                except Exception:
-                    continue
-                if _is_binary_blob(text):
-                    continue
-                rel = str(f.relative_to(td))
-                for label, frag in _scan_text(text, file_hint=rel):
-                    allhits.append((label, frag, rel))
+        proc = subprocess.run(
+            ["git", "cat-file", "--batch"], cwd=repo_root,
+            input=("\n".join(shas) + "\n").encode(),
+            capture_output=True, timeout=600).stdout
+        # --batch 输出格式：<sha> <type> <size>\n<content>\n
+        pos = 0
+        while pos < len(proc):
+            nl = proc.find(b"\n", pos)
+            if nl < 0:
+                break
+            header = proc[pos:nl].split()
+            if len(header) < 3:
+                break
+            sha_s = header[0].decode()
+            try:
+                size = int(header[2])
+            except ValueError:
+                break
+            out[sha_s] = proc[nl + 1:nl + 1 + size]
+            pos = nl + 1 + size + 1  # 内容后跟一个换行
+    except Exception:
+        pass
+    return out
+
+
+def _scan_tree(repo_root, ref):
+    """全树扫某 ref 的快照。首推/新分支无 base 时用。
+
+    ⚠️ 2026-11-05（冰爪 · 承如意 review 建议落地时实测）：**改用 ls-tree + cat-file
+       --batch，不再用 `git archive` + tarfile**。
+       病：旧实现 `git archive <ref>` 取 tar 再用 Python tarfile 解 —— 当 ref 的树
+       **为空**（首推、或某笔 commit 删光了所有文件）时，git archive 产出的是
+       「只有 pax_global_header 的 10KB 空档」，Python `tarfile.open` 直接报
+       `ReadError: end of file header` ⇒ 脚本 rc=2。
+       危害：pre-push 的**首推分支**（无远端基线 ⇒ 走 --tree 全树扫）会**莫名被拒**，
+       报错文案是「全树扫描故障」，运维看不出真因（不是隐私问题，是空树）。
+       修法：ls-tree 拿 blob 列表 + cat-file --batch 拿内容 ⇒ **不依赖 tarfile**，
+       空树天然是「0 个 blob ⇒ 零命中 ⇒ rc=0」。
+    """
+    try:
+        ls = subprocess.run(
+            ["git", "ls-tree", "-r", "-z", ref], cwd=repo_root,
+            capture_output=True, timeout=180).stdout
     except Exception as e:
-        print(f"⚠️ 全树扫描故障：{e}", file=sys.stderr)
+        print(f"⚠️ 全树扫描故障（读不到 {ref} 的树）：{e}", file=sys.stderr)
         return 2
+
+    blobs = []          # [(sha, rel_path)]
+    for entry in ls.split(b"\x00"):
+        if not entry:
+            continue
+        try:
+            meta, path = entry.split(b"\t", 1)
+            mode, typ, sha = meta.split()
+        except ValueError:
+            continue
+        if typ != b"blob":
+            continue
+        rel = path.decode("utf-8", "replace")
+        # 扫描器自身 = 规则代码，不是数据 ⇒ 跳过（否则白名单字面量自触发）
+        if os.path.basename(rel) == "scan-private-fields.py":
+            continue
+        blobs.append((sha.decode(), rel))
+
+    if not blobs:
+        print(f"✅ 隐私字段扫描：全树 {ref} 零命中（{ref} 的树里没有文件）")
+        return 0
+
+    contents = _read_blobs(repo_root, [s for s, _ in blobs])
+    allhits = []
+    for sha, rel in blobs:
+        content = contents.get(sha)
+        if content is None:
+            print(f"⚠️ 读不到 blob {sha[:12]}（{rel}）—— 读不到 ≠ 没变", file=sys.stderr)
+            return 2
+        try:
+            text = content.decode("utf-8", "ignore")
+        except Exception:
+            continue
+        if _is_binary_blob(text):
+            continue
+        for label, frag in _scan_text(text, file_hint=rel):
+            allhits.append((label, frag, rel))
+
     if not allhits:
         print(f"✅ 隐私字段扫描：全树 {ref} 零命中（代号与邮箱可公开，隐私字段才拦）")
         return 0
@@ -460,6 +539,117 @@ def _scan_tree(repo_root, ref):
         print(f"   ❌ {label}: {frag[:48]}  ({path})")
     print("\n   处理：私人信息不要进公开仓（占位值/代号见上方口径）。")
     return 1
+
+
+def _history_scan(repo_root, ref="HEAD"):
+    """**历史面报告模式**（2026-11-05 如意 review 建议 · 冰爪落地 · owner=冰爪）。
+
+    扫**历史树**里每一笔 commit 的快照，找出隐私字段命中 —— 但**只报告、不拦截**。
+
+    ⚠️ 为什么必须恒返回 0（不拦 push）：
+      · 拦历史面 ⇒ 必须 force-push 重写历史 ⇒ **高危**，只认猴哥直通道授权
+      · 本脚本没有、也不该有改写历史的职责 ⇒ 它的正确职责是**让家族看见**，
+        清不清由家族决定（清 = force-push = 走猴哥通道）
+      · 所以本模式**永远 exit 0**，即使命中也不拦 push
+
+    扫法（逐 commit 扫快照，而不是扫 blob）：
+      判据 = 「哪笔 commit 的树里能拿到这个隐私字段」⇒ 用 `git ls-tree -r <commit>`
+      逐个 blob 取内容扫。这样报出来的 commit hash **真实可达**（能被 `git show` 验证），
+      而不是「某个 blob 首次出现在某处」那种不可核的推断。
+
+    覆盖范围：每个 commit 的**完整树快照**（不是 diff）—— 存量隐私字段在被删掉之后
+    仍留在历史 commit 的树里 ⇒ 逐 commit 扫树才能覆盖「曾经有过」。
+
+    性能（两遍 + 一次批量取内容）：
+      ① 逐 commit `git ls-tree -r -z` ⇒ 记「每个 blob 最早出现在哪笔 commit」
+         （commit 必须**由旧到新**遍历 —— `git rev-list` 默认倒序，倒着扫会把
+         「最新那笔」当成「首次出现」，标注就错了）
+      ② 一次 `git cat-file --batch` 批量取所有去重 blob 的内容（不是每个 blob 一次
+         subprocess —— 1000+ 次 fork 在大仓上要一分钟）
+      ③ 扫每个 blob 一次，回填命中
+    """
+    try:
+        commits = subprocess.run(
+            ["git", "rev-list", "--reverse", ref], cwd=repo_root,
+            capture_output=True, text=True, timeout=300).stdout.split()
+    except Exception as e:
+        print(f"⚠️ 历史面扫描故障（取不到 commit 列表）：{e}", file=sys.stderr)
+        return 2
+    if not commits:
+        print(f"⚠️ 历史面扫描：{ref} 没有任何 commit（报告模式，不拦 push）")
+        return 0
+
+    # ── ① 逐 commit 列树：blob → (最早出现的 commit, 路径) ──────────────
+    blob_first = {}          # sha → (commit, path)
+    blob_commits = {}        # sha → 该 blob 出现在多少笔 commit 的树里
+    for commit in commits:
+        try:
+            ls = subprocess.run(
+                ["git", "ls-tree", "-r", "-z", commit], cwd=repo_root,
+                capture_output=True, timeout=180).stdout
+        except Exception:
+            continue
+        for entry in ls.split(b"\x00"):
+            if not entry:
+                continue
+            # 格式：<mode> SP <type> SP <sha> TAB <path>
+            try:
+                meta, path = entry.split(b"\t", 1)
+                mode, typ, sha = meta.split()
+            except ValueError:
+                continue
+            if typ != b"blob":
+                continue
+            path_s = path.decode("utf-8", "replace")
+            # 扫描器自身 = 规则代码，不是数据 ⇒ 跳过（否则白名单字面量自触发）
+            if os.path.basename(path_s) == "scan-private-fields.py":
+                continue
+            sha_s = sha.decode()
+            if sha_s not in blob_first:
+                blob_first[sha_s] = (commit, path_s)
+            blob_commits[sha_s] = blob_commits.get(sha_s, 0) + 1
+
+    if not blob_first:
+        print(f"📋 隐私字段历史面报告（**只报告，不拦截**）：{ref}")
+        print("   ✅ 该 ref 的历史里没有任何可扫的 blob（报告模式，不拦 push）")
+        return 0
+
+    # ── ② 一次 cat-file --batch 取全部 blob 内容 ────────────────────────
+    blobs = _read_blobs(repo_root, list(blob_first.keys()))
+
+    # ── ③ 扫每个 blob 一次 ─────────────────────────────────────────────
+    rows = []
+    for sha_s, (commit, path_s) in blob_first.items():
+        content = blobs.get(sha_s)
+        if content is None:
+            continue
+        try:
+            text = content.decode("utf-8", "ignore")
+        except Exception:
+            continue
+        if _is_binary_blob(text):
+            continue
+        for label, frag in _scan_text(text, file_hint=path_s):
+            rows.append((commit, path_s, label, frag, blob_commits.get(sha_s, 1)))
+
+    print(f"📋 隐私字段历史面报告（**只报告，不拦截**）：{ref}")
+    print(f"   扫了 {len(commits)} 笔 commit · {len(blob_first)} 个去重 blob")
+    if not rows:
+        print("✅ 历史面零命中（当前 tip 与全部历史 commit 的树里都没有隐私字段）")
+        return 0
+    print(f"   ⚠️ 历史面命中 {len(rows)} 处（按「最早出现的 commit」计）")
+    reach = set()
+    for commit, path, label, frag, ncommits in rows:
+        reach.add(commit)
+        print(f"   ❌ {label}: {frag[:48]}  ({path})")
+        print(f"      ↳ 最早出现于 {commit[:12]}（该内容出现在 {ncommits} 笔 commit 的树里）"
+              f" · 核验：git show {commit[:12]}:{path}")
+    print("")
+    print(f"   ⚠️ 这些是**存量历史**里的命中 —— pre-push 的新增行闸看不见它们（口径：只看新增行）。")
+    print(f"      涉及 {len(reach)} 笔 commit（最早出现的那批）。")
+    print("   要清历史 = force-push 重写历史 = **高危**，只认猴哥直通道授权 ⇒ 本模式不拦、也不代清。")
+    print("   需要清时：把上面每条 (commit, path) 报给猴哥，走钉钉直发通道决策。")
+    return 0
 
 
 def _scan_worktree(repo_root):
@@ -600,6 +790,9 @@ def main():
     ap.add_argument("--diff-range", nargs=2, metavar=("BASE", "REF"),
                     help="扫 BASE..REF 新增行")
     ap.add_argument("--tree", metavar="REF", help="全树扫某 ref（首推无 base 时用）")
+    ap.add_argument("--history-scan", nargs="?", const="HEAD", metavar="REF",
+                    help="**历史面报告模式**（只报告不拦截）：扫每笔 commit 的树快照，"
+                         "报出存量隐私字段的 (commit, path)；恒返回 0")
     ap.add_argument("--worktree", action="store_true", help="扫工作树（含未提交改动）")
     ap.add_argument("--scan-text", metavar="TEXT")
     ap.add_argument("--repo-root", default=".")
@@ -607,6 +800,8 @@ def main():
 
     if args.self_test:
         return _self_test()
+    if args.history_scan:
+        return _history_scan(os.path.abspath(args.repo_root), args.history_scan)
     if args.scan_text is not None:
         return _report(args.scan_text, "指定文本")
     if args.worktree:

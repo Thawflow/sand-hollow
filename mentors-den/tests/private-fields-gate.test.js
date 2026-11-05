@@ -338,3 +338,80 @@ test('⑧ 隐私闸：新增行含学员号 ⇒ pre-push 拒绝，远端 tip 不
   assert.match(out, /学员号|隐私/, `应报学员号/隐私问题，实际输出：\n${out}`);
   assert.ok(!out.includes(FAKE_SID), `学员号不该原样出现在报错里：\n${out}`);
 });
+
+// ── ⑨ 历史面报告模式（2026-11-05 如意 review 建议 · 冰爪落地 · owner=冰爪）──
+//   病：pre-push 隐私闸按「只看新增行」判定 ⇒ 存量历史里的隐私字段**闸看不见**。
+//   如意见：闸若要覆盖历史面需另加一条「全树扫 + 报告」模式（**非拦截**）。
+//   口径：**报告模式恒返回 0** —— 清历史 = force-push = 高危，只认猴哥直通道，
+//   脚本没资格拦 push、更没资格改历史 ⇒ 它的职责是「让家族看见」。
+
+test('⑨ 历史面报告模式：存量学员号在历史 commit 的树里 ⇒ 报出 (commit, path)，且 rc=0 不拦', () => {
+  const { work } = makeRepo();
+  // 造历史：第 1 笔 commit 里放一个学员号（之后删掉，但历史里还在）
+  fs.mkdirSync(path.join(work, 'mentors-den'), { recursive: true });
+  fs.writeFileSync(path.join(work, 'mentors-den', 'old-notes.md'),
+    '# 旧笔记\n\n学员ID: ' + FAKE_SID + '\n');
+  git(work, ['add', '-A']);
+  git(work, ['commit', '-m', 'chore: add old notes with student id']);
+  const dirtyCommit = git(work, ['rev-parse', 'HEAD']).trim();
+
+  // 第 2 笔 commit 删掉它（tip 面已干净，历史面还在）
+  fs.rmSync(path.join(work, 'mentors-den', 'old-notes.md'));
+  git(work, ['add', '-A']);
+  git(work, ['commit', '-m', 'chore: remove old notes']);
+
+  const r = spawnSync('python3', [SCANNER, '--history-scan', 'HEAD', '--repo-root', work],
+    { encoding: 'utf8', timeout: 300000 });
+  // ⚠️ 报告模式恒 rc=0 —— 命中也**不拦**（清历史 = force-push = 高危，走猴哥通道）
+  assert.strictEqual(r.status, 0, `报告模式必须恒返回 0，实际：\n${r.stdout}\n${r.stderr}`);
+  assert.match(r.stdout, /只报告，不拦截|不拦/, `应声明是报告模式，实际：\n${r.stdout}`);
+  assert.match(r.stdout, /学员号/, `应报学员号，实际：\n${r.stdout}`);
+  // 报出的 commit 必须**真实可核** —— `git show <commit>:<path>` 拿得到内容
+  assert.ok(r.stdout.includes(dirtyCommit.slice(0, 12)),
+    `应报出最早出现的 commit ${dirtyCommit.slice(0, 12)}，实际：\n${r.stdout}`);
+  assert.ok(r.stdout.includes('mentors-den/old-notes.md'),
+    `应报出文件路径，实际：\n${r.stdout}`);
+  // 脱敏：完整号不该原样进报告
+  assert.ok(!r.stdout.includes(FAKE_SID), `学员号不该原样进报告：\n${r.stdout}`);
+  // tip 面已干净 ⇒ 「只有历史面有」这句话要能被看出来
+  const tip = spawnSync('python3', [SCANNER, '--tree', 'HEAD', '--repo-root', work],
+    { encoding: 'utf8', timeout: 300000 });
+  assert.strictEqual(tip.status, 0, `tip 面应零命中，实际：\n${tip.stdout}`);
+});
+
+test('⑨b 历史面报告模式：历史干净 ⇒ 报「零命中」且 rc=0', () => {
+  const { work } = makeRepo();
+  fs.writeFileSync(path.join(work, 'README.md'), '# 只有代号\n\nmentor 小马 批改\n');
+  git(work, ['add', '-A']);
+  git(work, ['commit', '-m', 'chore: clean']);
+
+  const r = spawnSync('python3', [SCANNER, '--history-scan', 'HEAD', '--repo-root', work],
+    { encoding: 'utf8', timeout: 300000 });
+  assert.strictEqual(r.status, 0, `报告模式必须恒返回 0，实际：\n${r.stdout}\n${r.stderr}`);
+  assert.match(r.stdout, /零命中/, `历史干净应报零命中，实际：\n${r.stdout}`);
+});
+
+// ⑨c：--tree 模式在**空树**上必须 rc=0（不是 rc=2）
+//   病（2026-11-05 冰爪实测）：旧实现 `git archive` + Python tarfile —— 空树的 archive
+//   是「只有 pax_global_header 的 10KB 空档」，tarfile 报 ReadError ⇒ rc=2
+//   ⇒ pre-push 的**首推分支**（无远端基线 ⇒ 走 --tree）会莫名被拒，报错文案还看不出真因。
+//   修法：ls-tree + cat-file --batch，不依赖 tarfile。
+test('⑨c --tree 空树 ⇒ rc=0 零命中（首推分支不该被隐私闸莫名拒）', () => {
+  const { work } = makeRepo();
+  // 造一个「有文件 → 删光」的历史 ⇒ HEAD 的树是空的
+  fs.writeFileSync(path.join(work, 'a.txt'), 'hello\n');
+  git(work, ['add', '-A']);
+  git(work, ['commit', '-m', 'chore: add']);
+  git(work, ['rm', '-q', 'a.txt']);
+  git(work, ['commit', '-m', 'chore: remove']);
+
+  const empty = spawnSync('git', ['ls-tree', '-r', 'HEAD'], { cwd: work, encoding: 'utf8' });
+  assert.strictEqual(empty.stdout.trim(), '', '前置条件：HEAD 的树应为空');
+
+  const r = spawnSync('python3', [SCANNER, '--tree', 'HEAD', '--repo-root', work],
+    { encoding: 'utf8', timeout: 300000 });
+  assert.strictEqual(r.status, 0,
+    `空树必须 rc=0（不是自身故障 rc=2），实际：\n${r.stdout}\n${r.stderr}`);
+  assert.match(r.stdout, /零命中/, `空树应报零命中，实际：\n${r.stdout}`);
+  assert.doesNotMatch(r.stdout, /故障/, `不该报故障，实际：\n${r.stdout}`);
+});
