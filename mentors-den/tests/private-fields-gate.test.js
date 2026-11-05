@@ -17,7 +17,7 @@
  *   实际只拦 4 类 —— 身份证号(18位) / 手机号(11位大陆) / 生日(带锚点) / 住址(省市区+详细)。
  *   **邮箱不在拦截模式内**（对外联系入口属可公开面）—— 别照旧注释把邮箱改回拦截。
  *
- * 断言（7 项，与实现逐条对应）：
+ * 断言（11 项，与实现逐条对应）：
  *   ① 扫描器自检全过（模式层：拦隐私 / 放代号 / 不误伤假数据）
  *   ② 邮箱放行（对外联系入口可公开）
  *   ②b 手机号 ⇒ 扫描器命中（真隐私仍拦）
@@ -25,6 +25,16 @@
  *   ④ 保留域/假数据邮箱 ⇒ 零命中
  *   ⑤ 隐私闸：新增行含手机号 ⇒ pre-push 拒绝，远端 tip 不前进
  *   ⑥ 隐私闸：新增行只有代号 ⇒ pre-push 放行（不误伤）
+ *   ⑦ 8 位学员号（带标签锚点）⇒ 扫描器命中（Tree 11-05 立：学号+姓名=登录体系）
+ *   ⑦b 8 位学员号（裸数字）⇒ 命中；脱敏输出（只给首2+尾2）
+ *   ⑦c 日期/重复组/夹具学号 ⇒ 放行（不误伤 BUILD_TIME、测试夹具）
+ *   ⑧ 隐私闸：新增行含学员号 ⇒ pre-push 拒绝，远端 tip 不前进
+ *
+ * ⚠️ 2026-11-05 新增口径：**8 位学员号 = 登录凭据的一半**
+ *   沙坑登录体系 = 8 位数字 ID + 昵称，**昵称即密码**
+ *   （前端 isValidId() = /^\d{8}$/，输入框标注「昵称（= 密码）」；
+ *     Worker isValidId() 同款 + 「昵称即口令」）
+ *   ⇒ 学员号单独泄露 = 可对已知姓名逐一撞库 ⇒ 学员号本身属隐私字段。
  */
 const test = require('node:test');
 const assert = require('node:assert');
@@ -43,6 +53,9 @@ const MARKED = path.join(REPO_ROOT, 'docs', 'vendor', 'marked.min.js');
 // ⚠️ 假邮箱一律拼接构造 —— 完整字面留在源码里会被隐私闸扫自己命中
 const FAKE_EMAIL = ['someone', '@', 'brandct', '.', 'com'].join('');
 const FAKE_PHONE = ['139', '0013', '9000'].join('');
+// 8 位学员号（构造拼接，源码里不留完整字面 —— 隐私闸会扫测试文件自身）
+const FAKE_SID = ['20', '2609', '15'].join('');
+const FAKE_SID2 = ['21', '1114', '22'].join('');
 
 const GIT_ENV = {
   ...process.env,
@@ -248,4 +261,80 @@ test('⑥ 隐私闸：新增行只有代号 ⇒ pre-push 放行（不误伤）',
   } else {
     assert.notStrictEqual(after, baseTip, '放行则远端 tip 应前进');
   }
+});
+
+// ── ⑧ 8 位学员号（Tree 11-05 立：学号 + 姓名 = 登录体系，学员号属隐私）──
+
+test('⑦ 8 位学员号（带标签锚点）⇒ 扫描器命中', () => {
+  const cases = [
+    '学员ID: ' + FAKE_SID,
+    '学号 ' + FAKE_SID,
+    "targetId:'" + FAKE_SID + "'",
+    FAKE_SID + '/homework/w01.py',
+  ];
+  for (const text of cases) {
+    const r = spawnSync('python3', [SCANNER, '--scan-text', text], { encoding: 'utf8' });
+    assert.strictEqual(r.status, 1, `应命中并返 1，实际输出：\n${r.stdout}`);
+    assert.match(r.stdout, /学员号/, `应报学员号，实际：\n${r.stdout}`);
+  }
+});
+
+test('⑦b 8 位学员号（裸数字）⇒ 命中，且输出脱敏（首2+尾2）', () => {
+  const r = spawnSync('python3', [SCANNER, '--scan-text', '这个号是 ' + FAKE_SID + ' 记一下'],
+    { encoding: 'utf8' });
+  assert.strictEqual(r.status, 1, `裸学员号应被拦，实际：\n${r.stdout}`);
+  assert.match(r.stdout, /学员号/);
+  // 脱敏：完整号不该出现在输出里
+  assert.ok(!r.stdout.includes(FAKE_SID), `学员号不该原样进日志：\n${r.stdout}`);
+  const masked = FAKE_SID.slice(0, 2) + '***' + FAKE_SID.slice(-2);
+  assert.ok(r.stdout.includes(masked), `应输出脱敏形式 ${masked}，实际：\n${r.stdout}`);
+});
+
+test('⑦c 日期 / 重复组 / 测试夹具学号 ⇒ 放行（不误伤）', () => {
+  const cases = [
+    'print("2026" + "2026")  # ' + ['2026', '2026'].join(''),
+    '评语日期 20260902',
+    'var BUILD_TIME="20261030-0715"',
+    'Math.floor(10000000 + Math.random() * 90000000)',
+  ];
+  for (const text of cases) {
+    const r = spawnSync('python3', [SCANNER, '--scan-text', text], { encoding: 'utf8' });
+    assert.strictEqual(r.status, 0, `不该被拦：${text}\n实际：\n${r.stdout}`);
+  }
+});
+
+test('⑧ 隐私闸：新增行含学员号 ⇒ pre-push 拒绝，远端 tip 不前进', () => {
+  const { remote, work } = makeRepo();
+  writeCourseFixture(work, ['W01-S1.md']);
+  buildCourse(work);
+  git(work, ['add', '-A']);
+  git(work, ['commit', '-m', 'chore: base']);
+  git(work, ['push', '-u', 'origin', 'main']);
+  const baseTip = git(remote, ['rev-parse', 'main']).trim();
+
+  git(work, ['config', 'core.hooksPath', '.githooks']);
+  fs.mkdirSync(path.join(work, '.githooks'), { recursive: true });
+  fs.copyFileSync(HOOK, path.join(work, '.githooks', 'pre-push'));
+  fs.chmodSync(path.join(work, '.githooks', 'pre-push'), 0o755);
+  fs.mkdirSync(path.join(work, 'mentors-den', 'scripts'), { recursive: true });
+  fs.copyFileSync(SCANNER, path.join(work, 'mentors-den', 'scripts', 'scan-private-fields.py'));
+  fs.copyFileSync(WEEK_REFS, path.join(work, 'mentors-den', 'scripts', 'scan-week-refs.py'));
+  fs.copyFileSync(BUILD_HTML, path.join(work, 'mentors-den', 'scripts', 'build-course-html.js'));
+
+  // 新增含学员号的课时
+  fs.writeFileSync(path.join(work, 'mentors-den', 'course', 'W01-S2.md'),
+    '# W01-S2\n\n学员ID: ' + FAKE_SID + '\n');
+  buildCourse(work);
+  git(work, ['add', '-A']);
+  git(work, ['commit', '-m', 'feat: add lesson with student id']);
+
+  const push = spawnSync('git', ['push', 'origin', 'main'], {
+    cwd: work, encoding: 'utf8', env: GIT_ENV,
+  });
+  const after = git(remote, ['rev-parse', 'main']).trim();
+  assert.strictEqual(after, baseTip, '远端 tip 不该前进（学员号必须被拦）');
+  assert.notStrictEqual(push.status, 0, 'push 应失败');
+  const out = (push.stderr || '') + (push.stdout || '');
+  assert.match(out, /学员号|隐私/, `应报学员号/隐私问题，实际输出：\n${out}`);
+  assert.ok(!out.includes(FAKE_SID), `学员号不该原样出现在报错里：\n${out}`);
 });

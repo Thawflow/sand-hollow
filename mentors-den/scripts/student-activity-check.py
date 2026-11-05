@@ -477,16 +477,16 @@ def main():
                 fails.append((d, root, sub, want, got))
         # 元数据产物判据（11-04 修）：元数据 ⇒ True，真练习 ⇒ False
         meta_cases = [
-            ("24602243/homework/.DS_Store", ".DS_Store", True),
+            ("12345678/homework/.DS_Store", ".DS_Store", True),
             ("tree/homework/.DS_Store", ".DS_Store", True),
-            ("24602243/homework/__pycache__/W03-S1.cpython-314.pyc",
+            ("12345678/homework/__pycache__/W03-S1.cpython-314.pyc",
              "W03-S1.cpython-314.pyc", True),
             ("tree/homework/__pycache__/x.cpython-314.pyc", "x.cpython-314.pyc", True),
             ("tree/homework/notes.py.swp", "notes.py.swp", True),
-            ("24602243/homework/W03-S1-homework.py", "W03-S1-homework.py", False),
+            ("12345678/homework/W03-S1-homework.py", "W03-S1-homework.py", False),
             ("tree/reviews/W03-L01-homework.review.md", "W03-L01-homework.review.md", False),
             # pycache 目录里若混进真练习文件 ⇒ 仍要采信（不整棵排除）
-            ("24602243/homework/__pycache__/real_hw.py", "real_hw.py", False),
+            ("12345678/homework/__pycache__/real_hw.py", "real_hw.py", False),
         ]
         for rel, name, want in meta_cases:
             got = is_meta_artifact(rel, name)
