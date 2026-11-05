@@ -8,15 +8,23 @@
  * **两套都不拦家人隐私字段** —— 真邮箱曾在 README 里长期躺着无人拦。
  * 新增 `mentors-den/scripts/scan-private-fields.py` + pre-push 第 4 闸。
  *
- * 核心口径（家庭已定）：
+ * 核心口径（家庭已定 · Tree 11-04 06:27 补充定调「邮箱也可以公开」）：
  *   · 代号（小马 / 如意 / 冰爪 / 龙井 / 猴哥 / ThawPaw / Tree）**可公开，不拦**
- *   · 隐私字段（邮箱 / 手机 / 身份证 / 生日 / 住址）**必须拦**
+ *   · 对外联系邮箱**可公开，不拦**
+ *   · 真隐私字段（手机 / 身份证 / 生日 / 住址）**必须拦**
  *
- * 断言：
- *   ① 扫描器自检全过（模式层）
- *   ② 新增行含真邮箱 ⇒ pre-push 拒绝，远端 tip 不前进
- *   ③ 新增行只有代号 ⇒ pre-push 放行（不误伤正常协作署名）
- *   ④ 隐私字段在**存量**里 ⇒ 不追溯、不卡 push（与 commit-msg 口径一致）
+ * ⚠️ 本注释须与 `mentors-den/scripts/scan-private-fields.py` 的 PRIVATE_PATTERNS 保持一致：
+ *   实际只拦 4 类 —— 身份证号(18位) / 手机号(11位大陆) / 生日(带锚点) / 住址(省市区+详细)。
+ *   **邮箱不在拦截模式内**（对外联系入口属可公开面）—— 别照旧注释把邮箱改回拦截。
+ *
+ * 断言（7 项，与实现逐条对应）：
+ *   ① 扫描器自检全过（模式层：拦隐私 / 放代号 / 不误伤假数据）
+ *   ② 邮箱放行（对外联系入口可公开）
+ *   ②b 手机号 ⇒ 扫描器命中（真隐私仍拦）
+ *   ③ 只有代号 ⇒ 扫描器零命中（不误伤协作署名）
+ *   ④ 保留域/假数据邮箱 ⇒ 零命中
+ *   ⑤ 隐私闸：新增行含手机号 ⇒ pre-push 拒绝，远端 tip 不前进
+ *   ⑥ 隐私闸：新增行只有代号 ⇒ pre-push 放行（不误伤）
  */
 const test = require('node:test');
 const assert = require('node:assert');
@@ -185,7 +193,8 @@ test('⑤ 隐私闸：新增行含手机号 ⇒ pre-push 拒绝，远端 tip 不
   fs.copyFileSync(WEEK_REFS, path.join(work, 'mentors-den', 'scripts', 'scan-week-refs.py'));
   fs.copyFileSync(BUILD_HTML, path.join(work, 'mentors-den', 'scripts', 'build-course-html.js'));
 
-  // 新增一个含真邮箱的课时（先重建产物，让漂移闸过；隐私闸才是真正的拦截者）
+  // 新增一个含手机号的课时（先重建产物，让漂移闸过；隐私闸才是真正的拦截者）
+  // ⚠️ 写的是手机号不是邮箱 —— 邮箱按 Tree 11-04 定调属可公开面，不该被拦（见文件头口径）。
   fs.writeFileSync(path.join(work, 'mentors-den', 'course', 'W01-S2.md'),
     '# W01-S2\n\ncontact: ' + FAKE_PHONE + '\n');
   buildCourse(work);

@@ -77,6 +77,33 @@ test('8 位数字目录里的 probe.py 不算学员练习（文件名层）', ()
   assert.strictEqual(s.file_last, null, `probe.py 的 mtime 被算成活跃：file_last=${s.file_last}`);
 });
 
+test('★★ 元数据产物（.DS_Store / __pycache__/*.pyc）不算学员练习（11-04 修的洞）', () => {
+  // 病：零活跃学员目录只要被 Finder 碰过（.DS_Store）或作业被跑过（.pyc）
+  // ⇒ 判据 B 报「今天活跃」⇒ 假绿。
+  const root = makeCloneRoot({
+    '87654321/homework/.DS_Store': 'x\n',
+    '87654321/homework/__pycache__/w02-s5.cpython-314.pyc': 'x\n',
+  });
+  const j = runChecker(root);
+  const s = j.students.find((x) => x.student_dir === '87654321');
+  assert.ok(s, '学员目录应存在');
+  assert.strictEqual(
+    s.file_last,
+    null,
+    `元数据产物的 mtime 被算成活跃：file_last=${s.file_last}`
+  );
+});
+
+test('真练习文件藏在 __pycache__ 里仍要采信（不误伤）', () => {
+  const root = makeCloneRoot({
+    '87654321/homework/__pycache__/real_hw.py': 'print(1)\n',
+  });
+  const j = runChecker(root);
+  const s = j.students.find((x) => x.student_dir === '87654321');
+  assert.ok(s, '学员目录应存在');
+  assert.ok(s.file_last, 'pycache 目录里的真练习文件应被采信（不能整棵排除）');
+});
+
 test('标记文件放在学员目录根 ⇒ 整棵不采', () => {
   const root = makeCloneRoot({
     '87654321/.probe': 'x\n',

@@ -87,6 +87,38 @@ def is_probe_marker(name):
     return name in PROBE_MARKERS
 
 
+# 2026-11-04 修（冰爪·晨会 ⑥1 派活落地）：**文件系统元数据产物不是学员练习**。
+#   病：判据 B 只排除了探针文件 / 标记文件 / 被跟踪文件 ⇒ `.DS_Store`（Finder
+#   每次浏览目录都重写它）与 `__pycache__/*.pyc`（Python 跑一次作业就生成）
+#   照样计入 mtime ⇒ 一个**零活跃学员**只要目录被 Finder 碰过 / 作业被跑过一次，
+#   判据 B 就报「今天活跃」⇒ 假绿。
+#   实测复现（11-04，本机真仓）：给零活跃学员目录塞一个 `homework/.DS_Store`
+#   ⇒ 该目录从「零活跃 29 天」翻成「活跃 · 0 天」；再塞 `__pycache__/x.pyc`
+#   ⇒ 同样翻绿。
+#   ⇒ 元数据产物一律不计入判据 B（与「被跟踪文件不计入」同一层：不是学员写的）。
+#   ⚠️ 只排元数据本身，**不排除**整个 `__pycache__` 目录 —— 目录里若混进
+#   真练习文件仍要采信（防「用 pycache 目录藏作业」被误伤）。
+META_ARTIFACT_NAMES = {".DS_Store", "Thumbs.db", "desktop.ini", ".Spotlight-V100",
+                        ".Trashes", ".fseventsd", ".TemporaryItems"}
+META_ARTIFACT_DIRS = {"__pycache__"}
+META_ARTIFACT_SUFFIXES = (".pyc", ".pyo", ".pyd", ".swp", ".swo", ".orig", ".rej")
+# 源文件后缀：出现在 __pycache__ 目录里仍视为真练习（不整棵排除该目录）
+SOURCE_SUFFIXES = (".py", ".md", ".txt")
+
+
+def is_meta_artifact(rel_path, name):
+    """这个文件是不是文件系统/解释器元数据产物？⇒ 不计入判据 B。"""
+    if name in META_ARTIFACT_NAMES:
+        return True
+    if name.endswith(META_ARTIFACT_SUFFIXES):
+        return True
+    parts = rel_path.replace("\\", "/").split("/")
+    in_meta_dir = any(p in META_ARTIFACT_DIRS for p in parts[:-1])
+    # ⚠️ 不整棵排除 __pycache__：目录里若混进真练习文件仍要采信
+    #   （防「用 pycache 目录藏作业」被误伤）⇒ 只排非源文件。
+    return in_meta_dir and not name.endswith(SOURCE_SUFFIXES)
+
+
 def probe_reason(dir_name, root_entries, sub_entries):
     """这个学员目录是不是探针？返回原因串或 None（纯函数，供 --selftest）。"""
     if PROBE_DIR_RE.match(dir_name):
@@ -321,6 +353,10 @@ def newest_file_mtime_ts(root, rel_dir, tracked_global=None):
                     rel_path = name
                 if rel_path in tracked:
                     continue
+                # 元数据产物（.DS_Store / __pycache__/*.pyc 等）⇒ 不是学员写的
+                # ⇒ 不计入判据 B（11-04 修：零活跃学员被 Finder/pycache 带成假绿）
+                if is_meta_artifact(rel_path, name):
+                    continue
                 # mtime ≈ checkout 物化时刻 ⇒ 疑似 checkout 物化 ⇒ 标不可判，不采信
                 if ref is not None and abs(m - ref) <= CHECKOUT_SUSPECT_WINDOW:
                     if suspect is None or m > suspect:
@@ -439,6 +475,23 @@ def main():
             got = probe_reason(d, root, sub)
             if got != want:
                 fails.append((d, root, sub, want, got))
+        # 元数据产物判据（11-04 修）：元数据 ⇒ True，真练习 ⇒ False
+        meta_cases = [
+            ("24602243/homework/.DS_Store", ".DS_Store", True),
+            ("tree/homework/.DS_Store", ".DS_Store", True),
+            ("24602243/homework/__pycache__/W03-S1.cpython-314.pyc",
+             "W03-S1.cpython-314.pyc", True),
+            ("tree/homework/__pycache__/x.cpython-314.pyc", "x.cpython-314.pyc", True),
+            ("tree/homework/notes.py.swp", "notes.py.swp", True),
+            ("24602243/homework/W03-S1-homework.py", "W03-S1-homework.py", False),
+            ("tree/reviews/W03-L01-homework.review.md", "W03-L01-homework.review.md", False),
+            # pycache 目录里若混进真练习文件 ⇒ 仍要采信（不整棵排除）
+            ("24602243/homework/__pycache__/real_hw.py", "real_hw.py", False),
+        ]
+        for rel, name, want in meta_cases:
+            got = is_meta_artifact(rel, name)
+            if got != want:
+                fails.append(("meta", rel, name, want, got))
         for d, root, sub, want, got in fails:
             print("FAIL dir=%s root=%s sub=%s expect=%s got=%s" % (d, root, sub, want, got))
         print("SELFTEST PASS" if not fails else "SELFTEST FAIL (%d)" % len(fails))
