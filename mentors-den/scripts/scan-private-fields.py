@@ -424,6 +424,43 @@ def _report(scanned, where):
     return 1
 
 
+def _report_by_file(segments, where):
+    """按文件分段扫（diff 模式用）：每段保留自己的路径作为 file_hint。
+
+    ⚠️ 为什么 diff 模式不能走 _report（2026-11-06 冰爪快车道轮实测修 ·
+    承如意 08:25 review 观察②）：_report 把所有新增行拼成一坨扫 ⇒
+    file_hint 丢失 ⇒ 「整个文件就是测试夹具」永不触发 ⇒
+    **测试文件里的反例数据被当成真学员号拦住** ⇒ pre-push 门禁把
+    自己的回归测试判成隐私泄露（假红）。
+
+    输出格式与 _report 一致（同一套口径文案），但**逐文件扫** ⇒
+    命中条目按「文件 → 类别」给出，便于定位到具体文件。
+    """
+    all_hits = []
+    for path, text in segments:
+        for label, frag in _scan_text(text, file_hint=path):
+            all_hits.append((path, label, frag))
+    if not all_hits:
+        print(f"✅ 隐私字段扫描：{where} 零命中（代号可公开，隐私字段才拦）")
+        return 0
+    print(f"🚫 命中家人隐私字段：{where}（{len(all_hits)} 处）")
+    seen = set()
+    for path, label, frag in all_hits:
+        key = (path, label, frag)
+        if key in seen:
+            continue
+        seen.add(key)
+        print(f"   ❌ {label}: {frag[:64]}  ({path})")
+    print("")
+    print("   处理：私人信息不要进公开仓。")
+    print("     · 手机 / 身份证 / 生日 / 住址 → 删掉，或换成占位值")
+    print("     · 8 位学员号 → 删掉，或换成明显假的占位号（学员号 + 昵称 = 登录凭据）")
+    print("     · 邮箱与代号可以公开，不需要改")
+    print("     · 真实姓名 → 用代号（ThawPaw / Tree / IcePaw / 如意 / 小马 / 龙井）")
+    print("     · 代号本身可以公开，不需要改")
+    return 1
+
+
 def _added_lines(diff_text):
     """只取新增行（+），排除文件头（+++）。存量不追溯 —— 与门禁口径一致。"""
     return "\n".join(
@@ -440,6 +477,19 @@ def _added_lines_skipping_scanner(diff_text):
     认不出「这是扫描器自己的白名单」，会把规则定义误判成违规 ⇒ 门禁自锁。
 
     修法：按 diff 的文件头分段，跳过文件名 = scan-private-fields.py 的那段。
+
+    ⚠️ 2026-11-06（冰爪快车道轮实测修 · 承如意 08:25 review 观察②）：
+    **本函数只能保留「跳过扫描器自己」这一条职责**；**路径语境（file_hint）
+    的传递由 _added_lines_by_file 负责**（见下）。原因：diff 模式原先把
+    所有文件的新增行**混成一坨文本**再交给 _report ⇒ file_hint 丢失 ⇒
+    「整个文件就是测试夹具」这条规则（_FIXTURE_CONTEXT_RE 的 file_is_fixture
+    分支）永不触发 ⇒ **测试文件里的反例数据（形如无效日历日的假日期、
+    假学号）被当成真学员号拦住** ⇒ pre-push 门禁把**自己的回归测试**
+    判成隐私泄露（假红）⇒ 无关改动被卡在 push 门口。
+    实测：本机 76a83c7 三笔未推 commit 在 --diff-range origin/main HEAD 下
+    被拦 2 处（均为测试文件里的反例数据）。
+    ⚠️ 本注释**不得写出完整 8 位数字字面量**（哪怕是反例日期）—— 扫描器源码
+    自扫会把自己判成违规（自检会红）；样例一律拼接构造。
     """
     out = []
     skip_current = False
@@ -456,6 +506,53 @@ def _added_lines_skipping_scanner(diff_text):
     return "\n".join(out)
 
 
+def _added_lines_by_file(diff_text):
+    """按文件分段返回新增行：[(相对路径, 该文件的新增行文本), ...]。
+
+    ⚠️ 为什么要分段（2026-11-06 冰爪快车道轮实测修 · 承如意 08:25 review 观察②）：
+    diff 模式（--diff-only / --diff-range）原先把所有文件的新增行**拼成一坨**
+    交给 _report ⇒ **file_hint 丢失** ⇒ 「整个文件就是测试夹具」这条规则
+    （_scan_student_ids 里的 file_is_fixture 分支）永不触发 ⇒
+    **测试文件里的反例数据（假日期 / 假学号）被当成真学员号拦住**
+    ⇒ pre-push 门禁把**自己的回归测试**判成隐私泄露（假红）⇒
+    无关的正常改动被卡在 push 门口（实测：本机 3 笔未推 commit 被拦 2 处）。
+
+    修法：保留**每个文件自己的路径**作为 file_hint 传给 _scan_text ⇒
+    夹具语境（tests/ fixtures/ student-activity-check 等）重新生效 ⇒
+    反例数据放行，而**非测试文件**里的 8 位数字**照拦**（安全性不降）。
+
+    ⚠️ 安全边界（不可放松）：
+    ① 「文件级夹具豁免」只对**测试/夹具类路径**生效（file_is_fixture 白名单），
+       普通源文件（src/ / docs/ 等）**拿不到任何豁免** ⇒ 真号照样拦。
+    ② 扫描器自己那个文件（scan-private-fields.py）**仍然整段跳过**
+       （规则定义不是隐私数据）——该职责由 _added_lines_skipping_scanner 保持。
+    ③ 跳过扫描器自己时**保留路径**，使它不会因分段而「混进别的文件段落」。
+    """
+    out = []
+    cur_path = None
+    cur_lines = []
+
+    def flush():
+        if cur_path is not None and cur_lines:
+            out.append((cur_path, "\n".join(cur_lines)))
+
+    for line in diff_text.splitlines():
+        if line.startswith("+++ "):
+            flush()
+            path = line[4:].strip()
+            if path.startswith("b/"):
+                path = path[2:]
+            # 扫描器自己 = 规则定义，不是隐私数据 ⇒ 整段跳过（保留职责）
+            cur_path = None if os.path.basename(path) == "scan-private-fields.py" else path
+            cur_lines = []
+            continue
+        if line.startswith("+") and not line.startswith("+++"):
+            if cur_path is not None:
+                cur_lines.append(line[1:])
+    flush()
+    return out
+
+
 def _scan_diff_only(repo_root):
     try:
         diff = subprocess.run(
@@ -468,7 +565,7 @@ def _scan_diff_only(repo_root):
     if diff.returncode != 0:
         print("⚠️ git diff 失败（不等于没变）", file=sys.stderr)
         return 2
-    return _report(_added_lines_skipping_scanner(diff.stdout), "暂存区新增行")
+    return _report_by_file(_added_lines_by_file(diff.stdout), "暂存区新增行")
 
 
 def _scan_diff_range(repo_root, base, ref):
@@ -484,7 +581,7 @@ def _scan_diff_range(repo_root, base, ref):
     if diff.returncode != 0:
         print(f"⚠️ git diff {base}..{ref} 失败（不等于没变）", file=sys.stderr)
         return 2
-    return _report(_added_lines_skipping_scanner(diff.stdout), f"{base}..{ref} 新增行")
+    return _report_by_file(_added_lines_by_file(diff.stdout), f"{base}..{ref} 新增行")
 
 
 def _read_blobs(repo_root, shas):

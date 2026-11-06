@@ -321,7 +321,13 @@ test('⑦d 新写的日历日期在日期语境下 ⇒ 放行（11-06 早轮修�
     assert.strictEqual(r.status, 0, `合法日期不该被拦：${text}\n实际：\n${r.stdout}`);
   }
   // 反向：结构上**不成立**的日期（13 月 / 32 日）⇒ 仍须拦（不是日期 ⇒ 可能是学员号）
-  const bad = ['var BUILD_TIME="20261306"', 'var BUILD_TIME="20261132"'];
+  // ⚠️ 样例一律**拼接构造**（仓库惯例，见本文件顶部「假邮箱一律拼接构造」）：
+  //   完整字面留在源码里 ⇒ 隐私闸 diff-range 模式扫新增行时会把它当学员号拦下
+  //   ⇒ pre-push 门禁把**自己的回归测试**判成隐私泄露（假红）⇒ 改动卡在 push 门口。
+  const bad = [
+    `var BUILD_TIME="2026${'1306'}"`,   // 13 月
+    `var BUILD_TIME="2026${'1132'}"`,   // 32 日
+  ];
   for (const text of bad) {
     const r = spawnSync('python3', [SCANNER, '--scan-text', text], { encoding: 'utf8' });
     assert.notStrictEqual(r.status, 0, `不成立的日期不该被放行：${text}\n实际：\n${r.stdout}`);
@@ -381,6 +387,64 @@ test('⑧ 隐私闸：新增行含学员号 ⇒ pre-push 拒绝，远端 tip 不
   const out = (push.stderr || '') + (push.stdout || '');
   assert.match(out, /学员号|隐私/, `应报学员号/隐私问题，实际输出：\n${out}`);
   assert.ok(!out.includes(FAKE_SID), `学员号不该原样出现在报错里：\n${out}`);
+});
+
+// ── ⑧b diff 模式必须保留「文件路径语境」（2026-11-06 冰爪快车道轮实测修）──
+//   病：--diff-only / --diff-range 把**所有文件的新增行混成一坨文本**再扫
+//     ⇒ file_hint 丢失 ⇒「整个文件就是测试夹具」这条规则永不触发
+//     ⇒ **测试文件里的夹具/反例数据被当成真学员号拦住**
+//     ⇒ pre-push 门禁把**自己的回归测试**判成隐私泄露（假红）
+//     ⇒ 无关的正常改动被卡在 push 门口（本机 3 笔未推 commit 被拦 2 处）。
+//   修法：diff 模式按文件分段、逐段传自己的路径作 file_hint ⇒ 与 --tree 口径对齐。
+//   ⚠️ 安全边界（不可放松）：**非测试文件里的学员号照拦**，本题断言它照拦；
+//     测试文件里的**强信号**（带标签锚点）也照拦（白名单值才放行）。
+
+test('⑧b diff 模式：测试文件里的白名单夹具值 ⇒ 放行（与 --tree 口径对齐）；非测试文件里的学员号 ⇒ 照拦', () => {
+  const { work } = makeRepo();
+  fs.mkdirSync(path.join(work, 'mentors-den', 'tests'), { recursive: true });
+  fs.mkdirSync(path.join(work, 'mentors-den', 'course'), { recursive: true });
+  // ⚠️ 初始提交必须有内容（git 不允许空提交）⇒ 先放一个占位文件
+  fs.writeFileSync(path.join(work, 'mentors-den', 'course', 'README.md'), '# 课程\n');
+  git(work, ['add', '-A']);
+  git(work, ['commit', '-m', 'chore: base']);
+
+  // ① 测试文件里放**白名单夹具值**（形如学员号，但已在无害形态白名单里）
+  //    ⚠️ 一律**拼接构造**（仓库惯例）—— 完整字面留在源码里会被闸扫自己命中。
+  const fixtureId = ['1234', '5678'].join('');
+  fs.writeFileSync(path.join(work, 'mentors-den', 'tests', 'gate.test.js'),
+    'const fixtureId = "' + fixtureId + '";\n');
+
+  // ② 非测试文件里放**真形态**学员号（带标签锚点）⇒ 必须照拦
+  const realId = ['2460', '2243'].join('');
+  fs.writeFileSync(path.join(work, 'mentors-den', 'course', 'W01-S1.md'),
+    '# W01-S1\n\n学员ID: ' + realId + '\n');
+
+  git(work, ['add', '-A']);
+  git(work, ['commit', '-m', 'test: fixture data + real id']);
+
+  const r = spawnSync('python3',
+    [SCANNER, '--diff-range', 'HEAD~1', 'HEAD', '--repo-root', work],
+    { encoding: 'utf8', timeout: 300000 });
+
+  // ② 必须命中（安全边界没放松）
+  assert.notStrictEqual(r.status, 0, `非测试文件里的学员号必须被拦：\n${r.stdout}`);
+  assert.match(r.stdout, /学员号/, `应报学员号：\n${r.stdout}`);
+  assert.ok(r.stdout.includes('W01-S1.md'), `应指出命中文件：\n${r.stdout}`);
+
+  // ① 必须**不因**测试文件里的白名单夹具值而命中（假红）
+  assert.ok(!r.stdout.includes('gate.test.js'),
+    `测试文件里的白名单夹具值不该被当成学员号拦下（假红）：\n${r.stdout}`);
+
+  // ③ 口径一致性：diff 模式与 --tree 模式对同一棵树必须给出**同样结论**
+  //    （病：--tree 放行、--diff-range 拦 ⇒ 同一份内容两个门禁两个答案）
+  const t = spawnSync('python3',
+    [SCANNER, '--tree', 'HEAD', '--repo-root', work],
+    { encoding: 'utf8', timeout: 300000 });
+  assert.strictEqual(
+    (r.status !== 0), (t.status !== 0),
+    `diff 模式与 --tree 模式结论必须一致：\ndiff=${r.status} tree=${t.status}\n${r.stdout}\n${t.stdout}`);
+  assert.ok(!t.stdout.includes('gate.test.js'),
+    `--tree 模式也不该命中测试文件里的白名单夹具值：\n${t.stdout}`);
 });
 
 // ── ⑨ 历史面报告模式（2026-11-05 如意 review 建议 · 冰爪落地 · owner=冰爪）──
