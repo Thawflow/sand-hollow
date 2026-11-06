@@ -162,14 +162,50 @@ _FIXTURE_CONTEXT_RE = re.compile(
 _FILENAME_DATE_RE = re.compile(r"(?:^|[/\s`'\"])[0-9]{8}-[A-Za-z一-鿿]")
 
 
-def _is_benign_student_id(num, context_ok=False):
+def _looks_like_calendar_date(num):
+    """8 位数字是否是一个**结构上成立的日历日期**（YYYYMMDD）。
+
+    为什么需要它（11-06 早轮实测坐实的假红）：
+    学员号与 YYYYMMDD 形态完全重合，只能靠语境分辨。原先靠白名单硬编码
+    两个日期样例放行 —— 但白名单是**穷举**的：任何**新写的**日期
+    （形如 BUILD_TIME="YYYYMMDD" / created_at YYYYMMDD 的当天日期）
+    都会撞上「孤立 8 位数字 ⇒ 一律拦」那条规则 ⇒ 合法日期被误判成
+    学员号 ⇒ 闸会**假红**，把无关的正常改动卡在 push 门口。
+
+    修法 = 用**结构判定**代替穷举白名单：月份 1-12、日 1-31、
+    年份落在合理区间 ⇒ 形态自证是日期 ⇒ 放行。
+    ⚠️ 真学员号绝不可能满足这三项（真号形态 = 年份越界 + 月份越界），
+    且本函数**只在日期语境下**被调用（date_ctx_ok=True），不放行裸数字。
+    """
+    if len(num) != 8 or not num.isdigit():
+        return False
+    year, month, day = int(num[:4]), int(num[4:6]), int(num[6:8])
+    if not (2000 <= year <= 2099):      # 合理年份区间（当天日期都在内）
+        return False
+    if not (1 <= month <= 12):
+        return False
+    if not (1 <= day <= 31):
+        return False
+    # 日历实校（闰年）
+    import calendar
+    return day <= calendar.monthrange(year, month)[1]
+
+
+def _is_benign_student_id(num, context_ok=False, date_ctx_ok=False):
     """8 位数字是否属于无害形态。
 
     ⚠️ 白名单**必须靠语境生效** —— 白名单值（夹具学号、日期样例）形态
     与真学员号一模一样，唯一区分依据是**周围语境**。
     裸数字（无任何语境支撑）⇒ 一律拦，宁可多拦不可漏拦。
 
-    context_ok: 数字所在位置附近有「日期」或「测试夹具」语境。
+    context_ok: 数字所在位置附近有「日期」或「测试夹具」语境（白名单放行用）。
+    date_ctx_ok: 数字所在位置附近有「**日期**」语境（结构化日历日期放行用）。
+
+    ⚠️ **date_ctx_ok 必须与 context_ok 分开**（11-06 早轮实测踩坑）：
+    「夹具语境」锚点里含 `homework/` / `reviews/` ⇒ 形如 `<8位>/homework/x.py`
+    的路径天然带夹具语境 ⇒ 若把夹具语境也当日期语境，
+    结构判定会把**日期形态的学员号**放过去 ⇒ 闸漏拦（比假红更危险）。
+    ⇒ 日历日期放行**只认日期语境**，夹具语境只对白名单值生效。
     """
     # ① 4 位完全重复组（abcdabcd，如 20262026）—— 形态自证无害，无语境要求
     if num[:4] == num[4:]:
@@ -177,7 +213,11 @@ def _is_benign_student_id(num, context_ok=False):
     # ② 随机数区间端点（10000000 / 90000000）—— 源码里是 randId 公式的一部分
     if num in ("10000000", "90000000"):
         return True
-    # ③ 白名单值 —— 必须有语境支撑
+    # ③ 日期语境 + 结构上成立的日历日期 ⇒ 放行
+    #    （11-06 早轮修：不再靠穷举白名单 —— 白名单漏放任何**新写的**合法日期）
+    if date_ctx_ok and _looks_like_calendar_date(num):
+        return True
+    # ④ 白名单值 —— 必须有语境支撑
     if num in _STUDENT_ID_BENIGN:
         if not context_ok:
             return False
@@ -303,6 +343,11 @@ def _scan_student_ids(text, file_hint="", raw=False):
             # （真泄露场景不会写在 .test.js / _test.py / student-activity-check 里）
             if _in_fixture_ctx(m.start(), m.end()):
                 continue
+            # ⚠️ 强信号**不走**日历日期放行（11-06 早轮实测）：
+            # 强信号已带「标签锚点 / 字段赋值 / 路径形态」这类**强语境** ⇒
+            # 此时的 8 位数字几乎必然是学员号；哪怕它恰好长得像 YYYYMMDD，
+            # 也**必须拦**（宁可假红不可漏拦 —— 漏拦 = 真号进公开仓）。
+            # ⇒ 只有「弱信号（孤立裸数字）」才可能靠日期语境放行。
             seen.add(num)
             out.append(("学员号(带标签锚点)",
                         num if raw else _mask_student_id(num)))
@@ -312,9 +357,10 @@ def _scan_student_ids(text, file_hint="", raw=False):
         num = m.group(0)
         if num in seen:
             continue
-        context_ok = (_in_date_ctx(m.start(), m.end())
-                      or _in_fixture_ctx(m.start(), m.end()))
-        if _is_benign_student_id(num, context_ok=context_ok):
+        date_ctx_ok = _in_date_ctx(m.start(), m.end())
+        fixture_ctx_ok = _in_fixture_ctx(m.start(), m.end())
+        context_ok = date_ctx_ok or fixture_ctx_ok
+        if _is_benign_student_id(num, context_ok=context_ok, date_ctx_ok=date_ctx_ok):
             continue
         seen.add(num)
         out.append(("学员号(8位数字·登录凭据)",

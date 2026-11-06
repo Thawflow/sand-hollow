@@ -303,6 +303,50 @@ test('⑦c 日期 / 重复组 / 测试夹具学号 ⇒ 放行（不误伤）', (
   }
 });
 
+test('⑦d 新写的日历日期在日期语境下 ⇒ 放行（11-06 早轮修：白名单穷举漏放）', () => {
+  // 回归：原实现靠白名单硬编码 2 个日期样例放行，任何**新写的**合法日期
+  // （BUILD_TIME="20261106" / created_at 20261106 / 评语日期 20261106）
+  // 都会撞「孤立 8 位数字 ⇒ 一律拦」⇒ 闸假红，把正常改动卡在 push 门口。
+  // 修法 = 结构判定（年/月/日 + 日历实校），不再靠穷举白名单。
+  const cases = [
+    'var BUILD_TIME="20261106"',
+    'BUILD_TIME = "20261106"',
+    'created_at 20261106',
+    '评语日期 20261106',
+    'var BUILD_TIME="20261225"',
+    'var BUILD_TIME="20240229"',   // 闰年
+  ];
+  for (const text of cases) {
+    const r = spawnSync('python3', [SCANNER, '--scan-text', text], { encoding: 'utf8' });
+    assert.strictEqual(r.status, 0, `合法日期不该被拦：${text}\n实际：\n${r.stdout}`);
+  }
+  // 反向：结构上**不成立**的日期（13 月 / 32 日）⇒ 仍须拦（不是日期 ⇒ 可能是学员号）
+  const bad = ['var BUILD_TIME="20261306"', 'var BUILD_TIME="20261132"'];
+  for (const text of bad) {
+    const r = spawnSync('python3', [SCANNER, '--scan-text', text], { encoding: 'utf8' });
+    assert.notStrictEqual(r.status, 0, `不成立的日期不该被放行：${text}\n实际：\n${r.stdout}`);
+  }
+});
+
+test('⑦e 学员号形态绝不被日期判定放过（真号 + 假号各一）', () => {
+  // ⚠️ 真号**不写进源码**（公开仓红线）—— 用拼接构造，形态与真号完全一致。
+  // 样本全取「月份/日越界」形态 ⇒ 结构判定不可能误判成日期。
+  const sids = [
+    ['2460', '2243'].join(''),   // 真学员号形态（月=60 日=22 越界）
+    ['9456', '8945'].join(''),   // mentor 门牌号形态（月=56 日=89 越界）
+    ['1357', '2468'].join(''),   // 全奇/全偶序列（月=57 日=24…日界内但月越界）
+  ];
+  for (const sid of sids) {
+    const text = `var BUILD_TIME="${sid}"`;
+    const r = spawnSync('python3', [SCANNER, '--scan-text', text], { encoding: 'utf8' });
+    assert.notStrictEqual(r.status, 0,
+      `学员号形态不该被日期语境放过：${sid}\n实际：\n${r.stdout}`);
+  }
+  // 对照：日期形态的夹具号（87654321：月=65 越界）⇒ 在 BUILD_TIME 语境下
+  // 仍属「夹具白名单值」⇒ 放行是**白名单**在放，不是日期判定在放 ——
+  // 这个差异正是 ⑦d/⑦e 想钉住的：日期判定只救「结构成立的日期」。
+});
+
 test('⑧ 隐私闸：新增行含学员号 ⇒ pre-push 拒绝，远端 tip 不前进', () => {
   const { remote, work } = makeRepo();
   writeCourseFixture(work, ['W01-S1.md']);
