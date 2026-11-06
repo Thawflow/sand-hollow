@@ -154,7 +154,7 @@ _STUDENT_ID_BENIGN = {
 
 # 夹具语境锚点 —— 白名单里的夹具学号只在这些语境里放行
 _FIXTURE_CONTEXT_RE = re.compile(
-    r"(?:test|测试|夹具|fixture|mock|sample|样例|假数据|假学号|assert|"
+    r"(?:test|测试|夹具|fixture|mock|sample|样例|示例|假数据|假学号|assert|"
     r"student_dir|student_id|homework/|reviews/|exampl|\.test\.|_test\.py|"
     r"student-activity-check)", re.I)
 
