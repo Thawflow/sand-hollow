@@ -9,6 +9,7 @@
  * → 渲染结果必然一致）。不装任何 npm 包。
  */
 const fs = require('fs');
+const os = require('os');
 const path = require('path');
 
 // 仓库根 = 脚本所在 mentors-den/scripts/ 的上两级（脚本可从任意 cwd 跑）
@@ -115,8 +116,21 @@ function escapeHtml(s) {
     .replace(/>/g, '&gt;');
 }
 
-// 课时文件名 = WXX-*.md；周号从文件名头部取
-const LESSON_FILE_RE = /^(W\d\d)-.+\.md$/;
+// ── 课程轨元数据（2026-11-13 多课程线）────────────────────────
+// 每份 index.json 都带全轨清单 tracks，前端渲染切换条不依赖跨轨请求。
+// id='' = 默认轨（编程课，产物平铺在 docs/course/ 根）；子目录轨 id = 目录名。
+// ⚠️ 键序固定 + 无时间戳（确定性要求：两次构建字节必须相同）。
+const TRACK_META = [
+  { id: '', name: '编程课', icon: '🐍', desc: '17 周 Python', def: true },
+  { id: 'phonics', name: '英语音标', icon: '🔤', desc: '9 单元速成', def: false },
+];
+
+// 课时文件名 = <字母><两位数字>-*.md；周号从文件名头部取
+// ★ 2026-11-13 多课程轨（冰爪）：原来硬编码 W\d\d ⇒ 只能建编程轨。
+//   放宽成 [A-Z]\d{2} 后，编程轨仍是 W01…，音标轨用 P00…（前缀不冲突 ⇒ 同构）。
+//   ⚠️ 放宽只影响**文件名形状**；下面的作业串号闸仍只查 .py 文件名（W\d\d-*.py），
+//      音标轨没有 .py 作业 ⇒ 闸对音标轨天然空转，不会误伤。
+const LESSON_FILE_RE = /^([A-Z]\d{2})-.+\.md$/;
 // ── 作业文件名串号闸 ────────────────────────────────────────────
 // 判据（与 mentors-den/scripts/scan-week-refs.py、archived/learning-publish.js 同一套）：
 // 课时正文里出现的 `W\d\d-*.py` 文件名，其周号必须 = 本课自己的周号。
@@ -126,7 +140,8 @@ const LESSON_FILE_RE = /^(W\d\d)-.+\.md$/;
 //    pre-push 钩子本来就调本脚本重建再比对 ⇒ 本闸自动接入 push 闸。
 const WEEK_REF_RE = /W\d\d-[A-Za-z0-9-]*\.py/g;
 // SYLLABUS 里的周标题行：### WXX · 标题
-const WEEK_HEADING_RE = /^### (W\d\d) · (.+)$/;
+// ★ 2026-11-13 多课程轨：放宽成 ### <字母><两位数字> · 标题（音标轨 = ### P00 · …）
+const WEEK_HEADING_RE = /^### ([A-Z]\d{2}) · (.+)$/;
 
 function buildError(message, exitCode, problems) {
   const err = new Error(message);
@@ -196,7 +211,7 @@ function renderSyllabusPage(syllabusMd, weekCount) {
  * @param {{courseDir: string, outDir: string, allowWeekRefs?: boolean}} opts
  * @returns {{weeks: Array<{id: string, title: string, current: boolean, lesson_count: number}>, files: string[]}}
  */
-function buildCourse({ courseDir, outDir, allowWeekRefs }) {
+function buildOneTrack({ courseDir, outDir, allowWeekRefs }) {
   const dir = path.resolve(courseDir);
   const out = path.resolve(outDir);
 
@@ -263,10 +278,13 @@ function buildCourse({ courseDir, outDir, allowWeekRefs }) {
   }
 
   // ── 落盘 ─────────────────────────────────────────────────────
+  // current（学员默认落点）= **本轨的第一个周号**，不是硬编码 W01。
+  // ★ 2026-11-13 多轨：音标轨没有 W01 ⇒ 硬编码会让音标轨永远没有 current ⇒
+  //   「进来停在第一周」失效。weekIds 已按字典序排好 ⇒ 取首个即本轨起点。
   const weeks = weekIds.map(id => ({
     id,
     title: parseWeekTitle(syllabus, id),
-    current: id === 'W01',
+    current: id === weekIds[0],
     lesson_count: (lessonsByWeek.get(id) || []).length,
   }));
 
@@ -286,23 +304,89 @@ function buildCourse({ courseDir, outDir, allowWeekRefs }) {
   files.push(syllabusFile);
 
   const indexFile = path.join(out, 'index.json');
-  fs.writeFileSync(indexFile, JSON.stringify({ weeks }, null, 2) + '\n');
+  fs.writeFileSync(indexFile, JSON.stringify({ weeks, tracks: TRACK_META }, null, 2) + '\n');
   expected.add('index.json');
   files.push(indexFile);
 
   // 删掉本次不再构建的旧产物（只认自己那三类文件名，别人放的文件不动）——
   // 否则删掉一周课时后，孤儿 HTML 会留在仓里，把产物清单撑破。
+  // ★ 2026-11-13 多轨：放宽成 [A-Z]\d{2}（音标轨产物 P00.html…）。
+  //   子目录（如 docs/course/phonics/）不在匹配范围 ⇒ 别的轨的产物不会被误删。
   for (const name of fs.readdirSync(out)) {
     if (expected.has(name)) continue;
-    if (!/^W\d\d\.html$/.test(name) && name !== 'syllabus.html' && name !== 'index.json') continue;
+    if (!/^[A-Z]\d{2}\.html$/.test(name) && name !== 'syllabus.html' && name !== 'index.json') continue;
     fs.unlinkSync(path.join(out, name));
   }
 
   return { weeks, files };
 }
 
+// ══════════════════════════════════════════════════════════════
+// 多课程轨编排（2026-11-13 冰爪 · 音标第二课程线）
+//
+// 课程轨 = 一个周前缀字母：编程轨 W01…W17，音标轨 P00…P08（前缀不冲突 ⇒ 同构）。
+// 源侧形态：音标源独立放子目录（mentors-den/course/phonics/，源管理需要）；
+// 产物形态：所有轨**平铺**进同一个 docs/course/（W01.html … + phonics/index.json… 不行——
+//   index.json / syllabus.html 每轨一份，会同名撞车）⇒ 产物按轨分**子目录**：
+//   docs/course/       = 默认轨（编程轨，历史产物原地不动，老链接全保）
+//   docs/course/<轨名>/ = 非默认轨（docs/course/phonics/…）
+// 为什么默认轨必须留在根上：index.html / sw.js / tests 全部按 course/W##.html
+// 与 course/index.json 写死 ⇒ 平铺改路径 = 全站破坏性变更；分轨子目录是纯增量。
+//
+// 轨的发现规则（buildCourses 自动模式）：
+//   ① courseDir 顶层的 [A-Z]\d{2}-*.md ⇒ 默认轨（挂在 courseDir 根）
+//   ② courseDir 的每个**子目录**：含 SYLLABUS.md ⇒ 独立轨（轨名 = 子目录名）
+//   显式传 tracks（或 CLI --track）时只构建列出的轨（闸/测试可用）。
+// ⚠️ 前置约束（防漂移闸依赖）：pre-push 把 mentors-den/course **整树** archive 出来
+//    重建再 diff ⇒ 默认必须「一次调用 = 全轨产物」，少一轨 diff 必不一致 ⇒ push 永久被拦。
+// ══════════════════════════════════════════════════════════════
+function discoverTracks(courseDir) {
+  const dir = path.resolve(courseDir);
+  const tracks = [];
+  // ① 顶层课时 md ⇒ 默认轨（轨名 = '__root__'，产物平铺在 outDir 根）
+  const hasRootLessons = fs.readdirSync(dir)
+    .some(f => LESSON_FILE_RE.test(f) && fs.statSync(path.join(dir, f)).isFile());
+  if (hasRootLessons && fs.existsSync(path.join(dir, 'SYLLABUS.md'))) {
+    tracks.push({ name: '__root__', dir: dir, sub: '' });
+  }
+  // ② 子目录含 SYLLABUS.md ⇒ 独立轨
+  for (const name of fs.readdirSync(dir).sort()) {
+    const sub = path.join(dir, name);
+    if (!fs.statSync(sub).isDirectory()) continue;
+    if (!fs.existsSync(path.join(sub, 'SYLLABUS.md'))) continue;
+    tracks.push({ name: name, dir: sub, sub: name });
+  }
+  return tracks;
+}
+
+/**
+ * 全轨构建入口 —— buildCourse 的多轨超集。
+ * @param {{courseDir: string, outDir: string, allowWeekRefs?: boolean, tracks?: Array<{name: string, dir: string, sub: string}>}} opts
+ * @returns {{tracks: Array<{name: string, weeks: Array, files: string[]}>, files: string[]}} files = 全轨清单
+ */
+function buildCourses(opts) {
+  const tracks = opts.tracks || discoverTracks(opts.courseDir);
+  if (!tracks.length) {
+    throw buildError('课程目录里没发现任何轨（既无顶层课时，也无含 SYLLABUS.md 的子目录）：'
+      + path.resolve(opts.courseDir), 1);
+  }
+  const all = [];
+  for (const t of tracks) {
+    const outDir = t.sub ? path.join(path.resolve(opts.outDir), t.sub)
+                         : path.resolve(opts.outDir);
+    const r = buildOneTrack({
+      courseDir: t.dir,
+      outDir: outDir,
+      allowWeekRefs: opts.allowWeekRefs,
+    });
+    all.push({ name: t.name, weeks: r.weeks, files: r.files });
+  }
+  const files = all.flatMap(t => t.files);
+  return { tracks: all, files };
+}
+
 // ── CLI ────────────────────────────────────────────────────────
-const USAGE = '用法: node build-course-html.js [--course-dir DIR] [--out-dir DIR] [--allow-week-refs]';
+const USAGE = '用法: node build-course-html.js [--course-dir DIR] [--out-dir DIR] [--allow-week-refs] [--track NAME]...';
 
 function parseCliArgs(argv) {
   const opts = {
@@ -311,11 +395,19 @@ function parseCliArgs(argv) {
     outDir: path.join(REPO_ROOT, 'docs', 'course'),
     // 逃生阀：合法跨周 .py 引用确属有意时显式开（须留痕），默认关
     allowWeekRefs: false,
+    // 只构建指定轨（按 discoverTracks 的轨名）。缺省 = 全轨（防漂移闸依赖全轨一次出）。
+    trackNames: null,
   };
   for (let i = 0; i < argv.length; i++) {
     const a = argv[i];
     if (a === '--allow-week-refs') {
       opts.allowWeekRefs = true;
+      continue;
+    }
+    if (a === '--track') {
+      const v = argv[++i];
+      if (!v) throw buildError(USAGE + '\n--track 后面缺轨名（如 phonics）', 1);
+      (opts.trackNames = opts.trackNames || []).push(v);
       continue;
     }
     if (a === '--course-dir' || a === '--out-dir') {
@@ -345,9 +437,24 @@ function main(argv) {
     return 1;
   }
   try {
-    const result = buildCourse(opts);
-    const lessonCount = result.weeks.reduce((n, w) => n + w.lesson_count, 0);
-    console.log('✅ 构建完成：' + result.weeks.length + ' 周 · ' + lessonCount + ' 课 · syllabus 1 份');
+    const discovered = discoverTracks(opts.courseDir);
+    const tracks = opts.trackNames
+      ? discovered.filter(t => opts.trackNames.includes(t.name))
+      : discovered;
+    if (opts.trackNames && !tracks.length) {
+      console.error('❌ 没找到指定的轨：' + opts.trackNames.join(', ')
+        + '（发现的轨：' + (discovered.map(t => t.name).join(', ') || '无') + '）');
+      return 1;
+    }
+    const result = buildCourses({ ...opts, tracks });
+    const weekCount = result.tracks.reduce((n, t) => n + t.weeks.length, 0);
+    const lessonCount = result.tracks.reduce((n, t) => n + t.weeks.reduce((m, w) => m + w.lesson_count, 0), 0);
+    const trackLine = result.tracks
+      .map(t => t.name + '（' + t.weeks.length + ' 周 ' + t.weeks.reduce((m, w) => m + w.lesson_count, 0) + ' 课）')
+      .join(' · ');
+    console.log('✅ 构建完成：' + result.tracks.length + ' 轨 · ' + weekCount + ' 周 · '
+      + lessonCount + ' 课 · syllabus ' + result.tracks.length + ' 份');
+    console.log('   ' + trackLine);
     console.log('   输出目录：' + displayPath(opts.outDir) + '（' + result.files.length + ' 个文件）');
     return 0;
   } catch (err) {
@@ -378,5 +485,8 @@ module.exports = {
   titleLooksSane,
   parseWeekTitle,
   parseLessonTitle,
-  buildCourse,
+  buildCourse: buildOneTrack,   // 单轨（旧名保留 —— 测试与闸都按单目录语义调用）
+  buildOneTrack,
+  discoverTracks,
+  buildCourses,                 // 多轨入口（默认 CLI 路径）
 };

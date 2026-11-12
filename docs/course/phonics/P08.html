@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>P08 · 双系统实战：拼读 × 音标互验</title>
+<style>
+:root{--bg:#0f1420;--card:#171e2e;--card2:#1e2740;--border:#2a3550;--text:#e8ecf4;--text2:#8b96ad;--accent:#5b9dff;--ok:#3ecf8e}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+.wrap{max-width:900px;margin:0 auto;padding:28px 20px 60px}
+h1{font-size:1.5rem}
+.wk-meta{color:var(--text2);font-size:.85rem;margin:4px 0 20px}
+.lesson{border:1px solid var(--border);border-radius:12px;padding:16px 18px;margin-bottom:14px;background:var(--card2)}
+.lesson-head{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.lesson-head .lt{font-weight:700;font-size:1rem;flex:1}
+.md{font-size:.92rem;line-height:1.8;color:var(--text);overflow-wrap:break-word}
+.md h1,.md h2,.md h3{margin:14px 0 8px;font-size:1.05rem}
+.md p{margin:8px 0}
+.md code{background:rgba(91,157,255,.12);border-radius:5px;padding:2px 6px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.85em;color:#a8c8ff}
+.md pre{background:#0b0f18;border:1px solid var(--border);border-radius:10px;padding:12px 14px;overflow-x:auto;margin:10px 0}
+.md pre code{background:none;padding:0;color:#c9d7f0}
+.md ul,.md ol{margin:8px 0 8px 22px}
+.md blockquote{border-left:3px solid var(--accent);padding:4px 12px;color:var(--text2);margin:10px 0}
+.md a{color:var(--accent)}
+.md table{border-collapse:collapse;margin:10px 0;font-size:.85rem}
+.md td,.md th{border:1px solid var(--border);padding:6px 10px}
+.md input[type=checkbox]{width:15px;height:15px;accent-color:var(--ok);cursor:pointer;margin-right:6px;vertical-align:-2px}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+<h1 class="wk-title">双系统实战：拼读 × 音标互验</h1>
+<div class="wk-meta">P08 · 5 课</div>
+</header>
+<div class="week-body" data-week="P08">
+<section class="lesson" data-lid="P08-S1">
+<div class="lesson-head"><span class="lt">双系统 4 步法：拼读 → 音标 → 例外 → 查证</span></div>
+<div class="md" data-lid="P08-S1"><h1>P08-S1 · 双系统 4 步法：拼读 → 音标 → 例外 → 查证</h1>
+<blockquote>
+<p>🔤 英语音标速成课 · 单元 P08 · 第 1 节 · 约 35 分钟</p>
+</blockquote>
+<hr>
+<h2>今天学什么</h2>
+<p>前面 8 节，你分别有了「拼读地基」和「48 个音标」。今天把它们合起来用：一条固定流程，任何单词都能读准、标清、知道该不该查。</p>
+<p>整套流程叫 <strong>4 步法</strong>：① 拼读推读音 → ② IPA 精确标注 → ③ 对不上 = 例外词 → ④ 查证。</p>
+<hr>
+<h2>一、第①②步：先拼读，再贴标签</h2>
+<p><strong>第 ① 步（拼读）</strong>：看到词，先别查字典，按你已有的自然拼读规则把音推出来。</p>
+<p><strong>第 ② 步（音标）</strong>：把第 ① 步推出来的音，换成精确的 IPA 符号。这一步才需要音标上场。</p>
+<table>
+<thead>
+<tr>
+<th>单词</th>
+<th>① 拼读怎么切</th>
+<th>② IPA 标注</th>
+<th>结论</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>rocket</code></td>
+<td>ro + ck + et</td>
+<td>/ˈrɒkɪt/</td>
+<td>✅ 对得上</td>
+</tr>
+<tr>
+<td><code>light</code></td>
+<td>l + i + gh + t</td>
+<td>/laɪt/</td>
+<td>✅ 对得上</td>
+</tr>
+<tr>
+<td><code>think</code></td>
+<td>th + i + nk</td>
+<td>/θɪŋk/</td>
+<td>✅ 对得上</td>
+</tr>
+<tr>
+<td><code>apple</code></td>
+<td>a + pp + le</td>
+<td>/ˈæp(ə)l/</td>
+<td>✅ 对得上</td>
+</tr>
+</tbody></table>
+<blockquote>
+<p><strong>拼读对照</strong>：<code>rocket</code> → ro + ck + et → /r/ + /ɒ/ + /k/ + /ɪ/ + /t/ = /ˈrɒkɪt/
+拼读给你「读得出」，IPA 给你「说得准」</p>
+</blockquote>
+<blockquote>
+<p><strong>拼读对照</strong>：<code>beautiful</code> → beau + ti + ful → /b/ + /juː/ + /t/ + /ɪ/ + /f/ + /ə/ + /l/ = /ˈbjuːtɪf(ə)l/</p>
+</blockquote>
+<p>⚠️ 小提醒：本课音标统一用英式写法（/ɒ/ /əʊ/）。你在美式词典里看到的会是另一套符号（记法不同，读音几乎一样）。</p>
+<hr>
+<h2>二、第③④步：对不上，是最有价值的线索</h2>
+<p><strong>第 ③ 步（对不上 = 例外词）</strong>
+拼读推的音 ≠ 实际读的音 ⇒ 拼读规则在这个词上失效了。<strong>不是你读错了，是这个词背着历史包袱</strong>（几百年前的拼法被留下了）。</p>
+<p><strong>第 ④ 步（查证）</strong>
+查带音标的词典，看它到底怎么标。这一刻 IPA 就是你的<strong>答案校验器</strong>：不是让你学新词，是让你确认自己的读法。</p>
+<table>
+<thead>
+<tr>
+<th>词</th>
+<th>拼读会推成</th>
+<th>实际读音</th>
+<th>结论</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>one</code></td>
+<td>/əʊn/</td>
+<td>/wʌn/</td>
+<td>例外词</td>
+</tr>
+<tr>
+<td><code>island</code></td>
+<td>/ˈɪslænd/</td>
+<td>/ˈaɪlənd/</td>
+<td>例外词（s 哑音）</td>
+</tr>
+<tr>
+<td><code>says</code></td>
+<td>/seɪz/</td>
+<td>/sez/</td>
+<td>例外词</td>
+</tr>
+</tbody></table>
+<blockquote>
+<p><strong>拼读对照</strong>：<code>one</code> → o + ne → /əʊ/ + /n/ ≠ /wʌn/ → 查证后：例外词
+拼读给你「读得出」，IPA 给你「说得准」</p>
+</blockquote>
+<p><strong>今天的一句话口诀</strong>：拼读先猜 → 音标定案 → 不一致就怀疑 → 查证收尾。</p>
+<hr>
+<h2>三、今天要练的</h2>
+<ol>
+<li>挑 10 个你最近读到的英文词，各走一遍 4 步，纸上写出音标</li>
+<li>其中圈出 2 个「拼读对不上」的，标成「待查证」</li>
+<li>手写 <code>beautiful</code> 的音标，再给 <code>population</code> 写一个（下一节对答案）</li>
+</ol>
+<hr>
+<h2>四、今天不用管的</h2>
+<ul>
+<li>❌ 不用追求完美口音，标对了就赢一半</li>
+<li>❌ 不用现在背例外词（下一节整张表给你）</li>
+<li>❌ 不用纠结多音节重音（第三节专门讲）</li>
+</ul>
+<hr>
+<h2>✅ 本节完成自查</h2>
+<ul>
+<li><input disabled="" type="checkbox"> 能不看笔记说出 4 步法全流程</li>
+<li><input disabled="" type="checkbox"> 给 10 个词写出了音标，并标出至少 2 个「例外词」</li>
+<li><input disabled="" type="checkbox"> 手写了 <code>beautiful</code> /ˈbjuːtɪf(ə)l/</li>
+<li><input disabled="" type="checkbox"> 知道 <code>one</code> 为什么必须靠音标</li>
+</ul>
+</div>
+</section>
+<section class="lesson" data-lid="P08-S2">
+<div class="lesson-head"><span class="lt">例外词表：拼读失效的那几个地方</span></div>
+<div class="md" data-lid="P08-S2"><h1>P08-S2 · 例外词表：拼读失效的那几个地方</h1>
+<blockquote>
+<p>🔤 英语音标速成课 · 单元 P08 · 第 2 节 · 约 30 分钟</p>
+</blockquote>
+<hr>
+<h2>今天学什么</h2>
+<p>拼读能覆盖 70–80% 的词，剩下那 20% 就是<strong>例外词</strong>。今天把常见的例外词收进一张表：知道它们会骗人，你就不会被它们拖住。</p>
+<p>例外词不是「没规律」，是<strong>英语几百年的历史把旧拼法留在了纸上</strong>。</p>
+<hr>
+<h2>一、三个典型骗法</h2>
+<table>
+<thead>
+<tr>
+<th>骗法</th>
+<th>表现</th>
+<th>例词</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>哑音字母</td>
+<td>字母在纸上，读音里没有</td>
+<td><code>island</code>（s）、<code>colonel</code>（r）</td>
+</tr>
+<tr>
+<td>字母改读</td>
+<td>字母换了音</td>
+<td><code>one</code>（w 插入）、<code>says</code>（ay → /e/）</td>
+</tr>
+<tr>
+<td>元音改读</td>
+<td>o 不读 /əʊ/</td>
+<td><code>come</code>（/ʌ/）、<code>do</code>（/uː/）、<code>love</code>（/ʌ/）</td>
+</tr>
+</tbody></table>
+<p><strong>关键动作</strong>：看到 <code>o</code> 不发 /əʊ/，第一反应应该是「哦，这是例外词」，而不是以为自己拼错了。</p>
+<hr>
+<h2>二、例外词主表</h2>
+<table>
+<thead>
+<tr>
+<th>词</th>
+<th>拼读会推成</th>
+<th>实际音标</th>
+<th>特殊在哪</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>one</code></td>
+<td>/əʊn/</td>
+<td>/wʌn/</td>
+<td>w 插入，o 读 /ʌ/</td>
+</tr>
+<tr>
+<td><code>two</code></td>
+<td>/əʊ/</td>
+<td>/tuː/</td>
+<td>o 单独读 /uː/</td>
+</tr>
+<tr>
+<td><code>island</code></td>
+<td>/ˈɪslænd/</td>
+<td>/ˈaɪlənd/</td>
+<td>s 不发音，i 读 /aɪ/</td>
+</tr>
+<tr>
+<td><code>colonel</code></td>
+<td>/ˈkəʊlnəl/</td>
+<td>/ˈkɜːn(ə)l/</td>
+<td>r 不发音，e 读 /ɜː/</td>
+</tr>
+<tr>
+<td><code>though</code></td>
+<td>/θəʊ/</td>
+<td>/ðəʊ/</td>
+<td>th 浊化 + o → /əʊ/</td>
+</tr>
+<tr>
+<td><code>do</code></td>
+<td>/dəʊ/</td>
+<td>/duː/</td>
+<td>o 读 /uː/（对比 <code>go</code> /gəʊ/）</td>
+</tr>
+<tr>
+<td><code>come</code></td>
+<td>/kəʊm/</td>
+<td>/kʌm/</td>
+<td>o 读 /ʌ/</td>
+</tr>
+<tr>
+<td><code>says</code></td>
+<td>/seɪz/</td>
+<td>/sez/</td>
+<td>ay 读 /e/</td>
+</tr>
+<tr>
+<td><code>woman</code></td>
+<td>/wɒmən/</td>
+<td>/ˈwʊmən/</td>
+<td>wa- 读 /wʊ/，首音节带重音</td>
+</tr>
+<tr>
+<td><code>blood</code></td>
+<td>/bluːd/</td>
+<td>/blʌd/</td>
+<td>oo 读 /ʌ/</td>
+</tr>
+<tr>
+<td><code>heart</code></td>
+<td>/hɑːrt/</td>
+<td>/hɑːt/</td>
+<td>r 不发音</td>
+</tr>
+<tr>
+<td><code>half</code></td>
+<td>/hælf/</td>
+<td>/hɑːf/</td>
+<td>a 读 /ɑː/</td>
+</tr>
+</tbody></table>
+<blockquote>
+<p><strong>拼读对照</strong>：<code>island</code> → i + s + l + a + n + d → /ɪ/ + /s/ + /l/ + /æ/ + /n/ + /d/ ≠ /ˈaɪlənd/ → s 哑音
+拼读给你「读得出」，IPA 给你「说得准」</p>
+</blockquote>
+<blockquote>
+<p><strong>拼读对照</strong>：<code>says</code> → s + ay + s → /s/ + /eɪ/ + /z/ ≠ /sez/ → ay 读 /e/</p>
+</blockquote>
+<p><strong>再来三个常见的</strong>：<code>people</code> /ˈpiːp(ə)l/（eo 读 /iː/）、<code>eye</code> /aɪ/（结尾 y 读 /aɪ/）、<code>hour</code> /ˈaʊə/（our 读 /aʊə/）。</p>
+<hr>
+<h2>三、今天要练的</h2>
+<ol>
+<li>手抄主表 12 个词，<strong>只抄音标那一列</strong></li>
+<li>给 <code>two</code> <code>come</code> <code>love</code> <code>does</code> <code>done</code> 各标一个音标（<code>done</code> /dʌn/）</li>
+<li>用今天学的 4 步法，各走一遍 <code>island</code> 和 <code>woman</code></li>
+</ol>
+<hr>
+<h2>四、今天不用管的</h2>
+<ul>
+<li>❌ 不用背更多例外词（够用就行，词典里能查到）</li>
+<li>❌ 不用研究词源（知道「有历史」就够）</li>
+<li>❌ 不用管英美差异的小差别</li>
+</ul>
+<hr>
+<h2>✅ 本节完成自查</h2>
+<ul>
+<li><input disabled="" type="checkbox"> 手抄了 12 个例外词的音标</li>
+<li><input disabled="" type="checkbox"> 一眼能看出 <code>island</code> 里的 s、<code>colonel</code> 里的 r 是哑音</li>
+<li><input disabled="" type="checkbox"> 知道 <code>come</code> 的 o 读 /ʌ/、<code>do</code> 的 o 读 /uː/</li>
+<li><input disabled="" type="checkbox"> 会用 4 步法标一个例外词</li>
+</ul>
+</div>
+</section>
+<section class="lesson" data-lid="P08-S3">
+<div class="lesson-head"><span class="lt">音节与重音：声音的节拍器</span></div>
+<div class="md" data-lid="P08-S3"><h1>P08-S3 · 音节与重音：声音的节拍器</h1>
+<blockquote>
+<p>🔤 英语音标速成课 · 单元 P08 · 第 3 节 · 约 35 分钟</p>
+</blockquote>
+<hr>
+<h2>今天学什么</h2>
+<p>音节 = 词的节拍器；重音 = 节拍器上敲得最重的那一下。</p>
+<p>这一节解决两件事：怎么切音节，重音该落在哪。会的朋友念错词，八成不是音错，是<strong>重音落错了地方</strong>。</p>
+<hr>
+<h2>一、音节怎么切：数元音核心</h2>
+<p><strong>规则：一个音节 = 一个元音（+ 挂在它两边的辅音）。</strong></p>
+<table>
+<thead>
+<tr>
+<th>单词</th>
+<th>切分</th>
+<th>音节数</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>cat</code></td>
+<td>cat</td>
+<td>1（单音节）</td>
+</tr>
+<tr>
+<td><code>teacher</code></td>
+<td>teach · er</td>
+<td>2（双音节）</td>
+</tr>
+<tr>
+<td><code>beautiful</code></td>
+<td>beau · ti · ful</td>
+<td>3（多音节）</td>
+</tr>
+<tr>
+<td><code>computer</code></td>
+<td>com · pu · ter</td>
+<td>3（多音节）</td>
+</tr>
+<tr>
+<td><code>population</code></td>
+<td>po · pu · la · tion</td>
+<td>4（多音节）</td>
+</tr>
+</tbody></table>
+<p>小技巧：元音字母成对时常常合成<strong>一个</strong>音（<code>beau</code> 里的 ea + u 合起来读 /juː/），所以别按字母个数数，<strong>按元音核心数</strong>最稳。</p>
+<hr>
+<h2>二、重音标在哪：三个实战词</h2>
+<p><strong>重音符号</strong>：重读音节前写 /ˈ/（主重音），次重读写 /ˌ/。</p>
+<table>
+<thead>
+<tr>
+<th>单词</th>
+<th>音标</th>
+<th>音节</th>
+<th>重音位置</th>
+<th>规律</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>beautiful</code></td>
+<td>/ˈbjuːtɪf(ə)l/</td>
+<td>3</td>
+<td>第 1 个（beau）</td>
+<td>形容词常重前</td>
+</tr>
+<tr>
+<td><code>population</code></td>
+<td>/ˌpɒpjuˈleɪʃn/</td>
+<td>4</td>
+<td>最后（-tion）</td>
+<td>-tion 重读</td>
+</tr>
+<tr>
+<td><code>computer</code></td>
+<td>/kəmˈpjuːtə(r)/</td>
+<td>3</td>
+<td>中间（pu）</td>
+<td>-er 不重读</td>
+</tr>
+</tbody></table>
+<blockquote>
+<p><strong>拼读对照</strong>：<code>beautiful</code> → beau + ti + ful → /b/ + /juː/ + /t/ + /ɪ/ + /f/ + /ə/ + /l/ = /ˈbjuːtɪf(ə)l/ → 3 音节，重音在第 1 个
+拼读给你「读得出」，IPA 给你「说得准」</p>
+</blockquote>
+<blockquote>
+<p><strong>拼读对照</strong>：<code>population</code> → po + pu + la + tion → /ˌpɒpjuˈleɪʃn/ → 4 音节，重音压在最后的 -tion 上</p>
+</blockquote>
+<blockquote>
+<p><strong>拼读对照</strong>：<code>computer</code> → com + pu + ter → /kəmˈpjuːtə(r)/ → 3 音节，重音落在中间的 pu</p>
+</blockquote>
+<p><strong>后缀也能猜重音</strong>（记 4 条就够用）：</p>
+<ul>
+<li><code>-tion / -sion</code> → 重读：information /ˌɪnfəˈmeɪʃn/、decision /dɪˈsɪʒn/</li>
+<li><code>-ity / -ety</code> → 重读：ability /əˈbɪləti/、safety /ˈseɪfti/</li>
+<li><code>-ic / -ical</code> → 词根重读：music /ˈmjuːzɪk/、musical /ˈmjuːzɪk(ə)l/</li>
+<li><code>-eer / -ese</code> → 后半重：career /kəˈrɪə/、Chinese /ˌtʃaɪˈniːz/</li>
+</ul>
+<hr>
+<h2>三、今天要练的</h2>
+<ol>
+<li>给 8 个词切音节并数出个数：<code>table</code> <code>idea</code> <code>difficult</code> <code>information</code> <code>water</code> <code>family</code> <code>celebrate</code> <code>beautiful</code></li>
+<li>手写这 3 个词的重音：<code>beautiful</code> / <code>population</code> / <code>computer</code></li>
+<li>朗读 <code>beautiful</code> 三遍，每遍把重音挪到不同音节，听听有什么不一样</li>
+</ol>
+<hr>
+<h2>四、今天不用管的</h2>
+<ul>
+<li>❌ 不用学复杂的重音规则表（先会用 4 条）</li>
+<li>❌ 不用纠结音节划分唯一的答案（有些词两种切法都成立）</li>
+<li>❌ 不用练音节与节奏的连读（下一节讲）</li>
+</ul>
+<hr>
+<h2>✅ 本节完成自查</h2>
+<ul>
+<li><input disabled="" type="checkbox"> 会用「数元音核心」切音节</li>
+<li><input disabled="" type="checkbox"> 正确标出 <code>beautiful</code> / <code>population</code> / <code>computer</code> 的重音</li>
+<li><input disabled="" type="checkbox"> 知道 -tion 类后缀通常带重音</li>
+<li><input disabled="" type="checkbox"> 听得出重音换位置后词义/感觉变了</li>
+</ul>
+</div>
+</section>
+<section class="lesson" data-lid="P08-S4">
+<div class="lesson-head"><span class="lt">连读与弱读：真实语流里音会变</span></div>
+<div class="md" data-lid="P08-S4"><h1>P08-S4 · 连读与弱读：真实语流里音会变</h1>
+<blockquote>
+<p>🔤 英语音标速成课 · 单元 P08 · 第 4 节 · 约 35 分钟</p>
+</blockquote>
+<hr>
+<h2>今天学什么</h2>
+<p>词典里的音标是「单词站姿」，真人说话是「连着跑」。这一节教你两件事：<strong>弱读</strong>（哪些音会偷懒）和 <strong>连读</strong>（哪些音会粘在一起）。</p>
+<p>听懂这一节，你的耳朵会突然清楚很多 —— 因为你原来听见的不是「标准音」，是「变形后的音」。</p>
+<hr>
+<h2>一、弱读：偷懒的功能词</h2>
+<p>英语里，<strong>实义词</strong>（名词、动词、重读动词）读得实；<strong>功能词</strong>（and、of、to、for…）在句子里经常偷懒成 /ə/。</p>
+<table>
+<thead>
+<tr>
+<th>词</th>
+<th>单独读（强读）</th>
+<th>句子里常读（弱读）</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>a</td>
+<td>/eɪ/</td>
+<td>/ə/</td>
+</tr>
+<tr>
+<td>of</td>
+<td>/ɒv/</td>
+<td>/əv/</td>
+</tr>
+<tr>
+<td>to</td>
+<td>/tuː/</td>
+<td>/tə/</td>
+</tr>
+<tr>
+<td>for</td>
+<td>/fɔː/</td>
+<td>/fə/</td>
+</tr>
+<tr>
+<td>and</td>
+<td>/ænd/</td>
+<td>/ən/ /ənd/</td>
+</tr>
+<tr>
+<td>as</td>
+<td>/æz/</td>
+<td>/əz/</td>
+</tr>
+<tr>
+<td>can</td>
+<td>/kæn/</td>
+<td>/kən/</td>
+</tr>
+<tr>
+<td>was</td>
+<td>/wɒz/</td>
+<td>/wəz/</td>
+</tr>
+<tr>
+<td>them</td>
+<td>/ðem/</td>
+<td>/ðəm/</td>
+</tr>
+</tbody></table>
+<p><strong>你会听到</strong>：<code>I want to go</code> 里 <code>to</code> 是 /tə/，不是 /tuː/。</p>
+<hr>
+<h2>二、连读与失去爆破</h2>
+<p><strong>连读</strong>：前一个词的尾音直接滑进后一个词的头音，中间不再停顿。</p>
+<table>
+<thead>
+<tr>
+<th>原样分开</th>
+<th>语流里真的读成</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>want to</td>
+<td>/ˈwɒnə/（t 被吞）</td>
+</tr>
+<tr>
+<td>a lot of</td>
+<td>/əˈlɒtəv/</td>
+</tr>
+<tr>
+<td>pick it up</td>
+<td>/ˌpɪkɪˈtʌp/</td>
+</tr>
+<tr>
+<td>what are you</td>
+<td>/ˌwɒtəˈjuː/</td>
+</tr>
+<tr>
+<td>good evening</td>
+<td>/gʊdˈiːvnɪŋ/</td>
+</tr>
+</tbody></table>
+<blockquote>
+<p><strong>拼读对照</strong>：<code>want to</code> → want + to → /w/ + /ɒ/ + /n/ + /t/ + /ə/ ≈ /ˈwɒnə/ → 语流里 /t/ 直接消失
+拼读给你「读得出」，IPA 给你「说得准」</p>
+</blockquote>
+<blockquote>
+<p><strong>拼读对照</strong>：<code>a lot of</code> → a + lot + of → /ə/ + /l/ + /ɒ/ + /t/ + /ə/ + /v/ ≈ /əˈlɒtəv/ → of 弱读，两个音黏成一个</p>
+</blockquote>
+<p><strong>失去爆破</strong>：<code>t</code> / <code>d</code> / <code>k</code> / <code>g</code> 后面紧跟别的辅音时，<strong>只摆口型、不送气</strong>，听上去像那个辅音消失了。
+<code>take care</code> → /ˌteɪkˈkeə/、<code>good morning</code> → /gəʊdˈmɔːnɪŋ/、<code>big family</code> → /ˌbɪgˈfæm(ə)li/。</p>
+<hr>
+<h2>三、今天要练的</h2>
+<ol>
+<li>朗读 8 组词，<strong>故意</strong>把弱读/连读标出来：<code>want to</code> <code>a lot of</code> <code>used to</code> <code>pick it up</code> <code>put it on</code> <code>good evening</code> <code>what are you</code> <code>kind of</code></li>
+<li>手写 5 个功能词的弱读音标：<code>of</code> <code>to</code> <code>and</code> <code>for</code> <code>was</code></li>
+<li>录自己 30 秒朗读，回放，标出哪里偷懒了</li>
+</ol>
+<hr>
+<h2>四、今天不用管的</h2>
+<ul>
+<li>❌ 不用把所有连读都学全（先掌握表里这 5 组）</li>
+<li>❌ 不用追求「地道到连音」（能听懂比能说出更优先）</li>
+<li>❌ 不用管 -ed 的读法规则（下一节之前都不展开）</li>
+</ul>
+<hr>
+<h2>✅ 本节完成自查</h2>
+<ul>
+<li><input disabled="" type="checkbox"> 听得出 <code>to</code> 在句子里是 /tə/</li>
+<li><input disabled="" type="checkbox"> 会读 <code>want to</code> → /ˈwɒnə/、<code>a lot of</code> → /əˈlɒtəv/</li>
+<li><input disabled="" type="checkbox"> 知道 <code>take care</code> 里的 t 是「只摆口型」</li>
+<li><input disabled="" type="checkbox"> 录音回放过，并圈出了 2 处偷懒</li>
+</ul>
+</div>
+</section>
+<section class="lesson" data-lid="P08-S5">
+<div class="lesson-head"><span class="lt">综合实战清单 + 48 音标总表 + 自查</span></div>
+<div class="md" data-lid="P08-S5"><h1>P08-S5 · 综合实战清单 + 48 音标总表 + 自查</h1>
+<blockquote>
+<p>🔤 英语音标速成课 · 单元 P08 · 第 5 节 · 约 40 分钟</p>
+</blockquote>
+<hr>
+<h2>今天学什么</h2>
+<p>最后一节，做三件事：把 48 个音标装进一张总表、把 4 步法变成一张随身清单、做一份<strong>自查</strong>（不是打分，是你自己照着检查「哪块还虚」）。</p>
+<hr>
+<h2>一、48 音标总复习表</h2>
+<p><strong>元音 20</strong></p>
+<table>
+<thead>
+<tr>
+<th>类别</th>
+<th>音标 + 例词</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>前元音</td>
+<td>/iː/ see · /ɪ/ sit · /e/ bed · /æ/ bad</td>
+</tr>
+<tr>
+<td>中元音</td>
+<td>/ɜː/ bird · /ə/ about · /ʌ/ cup</td>
+</tr>
+<tr>
+<td>后元音</td>
+<td>/ɑː/ car · /ɒ/ hot · /ɔː/ door · /uː/ moon · /ʊ/ book</td>
+</tr>
+<tr>
+<td>合口双元音</td>
+<td>/eɪ/ day · /aɪ/ my · /ɔɪ/ boy · /əʊ/ go · /aʊ/ now</td>
+</tr>
+<tr>
+<td>集中双元音</td>
+<td>/ɪə/ near · /eə/ hair · /ʊə/ tour</td>
+</tr>
+</tbody></table>
+<p><strong>辅音 28</strong></p>
+<table>
+<thead>
+<tr>
+<th>类别</th>
+<th>音标 + 例词</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>爆破音</td>
+<td>/p/ pig · /b/ bag · /t/ ten · /d/ dog · /k/ cat · /g/ go</td>
+</tr>
+<tr>
+<td>摩擦音</td>
+<td>/f/ fish · /v/ van · /s/ sun · /z/ zoo · /θ/ think · /ð/ this · /ʃ/ ship · /ʒ/ vision · /h/ hat · /r/ red</td>
+</tr>
+<tr>
+<td>破擦音</td>
+<td>/ts/ cats · /dz/ beds · /tʃ/ chair · /dʒ/ jam · /tr/ tree · /dr/ dream</td>
+</tr>
+<tr>
+<td>鼻音 + 舌侧音</td>
+<td>/m/ map · /n/ no · /ŋ/ sing · /l/ leg</td>
+</tr>
+<tr>
+<td>半元音</td>
+<td>/w/ we · /j/ yes</td>
+</tr>
+</tbody></table>
+<blockquote>
+<p><strong>拼读对照</strong>：<code>think</code> → th + i + nk → /θ/ + /ɪ/ + /ŋ/ + /k/ = /θɪŋk/ → 落在总表「摩擦音 /θ/」+「鼻音 /ŋ/」
+拼读给你「读得出」，IPA 给你「说得准」</p>
+</blockquote>
+<blockquote>
+<p><strong>拼读对照</strong>：<code>beautiful</code> → beau + ti + ful → /b/ + /juː/ + /t/ + /ɪ/ + /f/ + /ə/ + /l/ = /ˈbjuːtɪf(ə)l/ → 元音 /juː/ /ɪ/ /ə/ + 辅音 /b/ /t/ /f/ /l/，一次用掉 7 个音标</p>
+</blockquote>
+<hr>
+<h2>二、随身清单：4 步法 + 3 个附加动作</h2>
+<p><strong>核心 4 步</strong></p>
+<ol>
+<li>拼读切词，推出读音</li>
+<li>写出 IPA 标注</li>
+<li>对不上 → 标记「例外词」</li>
+<li>查带音标的词典确认</li>
+</ol>
+<p><strong>附加 3 步（进阶）</strong>
+5. 数元音核心 → 数音节
+6. 在重读音节前标 /ˈ/
+7. 放进句子里读一遍 → 检查弱读与连读</p>
+<p><strong>自查用的 30 个词</strong>（每个都走一遍 7 步，纸上写音标）：
+<code>beautiful</code> <code>computer</code> <code>population</code> <code>one</code> <code>island</code> <code>colonel</code> <code>though</code> <code>come</code> <code>says</code> <code>woman</code> <code>rocket</code> <code>think</code> <code>light</code> <code>apple</code> <code>water</code> <code>idea</code> <code>difficult</code> <code>information</code> <code>celebrate</code> <code>family</code> <code>table</code> <code>want</code> <code>little</code> <code>sugar</code> <code>doctor</code> <code>nature</code> <code>picture</code> <code>music</code> <code>coffee</code> <code>career</code></p>
+<hr>
+<h2>三、今天要练的</h2>
+<ol>
+<li><strong>手写整张总表</strong>（48 个音标 + 一个例词），手写才算会</li>
+<li>用 7 步清单过 30 词，其中挑 5 个例外词单独列一页</li>
+<li>录一段 1 分钟朗读：先慢读（每个音标都到位），再自然读（带弱读连读），对比听</li>
+</ol>
+<hr>
+<h2>四、今天不用管的</h2>
+<ul>
+<li>❌ 不用追求每个例词都背下来</li>
+<li>❌ 不用追求 30 词全对（找得到自己的短板就行）</li>
+<li>❌ 不用再开新知识点（这套工具已经够用了）</li>
+</ul>
+<hr>
+<h2>✅ 本节完成自查</h2>
+<ul>
+<li><input disabled="" type="checkbox"> 手写了全部 48 个音标和例词</li>
+<li><input disabled="" type="checkbox"> 能在 30 秒内背出 20 元音 + 28 辅音的分类</li>
+<li><input disabled="" type="checkbox"> 完整走通 7 步清单（4 步 + 3 附加）</li>
+<li><input disabled="" type="checkbox"> 标出了至少 5 个例外词并写了正确音标</li>
+<li><input disabled="" type="checkbox"> 标对了 <code>beautiful</code> / <code>population</code> / <code>computer</code> 的音节与重音</li>
+<li><input disabled="" type="checkbox"> 读出了 <code>want to</code> → /ˈwɒnə/、<code>a lot of</code> → /əˈlɒtəv/</li>
+<li><input disabled="" type="checkbox"> 录了两版朗读，能听出差在哪</li>
+<li><input disabled="" type="checkbox"> 心里有一句总结：拼读给我「读得出」，IPA 给我「说得准 + 查得到」</li>
+</ul>
+</div>
+</section>
+</div>
+</div>
+</body>
+</html>

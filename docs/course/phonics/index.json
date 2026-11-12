@@ -1,0 +1,74 @@
+{
+  "weeks": [
+    {
+      "id": "P00",
+      "title": "地基回顾：自然拼读地图 + 48 音标全景",
+      "current": true,
+      "lesson_count": 1
+    },
+    {
+      "id": "P01",
+      "title": "前元音：/iː/ /ɪ/ /e/ /æ/",
+      "current": false,
+      "lesson_count": 5
+    },
+    {
+      "id": "P02",
+      "title": "中元音：/ɜː/ /ə/ /ʌ/",
+      "current": false,
+      "lesson_count": 5
+    },
+    {
+      "id": "P03",
+      "title": "后元音：/ɑː/ /ɒ/ /ɔː/ /uː/ /ʊ/",
+      "current": false,
+      "lesson_count": 5
+    },
+    {
+      "id": "P04",
+      "title": "双元音（一）：/eɪ/ /aɪ/ /ɔɪ/",
+      "current": false,
+      "lesson_count": 5
+    },
+    {
+      "id": "P05",
+      "title": "双元音（二）：/ɪə/ /eə/ /ʊə/ /aʊ/ /əʊ/",
+      "current": false,
+      "lesson_count": 5
+    },
+    {
+      "id": "P06",
+      "title": "爆破音与摩擦音：/p b t d k g/ + /f v s z θ ð ʃ ʒ h r/",
+      "current": false,
+      "lesson_count": 5
+    },
+    {
+      "id": "P07",
+      "title": "破擦音·鼻音·舌侧音·半元音：/ts dz tʃ dʒ tr dr/ + /m n ŋ/ + /l/ + /w j/",
+      "current": false,
+      "lesson_count": 5
+    },
+    {
+      "id": "P08",
+      "title": "双系统实战：拼读 × 音标互验",
+      "current": false,
+      "lesson_count": 5
+    }
+  ],
+  "tracks": [
+    {
+      "id": "",
+      "name": "编程课",
+      "icon": "🐍",
+      "desc": "17 周 Python",
+      "def": true
+    },
+    {
+      "id": "phonics",
+      "name": "英语音标",
+      "icon": "🔤",
+      "desc": "9 单元速成",
+      "def": false
+    }
+  ]
+}

@@ -178,7 +178,9 @@ test('切片 7：index.json 形状（升序 / title 去前缀 / current 仅 W01 
   const raw = fs.readFileSync(path.join(outDir, 'index.json'), 'utf8');
   const index = JSON.parse(raw);
 
-  assert.deepStrictEqual(Object.keys(index), ['weeks']);
+  // ★ 2026-11-13 多轨：index.json 顶层新增 tracks（全轨清单，前端切换条数据源）
+  assert.deepStrictEqual(Object.keys(index), ['weeks', 'tracks']);
+  assert.ok(Array.isArray(index.tracks) && index.tracks.length >= 2, 'tracks 清单缺失');
   assert.deepStrictEqual(index.weeks.map(w => w.id), ['W01', 'W02']);
   // title = 去掉 `WXX · ` 前缀的周标题（与现网 KV index 同形）
   assert.strictEqual(index.weeks[0].title, '合成第一周：把想法写在纸上');

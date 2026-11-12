@@ -102,5 +102,21 @@
       "current": false,
       "lesson_count": 4
     }
+  ],
+  "tracks": [
+    {
+      "id": "",
+      "name": "编程课",
+      "icon": "🐍",
+      "desc": "17 周 Python",
+      "def": true
+    },
+    {
+      "id": "phonics",
+      "name": "英语音标",
+      "icon": "🔤",
+      "desc": "9 单元速成",
+      "def": false
+    }
   ]
 }
