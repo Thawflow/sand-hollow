@@ -7,8 +7,10 @@
 //     （超时 15s→45s + 读路径重试 + 空体校验）→ 升版，老学员才能拿到修好的 JS。
 // v8（2026-10-29 移除网页交作业模块）：index.html 删除「📝 交作业」卡片 + 接线 JS
 //     （改走本地目录 ~/sand-hollow/<学员ID>/homework/ + 跟智能体说「修完了」）→ 升版。
-const CACHE = 'sandy-hollow-v8';
-const SHELL = ['./', './index.html', './course-dom.js', './course/index.json', './assets/favicon.svg', './assets/icon-192.png', './assets/icon-512.png'];
+// v9（2026-11-13 多课程线）：index.html 新增课程轨切换条（编程课/英语音标）+ 进度按轨隔离键
+//     + COURSE_BASE 按轨切换；SHELL 追加音标轨索引 course/phonics/index.json → 升版。
+const CACHE = 'sandy-hollow-v9';
+const SHELL = ['./', './index.html', './course-dom.js', './course/index.json', './course/phonics/index.json', './assets/favicon.svg', './assets/icon-192.png', './assets/icon-512.png'];
 
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(SHELL)).then(() => self.skipWaiting()));

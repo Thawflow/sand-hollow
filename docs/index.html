@@ -27,6 +27,12 @@ header{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;margin-bottom:8
 .home-link:hover{background:rgba(159,214,255,.12)}
 h1{font-size:1.6rem}
 .sub{color:var(--text2);font-size:.9rem}
+/* ── 课程轨切换条（2026-11-13 多课程线）── */
+.tracks{display:flex;gap:8px;flex-wrap:wrap;margin:4px 0 10px}
+.track-tab{padding:7px 14px;border-radius:20px;border:1px solid var(--border);background:var(--card);color:var(--text2);font-size:.85rem;cursor:pointer;font-family:inherit;transition:all .15s}
+.track-tab:hover{border-color:var(--accent);color:var(--accent)}
+.track-tab.active{background:linear-gradient(135deg,var(--accent),var(--accent2));border-color:transparent;color:#fff;font-weight:600}
+.track-tab .cnt{opacity:.75;font-size:.78em;margin-left:4px}
 .notice{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:12px 16px;margin:16px 0;font-size:.9rem;color:var(--text2);line-height:1.7}
 .notice b{color:var(--text)}
 .layout{display:grid;grid-template-columns:260px 1fr;gap:20px;margin-top:16px}
@@ -111,9 +117,11 @@ footer{text-align:center;color:var(--text2);font-size:.75rem;margin-top:30px}
 <div class="wrap">
   <header>
     <h1>🏖️ 沙坑训练场</h1>
-    <span class="sub">Skyclan 家庭 17 周课程 · 一套材料，两位学员（ThawPaw 🐱 × Tree 🌳）</span>
+    <span class="sub">Skyclan 家庭课程 · 一套材料，两位学员（ThawPaw 🐱 × Tree 🌳）</span>
     <button class="id-badge" id="id-badge" title="点击切换账号">🔑 登录</button>
   </header>
+  <!-- ── 课程轨切换（2026-11-13：第二课程线「英语音标」上线）── -->
+  <div class="tracks" id="tracks"></div>
   <div class="notice">
     <b>⭐ 最佳学习姿势 · 分屏边看边练：</b>左边开本站，右边开 Thonny，看一行写一行、写一行跑一行，不用靠记性来回切窗口。<br>
     Mac 🍎：拖窗口到屏幕最左/最右边缘 → 自动占半屏（或悬停绿色按钮 → 移到屏幕左侧/右侧）<br>
@@ -209,12 +217,22 @@ async function fetchJSON(url,timeout){
 //   写出 "[object Object],…" 垃圾；lsGet 读回字符串 JSON.parse 必抛 → 缓存永远 miss，
 //   「缓存秒开」自上线起就没真正生效过。修法：学习区独立命名 learnLsGet/learnLsSet，
 //   **不再声明同名 lsGet/lsSet**（function+const 同名重复声明 = SyntaxError，整页 JS 会死）。
-function learnLsGet(k){try{return JSON.parse(localStorage.getItem('learning-d:'+k))}catch(e){return null}}
-function learnLsSet(k,v){try{localStorage.setItem('learning-d:'+k,JSON.stringify(v))}catch(e){}}
+// ★ 2026-11-13 多轨：学习区缓存键（weeks / syll / wk:ID）按轨带后缀 ——
+//   编程轨保持旧键（learning-d:weeks 等，老缓存零迁移），音标轨 = learning-d:weeks:phonics。
+function learnLsGet(k){try{return JSON.parse(localStorage.getItem('learning-d:'+trackKey(k)))}catch(e){return null}}
+function learnLsSet(k,v){try{localStorage.setItem('learning-d:'+trackKey(k),JSON.stringify(v))}catch(e){}}
 // 记录学员上次停的章节（2026-09-08 Tree 提需求、小马 v1.8 实现）：默认页 localStorage key；intersection observer 50% 可见即写。
 // P3 静态化（2026-10-28）：值加 v:2 版本字段，读到旧值（无 v 或 v!==2）一律作废返回 null。
-function posGet(){try{const p=JSON.parse(localStorage.getItem('learning-pos'));return (p&&p.v===2)?p:null}catch(e){return null}}
-function posSet(p){try{localStorage.setItem('learning-pos',JSON.stringify({...p,v:2,ts:Date.now()}))}catch(e){}}
+// ★ 2026-11-13 多轨：键走 trackKey() —— 编程轨 = 旧键原样（老进度零迁移），音标轨 = learning-pos:phonics
+//   pos 记录还带 track 字段（code/phonics）：云端 data.pos 是单值混存，合并时靠它判归属。
+function posGet(){try{const p=JSON.parse(localStorage.getItem(trackKey('learning-pos')));return (p&&p.v===2)?p:null}catch(e){return null}}
+function posSet(p){try{localStorage.setItem(trackKey('learning-pos'),JSON.stringify({...p,v:2,ts:Date.now(),track:curTrack.id||'code'}))}catch(e){}}
+// pos 归属判定：显式 track 字段优先；缺省（旧记录）按 weekId 前缀兜底（P## = phonics，其余 = code）
+function trackOwnsPos(p){
+  if(!p)return false;
+  const t=p.track||( /^[P]\d\d/.test(p.weekId||'')?'phonics':'code');
+  return curTrack.id?t===curTrack.id:t==='code';
+}
 function posResolve(){const p=posGet();if(!p||!weeksData.length)return null;const w=weeksData.find(x=>(x.week_id||x.id)===p.weekId);if(!w)return null;return {week:w,lessonId:p.lessonId||null}}
 // ═══ P6 · 课程进度落库（2026-10-28 沙坑静态化）═══
 // 契约：POST /learning/progress/save {id,nickname,data} · POST /learning/progress/load {id,nickname}
@@ -227,26 +245,39 @@ const PROGRESS_SYNC_DEBOUNCE=2000;
 let _progressSyncTimer=null;
 let _progressSyncing=false;
 function _progressSnapshot(){
+  // ★ 2026-11-13 多轨：勾选键按轨分桶 —— 编程轨桶保持旧名 'checks'（老云档兼容），
+  //   音标轨桶 = 'checks:phonics'；桶内条目键本身已含周号前缀（W##:/P##:），天然不串。
   let checks={};
-  try{checks=JSON.parse(localStorage.getItem('learning-checks')||'{}')}catch(e){checks={}}
-  return {checks:checks,pos:posGet()};
+  try{checks=JSON.parse(localStorage.getItem(trackKey('learning-checks'))||'{}')}catch(e){checks={}}
+  return {checks:checks,pos:posGet(),track:curTrack.id||'code'};
 }
 // 云端进度与本机合并（并集）：勾选取并集，位置取较新
+// ★ 2026-11-13 多轨：云端 data.checks 是**全体轨混存的大桶**；条目键 = `<周号>:<lid>:<hash>`，
+//   周号自带轨前缀（W## = 编程轨 / P## = 音标轨）⇒ 归属判定按周号首字母走，天然不串。
+//   （历史遗留的非 W/P 键一律归编程轨 —— 它们只可能来自编程轨的旧版本。）
+function trackOwnsCheck(k){return curTrack.id ? /^P\d\d:/.test(k) : !/^P\d\d:/.test(k)}
 function mergeProgress(localData,cloudData){
   const out={checks:{},pos:null};
-  if(localData&&localData.checks)Object.assign(out.checks,localData.checks);
-  if(cloudData&&cloudData.checks)Object.assign(out.checks,cloudData.checks);
-  const lp=localData&&localData.pos,cp=cloudData&&cloudData.pos;
+  const pick=(d)=>{ // 抽取「属于本轨」的条目
+    const o={};
+    if(d&&d.checks)for(const k of Object.keys(d.checks))if(trackOwnsCheck(k))o[k]=d.checks[k];
+    return o;
+  };
+  Object.assign(out.checks,pick(localData));
+  Object.assign(out.checks,pick(cloudData));
+  // pos 只在「属于本轨」的候选里取较新（跨轨 pos 互不覆盖 —— 云档 pos 单值混存，靠 track 字段判归属）
+  const lp=localData&&trackOwnsPos(localData.pos)?localData.pos:null;
+  const cp=cloudData&&trackOwnsPos(cloudData.pos)?cloudData.pos:null;
   if(lp&&cp)out.pos=(lp.ts>=cp.ts)?lp:cp;
   else out.pos=lp||cp||null;
   return out;
 }
 // 把合并结果写回本机（并刷新已渲染的 checkbox）
 function applyProgressMerged(merged){
-  try{localStorage.setItem('learning-checks',JSON.stringify(merged.checks))}catch(e){}
+  try{localStorage.setItem(trackKey('learning-checks'),JSON.stringify(merged.checks))}catch(e){}
   if(merged.pos){
     // 位置只在「本机没有」时写入（pos 已是 v:2 形状；云端存的也是 v:2 形状）
-    try{localStorage.setItem('learning-pos',JSON.stringify(Object.assign({},merged.pos,{v:2})))}catch(e){}
+    try{localStorage.setItem(trackKey('learning-pos'),JSON.stringify(Object.assign({},merged.pos,{v:2})))}catch(e){}
   }
   // 已渲染的 checkbox 状态就地刷新（不重渲染整页，避免打断滚动位置）
   try{
@@ -318,20 +349,40 @@ function raceJSON(path,timeout){
   };
   return attempt().catch(()=>new Promise(r=>setTimeout(r,1500)).then(attempt));
 }
-// ══════════════════════════════════════════════════════════
+// ════════════════════════════════════════════════════════════
+// 多课程轨（2026-11-13 冰爪 · 音标第二课程线）
+//   course/index.json        → 编程轨（默认轨，老学员进度全在这条轨上）
+//   course/phonics/index.json → 音标轨（子目录 = 轨名）
+// 进度隔离铁律：**进度键全部按轨带前缀** ——
+//   · 旧键（learning-pos / learning-checks / learning-week-W## / learning-d:wk:W##）
+//     是编程轨的既有资产，**一个字节都不动**（老学员回来进度必须原地还在）；
+//   · 音标轨用 pos:phonics / checks:phonics / week-phonics-P## 等独立键；
+//   · 云端 data 里也按 trackId 分桶（旧字段视为编程轨桶，双向兼容）。
+// ════════════════════════════════════════════════════════════
+const TRACKS=[
+  {id:'',name:'编程课',icon:'🐍',base:'course/',def:true},
+  {id:'phonics',name:'英语音标',icon:'🔤',base:'course/phonics/'},
+];
+let curTrack=TRACKS[0];
+function trackById(id){return TRACKS.find(t=>t.id===id)||TRACKS[0]}
+// 轨私有键：默认轨保持**旧键原样**（零迁移），非默认轨加 `:track` 后缀
+function trackKey(k){return curTrack.id?k+':'+curTrack.id:k}
+// ════════════════════════════════════════════════════════════
 // P3 静态化（2026-10-28）：课程内容改为同源静态文件
 //   course/index.json     → 周列表元数据
 //   course/W##.html       → 单周正文（构建期已渲染好，运行时不碰 marked）
 //   course/syllabus.html  → 课程总大纲
 // 好处：不再打 Worker（冷启动 3-35s 的老毛病没了），弱网/离线也能开课。
-// ══════════════════════════════════════════════════════════
-const COURSE_BASE='course/';
+// ════════════════════════════════════════════════════════════
+// ★ 2026-11-13：COURSE_BASE 按当前轨解析（默认轨仍 = 'course/'，测试断言保留）
 // ★ 超时预算：15s → 45s（2026-10-29 实测修正）
 //   本机对 learning.thawflow.com 的完整下载 total 分布 = 1.4 / 1.75 / 2.6 / 7.5 / 8.1 /
 //   25.8 / 37.2 / 53.6 / 90+ / 120+ s（TTFB 只要 1.4-8s）⇒ 瓶颈在**传输**不在握手。
 //   15s 预算下学员看到「📡 课程加载失败（静态课程资源不可达）」——那个「网络不通」是**误报**：
 //   静态资源同源、无 Worker hop，文件就在那儿，是自己的超时太短。
 const STATIC_TIMEOUT_MS=45000;
+// 每轨的静态取数前缀：默认轨 = course/（测试断言保留字面量），音标轨 = course/phonics/
+let COURSE_BASE=TRACKS[0].base;
 // 读路径重试次数（读无副作用，重试免费）。只对**网络类**失败重试（超时/连接错），
 // HTTP 4xx/5xx 不重试（重试也不会变好，反而拖慢首屏）。
 const STATIC_RETRY=1;
@@ -365,9 +416,52 @@ function staticErr(msg){
   return '<div class="empty"><div class="big">📡</div>'+msg+
     '<br><br><button onclick="loadIndex()" style="margin-top:12px;padding:8px 22px;border-radius:9px;border:1px solid var(--accent);background:var(--card2);color:var(--accent);cursor:pointer">🔄 重试</button></div>';
 }
+// ── 课程轨切换条（2026-11-13 多课程线）─────────────────────────
+// 每轨静态元数据随主 index.json 一起发布（无额外请求）：轨清单由主索引的
+// tracks 字段驱动；未发布 tracks 字段的旧索引 → 只显示默认轨（自动降级）。
+// 切换 = 换 COURSE_BASE + 清空本周缓存状态 + 重新 loadIndex（按轨拉取）。
+// 每轨的周/勾选/位置键互不相通（trackKey()），进度天然隔离。
+let trackMeta=[];   // [{id,name,icon,desc,def}] — 来自 index.json.tracks
+function renderTracks(){
+  const box=$('#tracks');if(!box)return;
+  const list=trackMeta.length?trackMeta:TRACKS.map(t=>({id:t.id,name:t.name,icon:t.icon,def:!!t.def}));
+  box.innerHTML='';
+  for(const t of list){
+    const cur=(curTrack.id===(t.id||''))||(!curTrack.id&&t.def);
+    const el=document.createElement('button');
+    el.className='track-tab'+(cur?' active':'');
+    el.innerHTML=(t.icon||'📚')+' '+(t.name||t.id)+'<span class="cnt">'+(t.desc||'')+'</span>';
+    el.onclick=()=>switchTrack(t.id||'');
+    box.appendChild(el);
+  }
+}
+function switchTrack(id){
+  if(trackById(id).id===curTrack.id)return;
+  curTrack=trackById(id);
+  COURSE_BASE=curTrack.base;
+  try{localStorage.setItem('learning-track',curTrack.id)}catch(e){}
+  // 清空本轨视图状态（周列表/缓存按轨重拉；学习进度键互不相通，不会互相覆盖）
+  weeksData=[];curWeek=null;lessonCache={};
+  trackMeta=TRACKS.map(t=>({id:t.id,name:t.name,icon:t.icon,def:!!t.def}));
+  renderTracks();
+  $('#content').innerHTML='<div class="spin"></div>';
+  $('#syll-link').classList.remove('active');
+  loadIndex();
+}
+// 读上次停留的轨（默认编程轨）：放在最前，loadIndex 之前生效
+try{const savedTrack=localStorage.getItem('learning-track');if(savedTrack!==null)curTrack=trackById(savedTrack);COURSE_BASE=curTrack.base}catch(e){}
 async function loadIndex(){
   // 缓存优先：本地秒开 → 后台静默刷新（网络挂了也照常用旧数据）
   const cached=learnLsGet('weeks');
+  // 轨切换条先画出来（元数据来自主索引的 tracks 字段；音标轨索引里带全轨清单）
+  function _applyTracks(wks){
+    if(wks&&wks.tracks&&wks.tracks.length){
+      trackMeta=wks.tracks;
+      // 若当前轨不在索引发布的清单里（索引比前端旧），回落默认轨
+      if(!trackMeta.some(t=>(t.id||'')===curTrack.id)){curTrack=TRACKS[0];COURSE_BASE=curTrack.base}
+    }
+    renderTracks();
+  }
   // 进入页默认跳到「上次停留的章节」（2026-09-08 Tree 提需求）：pos 优先 > current 周 > 最新周
   function _pickStartWeek(){
     const pos=posResolve();
@@ -377,13 +471,15 @@ async function loadIndex(){
     return {week:weeksData[weeksData.length-1],lessonId:null,src:'latest'};
   }
   if(cached&&cached.length){
-    weeksData=cached;renderWeeks();
+    weeksData=cached;renderTracks();renderWeeks();
     const s0=_pickStartWeek();
     if(s0.week)loadWeek(s0.week.id,s0.lessonId||null);
   }
   try{
     const txt=await fetchStaticCourse('index.json');
-    const wks=(JSON.parse(txt).weeks)||[];
+    const parsed=JSON.parse(txt);
+    const wks=parsed.weeks||[];
+    _applyTracks(parsed);
     if(wks.length){
       learnLsSet('weeks',wks);weeksData=wks;renderWeeks();
       if(!cached||!cached.length){
@@ -432,7 +528,8 @@ function renderWeeks(){
   }
 }
 function weekDone(id){
-  const w=localStorage.getItem('learning-week-'+id);
+  // ★ 2026-11-13 多轨：周完成标记按轨存（编程轨保持旧键 learning-week-W##，零迁移）
+  const w=localStorage.getItem(trackKey('learning-week-'+id));
   return w==='1';
 }
 async function loadSyllabus(){
@@ -455,7 +552,12 @@ async function loadSyllabus(){
 }
 function renderSyll(md){
   // md 参数现在是**已渲染好的 HTML 片段**（P3 静态化），直接注入
-  $('#content').innerHTML='<div class="wk-title">📑 课程总大纲</div><div class="wk-meta">17 周 · 一套材料，两位学员</div><div class="md">'+md+'</div>';
+  // ★ 2026-11-13 多轨：meta 文案按当前轨生成（编程轨保持旧文案，音标轨显示单元数）
+  const tname=curTrack.id?'🔤 英语音标速成课':'📑 家庭编程课';
+  const tmeta=curTrack.id
+    ?(weeksData.length+' 单元 · 速成：站在拼读地基上快速掌握 IPA 符号')
+    :('17 周 · 一套材料，两位学员');
+  $('#content').innerHTML='<div class="wk-title">'+tname+' · 课程总大纲</div><div class="wk-meta">'+tmeta+'</div><div class="md">'+md+'</div>';
 }
 async function loadWeek(id,scrollToLid){
   curWeek=id;
@@ -507,12 +609,15 @@ function renderWeek(w){
       +'<div class="md" data-lid="'+lid+'">'+body+'</div>'
       +'</div>';
   }
-  html+='<div class="hw">🐾 <b>怎么交</b>：课后练习写进 <code>'+(wid||'WXX')+'-SXX-homework.py</code>，存到 <code>~/sand-hollow/&lt;你的学员ID&gt;/homework/</code>（目录没有就新建）。写完跟你的智能体说一声「修完了」，AI agent 就会批改，评语出现在 <code>&lt;你的学员ID&gt;/reviews/</code>。</div>';
+  // ★ 2026-11-13 多轨：作业提示只属于编程轨（音标课无 .py 作业，只有自查清单）
+  if(!curTrack.id){
+    html+='<div class="hw">🐾 <b>怎么交</b>：课后练习写进 <code>'+(wid||'WXX')+'-SXX-homework.py</code>，存到 <code>~/sand-hollow/&lt;你的学员ID&gt;/homework/</code>（目录没有就新建）。写完跟你的智能体说一声「修完了」，AI agent 就会批改，评语出现在 <code>&lt;你的学员ID&gt;/reviews/</code>。</div>';
+  }
   $('#content').innerHTML=html;
   // 课文内自查清单 checkbox：激活 marked 默认 disabled + 本机持久化（2026-08-30 Tree 反馈）
   // 注：本段必须活在 renderWeek 内——每次渲染后重新激活，放函数外只在首载空跑一次（本次修复的根因）
   const hsh=s=>{let h=5381;for(let i=0;i<s.length;i++)h=((h<<5)+h+s.charCodeAt(i))>>>0;return h.toString(36)};
-  const checks=JSON.parse(localStorage.getItem('learning-checks')||'{}');
+  const checks=JSON.parse(localStorage.getItem(trackKey('learning-checks'))||'{}');
   $('#content').querySelectorAll('.md input[type=checkbox]').forEach(cb=>{
     const li=cb.closest('li'),mdDiv=cb.closest('.md');
     const k=wid+':'+(mdDiv?mdDiv.dataset.lid:'?')+':'+hsh(li?li.textContent.trim().slice(0,60):'x');
@@ -520,7 +625,7 @@ function renderWeek(w){
     cb.checked=!!checks[k];
     cb.onchange=()=>{
       checks[k]=cb.checked;
-      localStorage.setItem('learning-checks',JSON.stringify(checks));
+      localStorage.setItem(trackKey('learning-checks'),JSON.stringify(checks));
       syncDone();
       scheduleProgressSync();   // P6：勾选变化 → 防抖同步云端（离线也不影响本机）
     };
@@ -535,7 +640,7 @@ function renderWeek(w){
       le.classList.toggle('done',done);
       if(!done)allDone=false;
     });
-    localStorage.setItem('learning-week-'+wid,allDone?'1':'0');
+    localStorage.setItem(trackKey('learning-week-'+wid),allDone?'1':'0');
     renderWeeks();
   }
   syncDone();

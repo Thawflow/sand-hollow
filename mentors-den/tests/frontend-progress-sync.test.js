@@ -40,12 +40,18 @@ test('进度数据来源：勾选态 + 章节位置（learning-checks + learning
 
 test('云端进度合并是「并集」语义（不因云端旧而抹掉本机新勾选）', () => {
   // 行为断言（不靠文本正则）：把 mergeProgress 从源码里抽出来真跑一遍
-  const src = indexHtml.match(/function\s+mergeProgress[\s\S]*?\n\}/);
-  assert.ok(src, '未找到 mergeProgress 合并函数');
+  // ★ 2026-11-13 多轨：mergeProgress 现在依赖 trackOwnsCheck/trackOwnsPos（按轨过滤），
+  //   抽取时必须连这两个判定函数一起带上；curTrack 也得注入（默认编程轨）。
+  const src0 = indexHtml.match(/function\s+trackOwnsCheck[\s\S]*?\n\}/)[0];
+  const src1 = indexHtml.match(/function\s+trackOwnsPos[\s\S]*?\n\}/)[0];
+  const src2 = indexHtml.match(/function\s+mergeProgress[\s\S]*?\n\}/)[0];
+  const src3 = indexHtml.match(/const TRACKS=\[[\s\S]*?\];/)[0];
   // eslint-disable-next-line no-new-func
-  const mergeProgress = new Function(src[0] + '; return mergeProgress;')();
-  const local = { checks: { a: true, b: true }, pos: { weekId: 'W01', ts: 100 } };
-  const cloud = { checks: { b: true, c: true }, pos: { weekId: 'W09', ts: 200 } };
+  const mergeProgress = new Function(
+    src3 + '\nlet curTrack=TRACKS[0];\n' + src0 + '\n' + src1 + '\n' + src2 + '; return mergeProgress;'
+  )();
+  const local = { checks: { a: true, b: true }, pos: { weekId: 'W01', ts: 100, track: 'code' } };
+  const cloud = { checks: { b: true, c: true }, pos: { weekId: 'W09', ts: 200, track: 'code' } };
   const merged = mergeProgress(local, cloud);
   assert.strictEqual(merged.checks.a, true, '本机独有勾选 a 不该被抹掉');
   assert.strictEqual(merged.checks.b, true, '共有勾选 b 应保留');

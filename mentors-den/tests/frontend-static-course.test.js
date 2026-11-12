@@ -229,9 +229,14 @@ test('fetchStaticCourse：HTTP 错误不重试（重试也不会变好，只拖�
     'HTTP 类失败未直接抛出（不应重试）');
 });
 
-test('静态资源路径：syllabus 走 course/ 前缀（线上实测路径 = /course/syllabus.html）', () => {
-  assert.ok(/COURSE_BASE\s*=\s*['"]course\/['"]/.test(indexHtml),
-    "COURSE_BASE 应为 'course/'");
+test('静态资源路径：默认轨走 course/ 前缀（线上实测路径 = /course/syllabus.html）', () => {
+  // ★ 2026-11-13 多轨：COURSE_BASE 由当前轨决定（TRACKS[0].base = 'course/' 为默认轨），
+  //   音标轨 fetchStaticCourse 实际取 course/phonics/ 前缀（switchTrack 切换）。
+  //   断言意图不变：默认轨前缀必须仍是 'course/'，且音标轨 base 指向子目录。
+  assert.ok(/base:\s*'course\/'/.test(indexHtml),
+    "默认轨 base 应为 'course/'");
+  assert.ok(/id:'phonics'[\s\S]{0,80}base:'course\/phonics\/'/.test(indexHtml),
+    '音标轨 base 应指向 course/phonics/');
   assert.ok(/fetchStaticCourse\(\s*['"]syllabus\.html['"]\s*\)/.test(indexHtml),
     '未发现 syllabus.html 的静态取用点');
 });
