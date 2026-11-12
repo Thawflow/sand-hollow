@@ -60,7 +60,7 @@ run_scan() {
     if [ "$rc" -eq 2 ]; then
       echo "🚫 pre-push 拒绝：串号扫描器**读不到 / 扫 0 个文件**（rc=2）—— 没验到 ≠ 没问题，不放行（${label}）"
     else
-      echo "🚫 pre-push 拒绝：$label 存在作业文件名串号 / 悬空课时 ID"
+      echo "🚫 pre-push 拒绝：${label} 存在作业文件名串号 / 悬空课时 ID"
     fi
     echo "$out"
     exit 1
@@ -72,7 +72,7 @@ run_scan() {
     case "$out" in
       *"正文指针指向不存在的课时 ID"*)
         echo ""
-        echo "📋 遗留清单（$label，不拦 push，但别装没看见 —— 改名后正文指针没跟着改）："
+        echo "📋 遗留清单（${label}，不拦 push，但别装没看见 —— 改名后正文指针没跟着改）："
         printf '%s\n' "$out" | awk '/正文指针指向不存在的课时 ID/{f=1} /^✅/{f=0} f' ;;
     esac
   fi
