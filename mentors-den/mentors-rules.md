@@ -66,7 +66,7 @@
 14. **daily-practice 节奏 · 14:00 发布 → 提交 → review** — cron `ruyi-icepaw-daily-practice` 每天 14:00 Asia/Shanghai 触发（原 `<user>-daily-joy-bringer` 命名不准确，v1.6 改名 `<user>-daily-practice` 并明确链路）：
     - **14:00 发布**：cron 同步写入 KV `learning/daily-practice/<date>`；学员通过本机 agent 主动拉取，不做推送
     - **学员当日完成**：答案写 `<你的学员ID>/homework/W0X-L0X-daily.py`（**命名约定**：daily-practice 配套）
-    - **mentor 14:00-22:00 巡检**：学员主动通知「交作业」→ 启动 review；或 cron `<user>-daily-practice-scan` 每 2h 扫 homework/ 新文件 → 自动触发 review
+    - **mentor 14:00-22:00 巡检**：学员主动通知「交作业」→ 启动 review。**如实口径**：**没有**「每 2h 扫 homework/ 自动触发 review」的 cron —— 该 cron 未实装、仓内也无对应脚本 ⇒ 巡检靠**学员主动通知 + mentor 人工兜底**（日报 / 晨会发现未批时补批）；补批须在评语文件头做**补录披露**（写明实际交批时间差与原因），不得把人工批改写成自动触发
     - **review 落档**：评语写 `<你的学员ID>/reviews/W0X-L0X-daily.review.md`；学员通过本机 agent 主动拉取（review 文件落档 = 信号）
     - **联动**：⑪ 晨会第①议题增列「昨日 daily-practice 提交率」（出勤三源融合统计）
 15. **随堂练习文件化 · 开课即建** — 每课讲义**开头**（第一个动手环节前）就要求学员新建随堂练习文件 `W0X-L0X-practice.py`（Thonny `文件 → 新建`，存学员 `<你的学员ID>/homework/` 平铺目录）；课内演示代码 + 随堂踩坑全部写进该文件，与课后作业 `W0X-L0X-homework.py` 严格分开两个文件。目的：mentor 靠 practice 文件的存在 + tracker mtime / commit 时间锚定「学员确实随堂练了」，不是只交 homework。这是 ⑨ 命名约定的执行层强化：⑨ 定文件名，⑮ 定课内动作。存量课（W02-L02 起的 `W0X-dN.py` 旧格式 + `W0X/` 周子目录）在各自解锁/发布前必须对齐本条。
@@ -149,7 +149,7 @@
 | `mentors-morning-standup` | cron 07:00 Asia/Shanghai | 每日晨会发起（⑪） |
 | `<user>-daily-practice` | cron 0 14 * * * Asia/Shanghai | 每日 14:00 发布练习题（⑭） |
 | `mentor-lesson-read-check` | cron 30 14 * * * Asia/Shanghai | 每日 14:30 提醒 mentor 读昨日新课（⑬） |
-| `<user>-daily-practice-scan` | every 2h 14:00-22:00 | 学员 daily-practice 作业巡检，触发 review（⑭） |
+| `<user>-daily-practice-scan` | **不适用（未实装）** | ⑭ 巡检无自动 cron：巡检 = 学员主动通知「交作业」+ mentor 人工兜底（日报/晨会补批，补批须做补录披露）——**承诺与现实须一致，不得再写「自动触发 review」** |
 | `<user>-safety-check` | cron 每小时 | 学员安全巡检（危险操作拦） |
 | `<user>-nightly-diary` | cron 23:00 | mentor 自我反思日记 |
 
