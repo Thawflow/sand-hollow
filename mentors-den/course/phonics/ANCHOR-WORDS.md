@@ -107,4 +107,12 @@
 |---|---|---|
 | 清辅音后 | /s/ | cats → /kæts/ · books → /bʊks/ |
 | 浊辅音/元音后 | /z/ | dogs → /dɒɡz/ · boys → /bɔɪz/ |
-| 塞音后 | /ɪz/ | jobs → /dʒɒbz/（/z/ 加一点"咝"） |
+| 咝音后（s/z/ʃ/ʒ/tʃ/dʒ） | /ɪz/ | buses → /ˈbʌsɪz/ · watches → /ˈwɒtʃɪz/ |
+
+## 词尾 -ed 的三读（同一个拼写，对应不同符号）
+
+| 场合 | 规则 | 例子 |
+|---|---|---|
+| 清辅音后 | /t/ | stopped → /stɒpt/ · looked → /lʊkt/ |
+| 浊辅音/元音后 | /d/ | played → /pleɪd/ · cleaned → /kliːnd/ |
+| /t/ /d/ 之后 | /ɪd/ | wanted → /ˈwɒntɪd/ · needed → /ˈniːdɪd/ |
