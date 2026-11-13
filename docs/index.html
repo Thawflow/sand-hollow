@@ -122,7 +122,9 @@ footer{text-align:center;color:var(--text2);font-size:.75rem;margin-top:30px}
   </header>
   <!-- ── 课程轨切换（2026-11-13：第二课程线「英语音标」上线）── -->
   <div class="tracks" id="tracks"></div>
-  <div class="notice">
+  <!-- ★ 2026-11-13 多轨：顶部说明按轨切换 —— 编程课那块（Thonny/Agent/作业闭环）是编程专属，
+       音标课不该看到（owner 11-13 反馈）。两块内容各自独立，编程课块文字一字未改。 -->
+  <div class="notice" id="notice-code">
     <b>⭐ 最佳学习姿势 · 分屏边看边练：</b>左边开本站，右边开 Thonny，看一行写一行、写一行跑一行，不用靠记性来回切窗口。<br>
     Mac 🍎：拖窗口到屏幕最左/最右边缘 → 自动占半屏（或悬停绿色按钮 → 移到屏幕左侧/右侧）<br>
     Windows 🪟：按住 <b>Win</b> 再按 <b>←</b> / <b>→</b> 一键半屏；Thonny 官网 <code>thonny.org</code> 有 Mac 和 Windows 版<br>
@@ -133,8 +135,17 @@ footer{text-align:center;color:var(--text2);font-size:.75rem;margin-top:30px}
     <b>怎么用：</b>每周左边选周 → 逐课阅读 → 学完勾选（进度自动保存在你的账号里）→ 作业写进 <b>&lt;你的学员ID&gt;/homework/</b> 目录，写完跟你的智能体说一声「修完了」，它就会批改，评语出现在 <b>&lt;你的学员ID&gt;/reviews/</b>（作业和评语分开放，更清楚）。<br>
     每周日晚发布下周内容。卡住随时跟你自己的智能体说一声 ❄️✨
   </div>
+  <!-- 音标课说明块（无 Thonny / 无 Agent / 无作业闭环 —— 这门课是纯阅读 + 自查） -->
+  <div class="notice" id="notice-phonics" style="display:none">
+    <b>⭐ 这门课怎么学：</b>左边读课文 → 边读边把每个音标<b>念出来</b>（出声，不出声不算会）→ 做完每节末尾的「本节完成自查」勾上 → 下次回来接着上次的地方。<br>
+    <b>📖 读法：</b>每节都有「<b>拼读对照</b>」块 —— 左边是字母怎么拼、右边是音标怎么写。<b>你会拼读，只是差一张标签</b>，所以不用重新学拼读，把音标贴到你已经会读的词上就行。<br>
+    <b>🗂 节奏建议：</b>每天 1 个单元（30–40 分钟），周末做 P08 综合实战。9 个单元走完大约一周。<br>
+    <b>✍️ 关于作业：</b>这门课<b>没有作业、没有考试</b> —— 每节末尾的「自查清单」就是全部功课。勾选后进度会保存。<br>
+    <b>🤖 卡住了？</b>音标拿不准就直接问词典查（手机词典 / 电脑词典都能查音标），查出来对着课文里的对照块看差在哪。<br>
+    进度按课程分开保存，和编程课互不影响 ❄️✨
+  </div>
   <div class="layout">
-    <aside class="weeks"><h3>🗓 课程周</h3><div class="syll" id="syll-link" onclick="loadSyllabus()">📑 课程总大纲</div><div id="weeks"><div class="spin"></div></div></aside>
+    <aside class="weeks"><h3 id="weeks-title">🗓 课程周</h3><div class="syll" id="syll-link" onclick="loadSyllabus()">📑 课程总大纲</div><div id="weeks"><div class="spin"></div></div></aside>
     <main class="content" id="content"><div class="spin"></div></main>
   </div>
   <footer>🏖️ 沙坑训练场 · learning v1 · <span id="bt"></span></footer>
@@ -434,6 +445,17 @@ function renderTracks(){
     el.onclick=()=>switchTrack(t.id||'');
     box.appendChild(el);
   }
+  renderTrackChrome();
+}
+// ★ 2026-11-13 多轨：轨专属界面元素按轨显隐 —— 编程课那块（Thonny/Agent/作业闭环）是编程专属，
+//   音标课不该看到（owner 11-13 反馈）。侧栏标题也跟着换（课程周 → 单元）。
+function renderTrackChrome(){
+  const isPhonics=!!curTrack.id;
+  const nc=$('#notice-code'),np=$('#notice-phonics');
+  if(nc)nc.style.display=isPhonics?'none':'';
+  if(np)np.style.display=isPhonics?'':'none';
+  const wl=$('#weeks-title');
+  if(wl)wl.textContent=isPhonics?'🗂 课程单元':'🗓 课程周';
 }
 function switchTrack(id){
   if(trackById(id).id===curTrack.id)return;
@@ -450,6 +472,8 @@ function switchTrack(id){
 }
 // 读上次停留的轨（默认编程轨）：放在最前，loadIndex 之前生效
 try{const savedTrack=localStorage.getItem('learning-track');if(savedTrack!==null)curTrack=trackById(savedTrack);COURSE_BASE=curTrack.base}catch(e){}
+// ★ 2026-11-13：立即按轨显隐（即使索引没加载出来，顶部说明块也要对）
+renderTrackChrome();
 async function loadIndex(){
   // 缓存优先：本地秒开 → 后台静默刷新（网络挂了也照常用旧数据）
   const cached=learnLsGet('weeks');

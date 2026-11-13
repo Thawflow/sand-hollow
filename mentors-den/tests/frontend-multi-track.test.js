@@ -181,3 +181,32 @@ test('音标轨页面不带 .py 作业提示（静态产物级回归保护）', 
   assert.ok(!wHtml.includes('-homework.py') || indexHtml.includes('-SXX-homework.py'),
     '编程轨作业提示链路丢失');
 });
+
+// ── 顶部说明块按轨显隐（owner 11-13 反馈：音标轨不该看到 Thonny/Agent 配置）──
+test('顶部说明按轨拆成两块：编程课块含 Thonny/Agent，音标课块不含', () => {
+  const codeBlock = /<div class="notice" id="notice-code">([\s\S]*?)<\/div>/.exec(indexHtml);
+  const phonBlock = /<div class="notice" id="notice-phonics"[^>]*>([\s\S]*?)<\/div>/.exec(indexHtml);
+  assert.ok(codeBlock, '缺 notice-code 块');
+  assert.ok(phonBlock, '缺 notice-phonics 块');
+  // 编程课块：Thonny / Agent / 作业闭环必须在
+  assert.ok(codeBlock[1].includes('Thonny'), '编程课块缺 Thonny 说明');
+  assert.ok(codeBlock[1].includes('智能体（Agent）'), '编程课块缺 Agent 说明');
+  assert.ok(codeBlock[1].includes('homework'), '编程课块缺作业目录说明');
+  // 音标课块：这些编程专属词一个都不能有
+  for (const kw of ['Thonny', '智能体（Agent）', 'homework', 'reviews', '学员ID', '修完了', 'Python']) {
+    assert.ok(!phonBlock[1].includes(kw), '音标课块不该出现编程专属内容：' + kw);
+  }
+  assert.ok(phonBlock[1].includes('没有作业'), '音标课块应明说没有作业/考试');
+  assert.ok(phonBlock[1].includes('拼读对照'), '音标课块应说明拼读对照怎么读');
+});
+
+test('renderTrackChrome 按轨显隐 notice + 换侧栏标题', () => {
+  assert.ok(/function renderTrackChrome\(/.test(indexHtml), '缺 renderTrackChrome');
+  const fn = extractFn(indexHtml, 'renderTrackChrome');
+  assert.ok(fn.includes('#notice-code') && fn.includes('#notice-phonics'), '未按轨操作 notice');
+  assert.ok(/isPhonics\?'none':''/.test(fn), '编程 notice 未按轨隐藏');
+  assert.ok(/课程单元/.test(fn) && /课程周/.test(fn), '侧栏标题未按轨切换');
+  // renderTracks 必须调用它（否则切轨后不刷新）
+  const rt = extractFn(indexHtml, 'renderTracks');
+  assert.ok(rt.includes('renderTrackChrome()'), 'renderTracks 未触发 chrome 刷新');
+});

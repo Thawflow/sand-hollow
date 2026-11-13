@@ -9,7 +9,10 @@
 //     （改走本地目录 ~/sand-hollow/<学员ID>/homework/ + 跟智能体说「修完了」）→ 升版。
 // v9（2026-11-13 多课程线）：index.html 新增课程轨切换条（编程课/英语音标）+ 进度按轨隔离键
 //     + COURSE_BASE 按轨切换；SHELL 追加音标轨索引 course/phonics/index.json → 升版。
-const CACHE = 'sandy-hollow-v9';
+// v10（2026-11-13 顶部说明按轨切换）：owner 反馈「Thonny/Agent 配置是编程的，音标轨不该看到」
+//     ⇒ index.html 的 .notice 拆成 notice-code / notice-phonics 两块 + renderTrackChrome
+//     按轨显隐 + 侧栏标题按轨换 → 升版，老学员才能拿到新 JS。
+const CACHE = 'sandy-hollow-v10';
 const SHELL = ['./', './index.html', './course-dom.js', './course/index.json', './course/phonics/index.json', './assets/favicon.svg', './assets/icon-192.png', './assets/icon-512.png'];
 
 self.addEventListener('install', e => {
