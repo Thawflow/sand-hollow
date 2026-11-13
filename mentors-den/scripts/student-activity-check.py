@@ -98,8 +98,11 @@ def is_probe_marker(name):
 #   ⇒ 元数据产物一律不计入判据 B（与「被跟踪文件不计入」同一层：不是学员写的）。
 #   ⚠️ 只排元数据本身，**不排除**整个 `__pycache__` 目录 —— 目录里若混进
 #   真练习文件仍要采信（防「用 pycache 目录藏作业」被误伤）。
+#   ⚠️ `.gitkeep` 同属占位空文件：学员建 `homework/` 子目录时 git 常顺手放它
+#   （把空目录纳入版本控制），学员本人没交任何作业 ⇒ 它的 mtime 不该算活跃。
+#   （11-08 IcePaw 报：本机 Thawpaw 侧因无 homework 子目录未爆，跨机必爆。）
 META_ARTIFACT_NAMES = {".DS_Store", "Thumbs.db", "desktop.ini", ".Spotlight-V100",
-                        ".Trashes", ".fseventsd", ".TemporaryItems"}
+                        ".Trashes", ".fseventsd", ".TemporaryItems", ".gitkeep"}
 META_ARTIFACT_DIRS = {"__pycache__"}
 META_ARTIFACT_SUFFIXES = (".pyc", ".pyo", ".pyd", ".swp", ".swo", ".orig", ".rej")
 # 源文件后缀：出现在 __pycache__ 目录里仍视为真练习（不整棵排除该目录）

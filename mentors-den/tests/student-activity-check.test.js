@@ -94,6 +94,25 @@ test('★★ 元数据产物（.DS_Store / __pycache__/*.pyc）不算学员练�
   );
 });
 
+test('★★ .gitkeep（占位空文件）不算学员练习（11-08 修的洞）', () => {
+  // 病：学员目录要建 homework/ 子目录时，git 常常顺手放一个 `homework/.gitkeep`
+  //   （把空目录纳入版本控制）。学员没交任何作业，但 .gitkeep 的 mtime 被算成
+  //   活跃 ⇒ 判据 B 报「今天活跃」⇒ 零活跃学员被翻绿 ⇒ 提醒腿漏报。
+  //   本机 Thawpaw 侧因无 homework 子目录未爆；跨机必爆。
+  const root = makeCloneRoot({
+    '87654321/homework/.gitkeep': '',
+    '87654321/reviews/.gitkeep': '',
+  });
+  const j = runChecker(root);
+  const s = j.students.find((x) => x.student_dir === '87654321');
+  assert.ok(s, '学员目录应存在');
+  assert.strictEqual(
+    s.file_last,
+    null,
+    `.gitkeep 的 mtime 被算成活跃：file_last=${s.file_last}`
+  );
+});
+
 test('真练习文件藏在 __pycache__ 里仍要采信（不误伤）', () => {
   const root = makeCloneRoot({
     '87654321/homework/__pycache__/real_hw.py': 'print(1)\n',
