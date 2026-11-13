@@ -93,16 +93,20 @@ def lesson_ids_from_ref(repo: Path, ref: str, rel_dir: str):
     ⚠️ 用 <ref>:<dir> 形式读快照（判「被推的那一份」）；读不到 ⇒ None（fail-closed）。"""
     # ⚠️ `git ls-tree --name-only <ref> -- <dir>` 只列出**目录项本身**、列不出内容
     #    ⇒ 必须用 tree-ish 形式 `<ref>:<dir>`（它列出该目录的**直接子项**）。
+    # ⚠️ 2026-11-09 修（冰爪拍板④）：`-z` + 按 NUL 切分。
+    #    病：默认输出对**非 ASCII 文件名**做 C 风格 quote（`"\344\270\255\346\226\207.md"`）
+    #      ⇒ 尾部多一个引号 ⇒ `Path(name).suffix` 变成 `.md"` ⇒ 判定失真（文件名可能被
+    #      误认成非课程文件而漏扫，或课时文件名尾部被污染后认不出课时）。
+    #    `-z` = NUL 分隔 + **不 quote**（原样输出字节）⇒ 解析与文件名一一对应。
     treeish = ref + ":" + rel_dir if rel_dir else ref
     out = subprocess.run(
-        ["git", "ls-tree", "--name-only", treeish],
+        ["git", "ls-tree", "--name-only", "-z", treeish],
         cwd=str(repo), capture_output=True, text=True,
     )
     if out.returncode != 0:
         return None
     ids = set()
-    for line in out.stdout.splitlines():
-        name = line.strip()
+    for name in out.stdout.split("\0"):
         if not name:
             continue
         p = Path(name)
@@ -168,10 +172,15 @@ def list_files_in_ref(repo: Path, ref: str, rel_dir: str):
     # 完全不进扫描范围（洞 D）。工作树模式已同步改成 os.walk 递归 ⇒ 两模式口径一致。
     # ⚠️ `git ls-tree --name-only <ref> -- <dir>` 只会列出**目录项本身**，列不出内容
     #    ⇒ 这里用 pathspec 形式 + -r（输出路径相对仓根，可直接 git show <ref>:<path>）。
+    # ⚠️ 2026-11-09 修（冰爪拍板④）：`-z` + 按 NUL 切分（与 lesson_ids_from_ref 同款）。
+    #    病：默认输出对**非 ASCII 文件名**做 C 风格 quote（`"\344\270\255.md"`）
+    #      ⇒ 尾部多一个引号 ⇒ `Path(name).suffix` = `.md"` ∉ COURSE_SUFFIXES
+    #      ⇒ **该文件被当成非课程文件直接漏扫**（中文名讲义扫不到）。
+    #    `-z` = NUL 分隔 + **不 quote** ⇒ 解析与文件名一一对应。
     if rel_dir:
-        args = ["git", "ls-tree", "-r", "--name-only", ref, "--", rel_dir]
+        args = ["git", "ls-tree", "-r", "--name-only", "-z", ref, "--", rel_dir]
     else:
-        args = ["git", "ls-tree", "-r", "--name-only", ref]
+        args = ["git", "ls-tree", "-r", "--name-only", "-z", ref]
     out = subprocess.run(
         args,
         cwd=str(repo), capture_output=True, text=True,
@@ -179,8 +188,7 @@ def list_files_in_ref(repo: Path, ref: str, rel_dir: str):
     if out.returncode != 0:
         return None  # 读不到（ref 不存在 / 不可解析）⇒ 不能当「没问题」
     files = []
-    for line in out.stdout.splitlines():
-        name = line.strip()
+    for name in out.stdout.split("\0"):
         if not name:
             continue
         if Path(name).suffix in COURSE_SUFFIXES:
